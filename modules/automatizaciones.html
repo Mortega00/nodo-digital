@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Automatizaciones · NODO</title>
+        <link rel="stylesheet" href="../style.css">
+    </head>
+    <body>
+        <header class="navbar" id="navbar">
+            <div class="container nav-container">
+                <a href="../index.html" class="logo" aria-label="NODO, volver al inicio">
+                    <img src="../assets/logo.png" alt="">
+                    <span>NODO</span>
+                </a>
+                <nav class="nav-menu" aria-label="Navegación principal">
+                    <a href="../index.html#proyectos" class="nav-link">Proyectos</a>
+                    <a href="../index.html#que-hacemos" class="nav-link">Qué hacemos</a>
+                    <a href="../index.html#proceso" class="nav-link">Cómo trabajamos</a>
+                    <a href="../index.html#nodo" class="nav-link">NODO</a>
+                </nav>
+                <button class="mobile-toggle" id="mobile-toggle" type="button" aria-controls="nodo-panel" aria-expanded="false" aria-label="Abrir menú NODO">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+            <aside class="nodo-panel" id="nodo-panel" aria-hidden="true" aria-label="Mapa del ecosistema NODO">
+                <div class="container nodo-panel-content">
+                    <section>
+                        <p class="panel-eyebrow">EXPLORAR NODO</p>
+                        <div class="panel-links">
+                            <a href="landing-pages.html">Landing Pages <span>→</span>
+                            </a>
+                            <a href="training.html">Training <span>→</span>
+                            </a>
+                            <a href="gastronomia.html">Gastronomía <span>→</span>
+                            </a>
+                            <a href="automatizaciones.html">Automatización <span>→</span>
+                            </a>
+                            <a href="aplicaciones.html">Aplicaciones <span>→</span>
+                            </a>
+                            <a href="sistemas.html">Sistemas <span>→</span>
+                            </a>
+                        </div>
+                    </section>
+                    <section>
+                        <p class="panel-eyebrow">TRABAJEMOS JUNTOS</p>
+                        <div class="panel-links panel-links-compact">
+                            <a href="../index.html#planes">Ver planes <span>→</span>
+                            </a>
+                            <a href="../index.html#brief">Contar mi proyecto <span>→</span>
+                            </a>
+                            <a href="https://wa.me/5491130700900" target="_blank" rel="noopener noreferrer">WhatsApp <span>↗</span>
+                            </a>
+                        </div>
+                    </section>
+                </div>
+            </aside>
+        </header>
+        <main class="container">
+            <section class="module-hero reveal">
+                <a href="../index.html#explorar" class="back-link">← Volver al ecosistema</a>
+                <p class="section-eyebrow">MÓDULO NODO</p>
+                <h1 class="module-hero-title">Ecosistema de <span class="gradient-text">Automatización</span>
+                </h1>
+                <p class="module-hero-subtitle">Flujos que conectan herramientas y reducen trabajo manual en procesos concretos.</p>
+            </section>
+            <section class="module-grid">
+                <article class="project-module-card reveal" data-project-id="automation-whatsapp" role="button" tabindex="0" aria-label="Conocer automatización de WhatsApp">
+                    <div class="module-card-header">
+                        <span class="project-category">Solución NODO</span>
+                        <span class="status-badge status-development">En desarrollo</span>
+                    </div>
+                    <h2 class="module-card-title">Automatización de WhatsApp</h2>
+                    <p class="module-card-desc">Flujos para ordenar consultas, respuestas y seguimiento sin trabajo manual repetitivo.</p>
+                    <ul class="project-tags">
+                        <li>WhatsApp</li>
+                        <li>Flujos</li>
+                        <li>Procesos</li>
+                    </ul>
+                    <span class="btn btn-secondary project-btn">Conocer solución <span aria-hidden="true">→</span>
+                    </span>
+                </article>
+            </section>
+        </main>
+        <footer class="module-footer">
+            <div class="container">
+                <p>Parte del ecosistema NODO.</p>
+                <a href="../index.html#explorar">Volver al ecosistema →</a>
+            </div>
+        </footer>
+        <div class="project-modal" id="project-modal" hidden>
+            <div class="project-modal-backdrop" data-modal-close></div>
+            <section class="project-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="project-modal-title" tabindex="-1">
+                <button class="modal-close" type="button" data-modal-close aria-label="Cerrar proyecto">×</button>
+                <p class="section-eyebrow" id="project-modal-category"></p>
+                <span class="status-badge" id="project-modal-status"></span>
+                <h2 id="project-modal-title"></h2>
+                <p class="modal-intro" id="project-modal-description"></p>
+                <div class="modal-details">
+                    <section>
+                        <h3>Contexto</h3>
+                        <p id="project-modal-context"></p>
+                    </section>
+                    <section>
+                        <h3>El desafío</h3>
+                        <p id="project-modal-challenge"></p>
+                    </section>
+                    <section>
+                        <h3>Qué hicimos</h3>
+                        <p id="project-modal-solution"></p>
+                    </section>
+                    <section>
+                        <h3>Objetivo</h3>
+                        <p id="project-modal-objective"></p>
+                    </section>
+                </div>
+                <ul class="project-tags" id="project-modal-tags"></ul>
+                <a class="btn btn-primary" id="project-modal-link" target="_blank" rel="noopener noreferrer" hidden>Ver proyecto <span aria-hidden="true">↗</span>
+                </a>
+            </section>
+        </div>
+        <script src="../app.js"></script>
+    </body>
+</html>
