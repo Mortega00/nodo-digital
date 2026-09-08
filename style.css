@@ -1865,48 +1865,39 @@ a:visited {
 }
 
 .choice-card-with-glossary {
-    display: flex !important;
-    align-items: center;
-    min-height: 56px;
-    padding: 0;
+    display: block !important;
+    min-height: auto;
+    padding: 15px 16px;
 }
 
 .choice-card-with-glossary input {
-    width: 1px;
-    height: 1px;
-    inset: auto;
-    left: 16px;
-    top: 16px;
-}
-
-.choice-card-with-glossary label {
-    width: 100%;
-    padding: 15px 48px 15px 16px;
-    color: var(--text-white);
-    cursor: pointer;
+    width: auto;
+    height: auto;
+    inset: 0;
+    left: auto;
+    top: auto;
 }
 
 .choice-card-info.glossary-trigger {
-    display: grid;
-    place-items: center;
-    position: absolute;
+    display: inline;
+    position: relative;
     z-index: 2;
-    top: 50%;
-    right: 14px;
-    width: 25px;
-    height: 25px;
-    border: 1px solid var(--border-color);
-    border-radius: 50%;
-    color: var(--primary-purple);
-    line-height: 1;
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    color: var(--text-white);
+    font: inherit;
+    font-weight: 600;
     text-align: center;
-    transform: translateY(-50%);
+    transform: none;
 }
 
 .choice-card-info.glossary-trigger:hover,
 .choice-card-info.glossary-trigger:focus-visible {
-    border-color: var(--border-color-active);
-    color: var(--text-white);
+    color: var(--primary-purple);
 }
 
 .choice-card-with-glossary:has(input:focus-visible) {
@@ -1924,6 +1915,44 @@ a:visited {
 .brief-help-first {
     margin-top: -8px;
     margin-bottom: 20px;
+}
+
+.brief-checkbox-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.brief-checkbox-control input {
+    accent-color: var(--primary-purple);
+}
+
+.brief-unnamed-note,
+.brief-selection-count,
+.brief-limit-message {
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    margin-top: 8px;
+}
+
+.brief-selection-count {
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 14px;
+}
+
+.brief-limit-message {
+    color: var(--text-muted);
+}
+
+.choice-card:has(input:disabled) {
+    cursor: not-allowed;
+    opacity: 0.52;
 }
 
 .conditional-fields {
@@ -2450,25 +2479,33 @@ body.modal-open {
 }
 
 .glossary-trigger {
-    display: inline;
-    padding: 0;
+    appearance: none;
     border: 0;
-    border-bottom: 1px dotted rgba(162, 89, 255, 0.7);
+    padding: 0 2px;
+    margin: 0 1px;
     background: transparent;
     color: inherit;
     cursor: pointer;
     font: inherit;
     font-weight: 600;
+    letter-spacing: 0.015em;
     text-align: inherit;
+    text-decoration-line: underline;
+    text-decoration-style: dotted;
+    text-decoration-thickness: 1px;
+    text-decoration-color: rgba(162, 89, 255, 0.55);
+    text-underline-offset: 4px;
 }
 
 .glossary-trigger:hover {
-    border-bottom-color: var(--primary-blue);
     color: var(--text-white);
+    text-decoration-color: var(--primary-purple);
 }
 
 .glossary-trigger:focus-visible {
     border-radius: 2px;
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 3px;
 }
 
 .educational-modal {

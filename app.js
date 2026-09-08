@@ -441,13 +441,23 @@ function setupBriefForm() {
     const status = document.getElementById("brief-status");
     const label = document.getElementById("brief-step-label");
     const progress = document.getElementById("brief-progress-value");
-    if (!steps.length || !previous || !next || !submit || !status || !label || !progress) return;
+    const objectiveCount = document.getElementById("objective-count");
+    const objectiveLimitMessage = document.getElementById("objective-limit-message");
+    const unnamedNote = document.getElementById("brief-unnamed-note");
+    const businessRequiredMarker = form.querySelector("[data-business-required-marker]");
+    if (!steps.length || !previous || !next || !submit || !status || !label || !progress || !objectiveCount || !objectiveLimitMessage || !unnamedNote || !businessRequiredMarker) return;
+    if (form.dataset.briefInitialized === "true") return;
+    form.dataset.briefInitialized = "true";
 
     let currentStep = 1;
+    let navigationLocked = false;
     const conditionalTimers = new WeakMap();
+    const objectives = [...form.querySelectorAll('[name="objective"]')];
     const choice = name => form.querySelector('[name="' + name + '"]:checked')?.value || "";
     const choices = name => [...form.querySelectorAll('[name="' + name + '"]:checked')].map(input => input.value).join(", ");
     const value = name => typeof form.elements[name]?.value === "string" ? form.elements[name].value.trim() : "";
+    const projectIsUnnamed = () => Boolean(form.elements.project_unnamed?.checked);
+    const businessValue = () => projectIsUnnamed() ? "Todavía sin nombre" : value("business");
     const isConditionalNameActive = name => {
         const container = form.querySelector('[name="' + name + '"]')?.closest(".conditional-field");
         return !container || container.dataset.active === "true";
@@ -490,6 +500,20 @@ function setupBriefForm() {
             container.querySelectorAll("[data-conditional-required]").forEach(field => field.required = active);
         });
     };
+    const updateProjectNameState = () => {
+        const business = form.elements.business;
+        const unnamed = projectIsUnnamed();
+        business.required = !unnamed;
+        businessRequiredMarker.hidden = unnamed;
+        unnamedNote.hidden = !unnamed;
+    };
+    const updateObjectiveSelection = () => {
+        const selectedCount = objectives.filter(input => input.checked).length;
+        const atLimit = selectedCount >= 3;
+        objectives.forEach(input => input.disabled = atLimit && !input.checked);
+        objectiveCount.textContent = selectedCount + " de 3 seleccionadas";
+        objectiveLimitMessage.hidden = !atLimit;
+    };
     const updateConditionalFields = () => {
         const currentValues = new Set([...form.querySelectorAll('[name="current"]:checked')].map(input => input.value));
         const selectedNeed = choice("need");
@@ -504,10 +528,10 @@ function setupBriefForm() {
     const updateSummary = () => {
         const values = {
             name: value("name"),
-            business: value("business"),
+            business: businessValue(),
             whatsapp: value("whatsapp"),
             email: value("email"),
-            objective: choice("objective"),
+            objective: choices("objective"),
             current: choices("current"),
             current_social: conditionalValue("current_social"),
             current_website: conditionalValue("current_website"),
@@ -540,8 +564,7 @@ function setupBriefForm() {
             window.scrollTo({ top: Math.max(0, window.scrollY + formBounds.top - topOffset), behavior: "smooth" });
         }
     };
-    const showStep = (step, keepVisible = false) => {
-        currentStep = Math.min(steps.length, Math.max(1, Number(step) || 1));
+    const renderStep = () => {
         updateConditionalFields();
         steps.forEach(item => item.hidden = Number(item.dataset.step) !== currentStep);
         label.textContent = "Paso " + currentStep + " de " + steps.length;
@@ -549,34 +572,71 @@ function setupBriefForm() {
         previous.hidden = currentStep === 1;
         next.hidden = currentStep === steps.length;
         submit.hidden = currentStep !== steps.length;
+        previous.disabled = navigationLocked || currentStep === 1;
+        next.disabled = navigationLocked || currentStep === steps.length;
+        submit.disabled = navigationLocked || currentStep !== steps.length;
         status.textContent = "";
         if (currentStep === steps.length) updateSummary();
+    };
+    const goToStep = (nextStep, keepVisible = false) => {
+        if (navigationLocked) return false;
+        navigationLocked = true;
+        const requestedStep = Number(nextStep);
+        const normalizedStep = Math.max(1, Math.min(steps.length, Number.isFinite(requestedStep) ? Math.trunc(requestedStep) : currentStep));
+        currentStep = normalizedStep;
+        renderStep();
         if (keepVisible) window.requestAnimationFrame(keepFormHeaderVisible);
+        window.requestAnimationFrame(() => {
+            navigationLocked = false;
+            renderStep();
+        });
+        return true;
+    };
+    const showMissingData = (field, message = "Nos falta este dato para seguir.") => {
+        status.textContent = message;
+        if (!field) return false;
+        field.reportValidity();
+        field.focus({ preventScroll: true });
+        return false;
     };
     const validateCurrentStep = () => {
+        updateProjectNameState();
         updateConditionalRequirements();
+        updateObjectiveSelection();
         const step = steps[currentStep - 1];
+        if (currentStep === 2 && !objectives.some(input => input.checked)) {
+            return showMissingData(objectives[0], "Elegí al menos un objetivo para poder entender qué buscás.");
+        }
+        if (currentStep === 3 && !form.querySelector('[name="current"]:checked')) {
+            return showMissingData(form.querySelector('[name="current"]'), "Elegí al menos una opción. Si todavía no tenés nada, podés marcar “Nada todavía”.");
+        }
         const fields = [...step.querySelectorAll("input, textarea")].filter(isVisibleField);
         const invalid = fields.find(field => !field.checkValidity());
-        if (!invalid) return true;
-        status.textContent = "Completá los campos requeridos para continuar.";
-        invalid.reportValidity();
-        return false;
+        if (invalid) return showMissingData(invalid);
+        return true;
     };
     const validate = () => {
         if (!validateCurrentStep()) return false;
         const step = steps[currentStep - 1];
         const missingGroup = [...step.querySelectorAll("[data-required-group]")].find(group => group.dataset.active === "true" && !group.querySelector("input:checked"));
         if (!missingGroup) return true;
-        status.textContent = "Elegí al menos una opción para continuar.";
-        missingGroup.querySelector("input")?.focus();
-        return false;
+        return showMissingData(missingGroup.querySelector("input"), "Elegí al menos una opción para continuar.");
     };
     next.addEventListener("click", () => {
-        if (validate()) showStep(currentStep + 1, true);
+        if (currentStep >= steps.length || navigationLocked || !validate()) return;
+        goToStep(currentStep + 1, true);
     });
-    previous.addEventListener("click", () => showStep(currentStep - 1, true));
+    previous.addEventListener("click", () => {
+        if (currentStep <= 1 || navigationLocked) return;
+        goToStep(currentStep - 1, true);
+    });
     form.addEventListener("change", event => {
+        if (event.target.name === "project_unnamed") updateProjectNameState();
+        if (event.target.name === "objective") {
+            const selectedCount = objectives.filter(input => input.checked).length;
+            if (selectedCount > 3) event.target.checked = false;
+            updateObjectiveSelection();
+        }
         if (event.target.name === "current") {
             const nothing = form.querySelector('[name="current"][value="Nada todavía"]');
             if (event.target === nothing && nothing.checked) {
@@ -595,7 +655,7 @@ function setupBriefForm() {
     });
     form.addEventListener("submit", event => {
         event.preventDefault();
-        if (!validate()) return;
+        if (currentStep !== steps.length || navigationLocked || !validate()) return;
         const current = choices("current");
         const conditionalCurrent = [
             ["Redes", conditionalValue("current_social")],
@@ -619,13 +679,13 @@ function setupBriefForm() {
             "Hola! Quiero hablar sobre un proyecto para NODO.", "",
             "DATOS",
             "Nombre: " + value("name"),
-            "Negocio: " + value("business"),
+            "Negocio / marca / idea: " + businessValue(),
             "WhatsApp: " + value("whatsapp"),
             "Email: " + value("email"), "",
             "OBJETIVO",
-            "Objetivo: " + choice("objective"), "",
+            "Objetivos: " + choices("objective"), "",
             "ACTUALMENTE TENGO",
-            "Actualmente tengo: " + (current || "No indicado")
+            "Actualmente tengo: " + current
         ];
         addOptionalLines(message, conditionalCurrent);
         message.push("", "CREO QUE NECESITO", "Necesito: " + choice("need"));
@@ -633,7 +693,9 @@ function setupBriefForm() {
         message.push("", "SOBRE EL PROYECTO", "Detalles: " + value("details"), "Fecha ideal: " + value("date"), "Presupuesto: " + choice("budget"), "", "Origen: Formulario NODO");
         window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(message), "_blank", "noopener");
     });
-    showStep(currentStep);
+    updateProjectNameState();
+    updateObjectiveSelection();
+    goToStep(currentStep);
 }
 
 function setupFaq() {
