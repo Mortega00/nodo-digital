@@ -1,6 +1,66 @@
 const WHATSAPP_NUMBER = "5491130700900";
 const NATIVA_ESTETICA_URL = "https://mortega00.github.io/estetica-natalia/#inicio";
 
+const solutionGuides = {
+    web: {
+        title: "Web / Landing Pages",
+        shortDefinition: "Una presencia digital pensada para explicar lo que hacés y llevar a una acción.",
+        whatIsIt: "Una landing page es una página enfocada en un objetivo concreto. Puede servir para presentar un servicio, conseguir consultas, recibir reservas o promocionar una propuesta sin obligar a la persona a recorrer un sitio enorme.",
+        usefulFor: ["Presentar un negocio o servicio", "Conseguir consultas", "Mostrar una promoción", "Recibir reservas", "Llevar personas a WhatsApp", "Validar una idea rápidamente"],
+        whenItMakesSense: "Cuando necesitás comunicar algo de forma clara y no hace falta construir un sitio grande o un sistema completo.",
+        examples: ["NATIVA: una landing que organiza tratamientos y facilita consultas y reservas."],
+        relatedModule: "modules/landing-pages.html",
+        ctaLabel: "Explorar Landing Pages"
+    },
+    systems: {
+        title: "Sistemas / Aplicaciones",
+        shortDefinition: "Una herramienta para organizar información, personas o procesos.",
+        whatIsIt: "Un sistema digital permite registrar, consultar y gestionar información que antes podía estar repartida entre planillas, WhatsApp, papeles o distintas herramientas.",
+        usefulFor: ["Pedidos", "Clientes", "Cobranzas", "Inventario", "Turnos", "Tareas", "Roles de empleados", "Reportes y seguimientos"],
+        whenItMakesSense: "Cuando un proceso empieza a ser difícil de manejar manualmente o cuando necesitás que varias personas trabajen con la misma información.",
+        examples: ["BLOC y Planner: productos del ecosistema orientados a organizar procesos y trabajo."],
+        relatedModule: "modules/sistemas.html",
+        ctaLabel: "Explorar Sistemas"
+    },
+    automation: {
+        title: "Automatizaciones",
+        shortDefinition: "Hacer que tareas repetitivas sucedan automáticamente.",
+        whatIsIt: "Una automatización conecta acciones que normalmente harías de forma manual. Por ejemplo: recibir un formulario, guardar los datos, enviar una confirmación y avisar a una persona.",
+        usefulFor: ["Confirmaciones", "Seguimientos", "Recordatorios", "Formularios", "WhatsApp y emails", "Carga de datos", "Integración entre herramientas"],
+        whenItMakesSense: "Cuando repetís una misma tarea muchas veces y existe una lógica clara que puede ejecutarse automáticamente.",
+        examples: ["Un formulario que registra un contacto, confirma la consulta y avisa al equipo."],
+        relatedModule: "modules/automatizaciones.html",
+        ctaLabel: "Explorar Automatizaciones"
+    },
+    products: {
+        title: "Apps / Productos digitales",
+        shortDefinition: "Una herramienta creada alrededor de una necesidad concreta.",
+        whatIsIt: "Una aplicación es una herramienta digital con funciones específicas que una persona utiliza para registrar, consultar, calcular, organizar, comprar, reservar o gestionar.",
+        usefulFor: ["Resolver una necesidad específica", "Crear un producto propio", "Digitalizar una experiencia", "Llevar una idea a una herramienta utilizable"],
+        whenItMakesSense: "Cuando la solución necesita funciones propias y una experiencia pensada para que alguien haga una tarea concreta.",
+        examples: ["START, QARTA, MyLuna y otros productos del ecosistema NODO."],
+        relatedModule: "modules/aplicaciones.html",
+        ctaLabel: "Explorar Aplicaciones"
+    }
+};
+
+const glossaryTerms = {
+    seo: { title: "SEO", definition: "Ajustes que ayudan a que Google entienda de qué trata tu página y pueda mostrarla cuando alguien busca algo relacionado." },
+    responsive: { title: "Responsive", definition: "Significa que la web se adapta correctamente a celular, tablet y computadora." },
+    dominio: { title: "Dominio", definition: "Es la dirección de tu web.", optionalExample: "Ejemplo: tunegocio.com." },
+    hosting: { title: "Hosting", definition: "Es el servicio donde se alojan los archivos de una web para que pueda estar disponible en Internet." },
+    integracion: { title: "Integración", definition: "Es conectar una solución con otra herramienta, por ejemplo WhatsApp, Google Maps, una agenda o un formulario." },
+    analytics: { title: "Analytics", definition: "Son datos que permiten entender cuántas personas entran a una web y cómo la utilizan." },
+    automatizacion: { title: "Automatización", definition: "Es una serie de acciones que se ejecutan automáticamente siguiendo reglas definidas." },
+    "landing-page": { title: "Landing Page", definition: "Es una página enfocada en un objetivo concreto, como conseguir consultas, reservas o ventas." },
+    sistema: { title: "Sistema", definition: "Es una herramienta digital para registrar, organizar y gestionar información o procesos." },
+    aplicacion: { title: "Aplicación", definition: "Es una herramienta digital creada para que una persona pueda realizar acciones concretas." },
+    formulario: { title: "Formulario", definition: "Es un espacio para que una persona deje sus datos o cuente qué necesita de forma ordenada." },
+    maps: { title: "Maps", definition: "Permite mostrar una ubicación o indicar cómo llegar a un negocio desde una página." },
+    animaciones: { title: "Animaciones", definition: "Son movimientos visuales sutiles que ayudan a guiar la atención sin dificultar la lectura." },
+    agenda: { title: "Agenda", definition: "Es una herramienta para consultar disponibilidad y organizar turnos o reservas." }
+};
+
 const projects = [
     // TODO NODO: revisar manualmente estados públicos de Planner, MyLuna y extensiones START antes del lanzamiento.
     { id: "nativa-estetica", title: "Nativa Estética", category: "Landing Pages", description: "Landing page diseñada para ordenar servicios de estética y facilitar consultas o reservas.", status: "available", statusLabel: "Disponible", url: NATIVA_ESTETICA_URL, tags: ["Responsive", "Reservas", "WhatsApp"], context: "NATIVA necesitaba una presencia digital que acompañara una experiencia de atención presencial.", challenge: "Ordenar tratamientos y transmitir confianza sin sumar fricción entre una visita y una consulta.", solution: "Diseñamos una landing clara, responsive y orientada al contacto directo.", objective: "Hacer más simple entender los servicios y dar el siguiente paso hacia una reserva.", technologies: ["Landing page", "Responsive", "WhatsApp"] },
@@ -180,6 +240,110 @@ function setupProjectModal() {
     });
 }
 
+function setupSolutionGuides() {
+    const triggers = document.querySelectorAll("[data-solution-guide]");
+    const modal = document.getElementById("solution-guide-modal");
+    if (!triggers.length || !modal) return;
+
+    const dialog = modal.querySelector(".solution-guide-dialog");
+    const title = document.getElementById("solution-guide-title");
+    const shortDefinition = document.getElementById("solution-guide-short");
+    const whatIsIt = document.getElementById("solution-guide-what");
+    const usefulFor = document.getElementById("solution-guide-useful-for");
+    const whenItMakesSense = document.getElementById("solution-guide-when");
+    const examples = document.getElementById("solution-guide-examples");
+    const moduleLink = document.getElementById("solution-guide-module");
+    const briefLink = document.getElementById("solution-guide-brief");
+    if (!dialog || !title || !shortDefinition || !whatIsIt || !usefulFor || !whenItMakesSense || !examples || !moduleLink || !briefLink) return;
+
+    let lastFocus = null;
+    const fillList = (target, items) => {
+        target.replaceChildren();
+        items.forEach(item => {
+            const listItem = document.createElement("li");
+            listItem.textContent = item;
+            target.appendChild(listItem);
+        });
+    };
+    const close = () => {
+        if (modal.hidden) return;
+        modal.hidden = true;
+        document.body.classList.remove("modal-open");
+        if (lastFocus) lastFocus.focus();
+    };
+    const open = trigger => {
+        const guide = solutionGuides[trigger.dataset.solutionGuide];
+        if (!guide) return;
+
+        lastFocus = trigger;
+        title.textContent = guide.title;
+        shortDefinition.textContent = guide.shortDefinition;
+        whatIsIt.textContent = guide.whatIsIt;
+        whenItMakesSense.textContent = guide.whenItMakesSense;
+        moduleLink.href = guide.relatedModule;
+        moduleLink.textContent = guide.ctaLabel;
+        fillList(usefulFor, guide.usefulFor);
+        fillList(examples, guide.examples);
+        modal.hidden = false;
+        document.body.classList.add("modal-open");
+        dialog.focus();
+    };
+
+    triggers.forEach(trigger => {
+        trigger.addEventListener("click", () => open(trigger));
+        trigger.addEventListener("keydown", event => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                open(trigger);
+            }
+        });
+    });
+    modal.querySelectorAll("[data-solution-guide-close]").forEach(control => control.addEventListener("click", close));
+    briefLink.addEventListener("click", close);
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && !modal.hidden) close();
+    });
+}
+
+function setupGlossary() {
+    const triggers = document.querySelectorAll("[data-glossary]");
+    const modal = document.getElementById("glossary-modal");
+    if (!triggers.length || !modal) return;
+
+    const dialog = modal.querySelector(".glossary-dialog");
+    const title = document.getElementById("glossary-title");
+    const definition = document.getElementById("glossary-definition");
+    const example = document.getElementById("glossary-example");
+    if (!dialog || !title || !definition || !example) return;
+
+    let lastFocus = null;
+    const close = () => {
+        if (modal.hidden) return;
+        modal.hidden = true;
+        document.body.classList.remove("modal-open");
+        if (lastFocus) lastFocus.focus();
+    };
+    const open = trigger => {
+        const term = glossaryTerms[trigger.dataset.glossary];
+        if (!term) return;
+
+        lastFocus = trigger;
+        title.textContent = term.title;
+        definition.textContent = term.definition;
+        example.textContent = term.optionalExample || "";
+        example.hidden = !term.optionalExample;
+        modal.hidden = false;
+        document.body.classList.add("modal-open");
+        dialog.focus();
+    };
+
+    triggers.forEach(trigger => trigger.addEventListener("click", () => open(trigger)));
+    modal.querySelectorAll("[data-glossary-close]").forEach(control => control.addEventListener("click", close));
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && !modal.hidden) close();
+    });
+}
+
 function setupBrandMarquee() {
     const marquee = document.getElementById("brand-marquee");
     const track = marquee?.querySelector("[data-brand-track]");
@@ -324,6 +488,8 @@ document.addEventListener("DOMContentLoaded", () => {
     setupSmoothScroll();
     setupRevealAnimations();
     setupProjectModal();
+    setupSolutionGuides();
+    setupGlossary();
     setupBrandMarquee();
     setupVideo();
     setupBriefForm();
