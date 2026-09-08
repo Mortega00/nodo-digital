@@ -7,6 +7,8 @@ const solutionGuides = {
         shortDefinition: "Una presencia digital pensada para explicar lo que hacés y llevar a una acción.",
         whatIsIt: "Una landing page es una página enfocada en un objetivo concreto. Puede servir para presentar un servicio, conseguir consultas, recibir reservas o promocionar una propuesta sin obligar a la persona a recorrer un sitio enorme.",
         usefulFor: ["Presentar un negocio o servicio", "Conseguir consultas", "Mostrar una promoción", "Recibir reservas", "Llevar personas a WhatsApp", "Validar una idea rápidamente"],
+        goodFit: ["Querés presentar mejor tu negocio", "Necesitás consultas o reservas", "Tenés una oferta concreta para comunicar"],
+        notFit: ["Ya tenés una web que cumple ese objetivo", "Lo que necesitás es gestionar procesos internos"],
         whenItMakesSense: "Cuando necesitás comunicar algo de forma clara y no hace falta construir un sitio grande o un sistema completo.",
         examples: ["NATIVA: una landing que organiza tratamientos y facilita consultas y reservas."],
         relatedModule: "modules/landing-pages.html",
@@ -17,6 +19,8 @@ const solutionGuides = {
         shortDefinition: "Una herramienta para organizar información, personas o procesos.",
         whatIsIt: "Un sistema digital permite registrar, consultar y gestionar información que antes podía estar repartida entre planillas, WhatsApp, papeles o distintas herramientas.",
         usefulFor: ["Pedidos", "Clientes", "Cobranzas", "Inventario", "Turnos", "Tareas", "Roles de empleados", "Reportes y seguimientos"],
+        goodFit: ["La información hoy está repartida", "Varias personas necesitan trabajar con los mismos datos", "Un proceso manual ya es difícil de seguir"],
+        notFit: ["Una planilla bien organizada todavía alcanza", "La necesidad principal es solo comunicar una propuesta"],
         whenItMakesSense: "Cuando un proceso empieza a ser difícil de manejar manualmente o cuando necesitás que varias personas trabajen con la misma información.",
         examples: ["BLOC y Planner: productos del ecosistema orientados a organizar procesos y trabajo."],
         relatedModule: "modules/sistemas.html",
@@ -27,6 +31,8 @@ const solutionGuides = {
         shortDefinition: "Hacer que tareas repetitivas sucedan automáticamente.",
         whatIsIt: "Una automatización conecta acciones que normalmente harías de forma manual. Por ejemplo: recibir un formulario, guardar los datos, enviar una confirmación y avisar a una persona.",
         usefulFor: ["Confirmaciones", "Seguimientos", "Recordatorios", "Formularios", "WhatsApp y emails", "Carga de datos", "Integración entre herramientas"],
+        goodFit: ["Repetís una misma tarea muchas veces", "El proceso ya tiene una lógica clara", "Necesitás conectar herramientas"],
+        notFit: ["El proceso cambia constantemente", "Todavía no está claro cómo debería funcionar"],
         whenItMakesSense: "Cuando repetís una misma tarea muchas veces y existe una lógica clara que puede ejecutarse automáticamente.",
         examples: ["Un formulario que registra un contacto, confirma la consulta y avisa al equipo."],
         relatedModule: "modules/automatizaciones.html",
@@ -37,6 +43,8 @@ const solutionGuides = {
         shortDefinition: "Una herramienta creada alrededor de una necesidad concreta.",
         whatIsIt: "Una aplicación es una herramienta digital con funciones específicas que una persona utiliza para registrar, consultar, calcular, organizar, comprar, reservar o gestionar.",
         usefulFor: ["Resolver una necesidad específica", "Crear un producto propio", "Digitalizar una experiencia", "Llevar una idea a una herramienta utilizable"],
+        goodFit: ["Necesitás funciones propias", "Querés crear una experiencia de uso específica", "Una necesidad concreta merece una herramienta"],
+        notFit: ["Una web simple ya puede resolverlo", "Existe una herramienta disponible que cubre la necesidad"],
         whenItMakesSense: "Cuando la solución necesita funciones propias y una experiencia pensada para que alguien haga una tarea concreta.",
         examples: ["START, QARTA, MyLuna y otros productos del ecosistema NODO."],
         relatedModule: "modules/aplicaciones.html",
@@ -58,7 +66,9 @@ const glossaryTerms = {
     formulario: { title: "Formulario", definition: "Es un espacio para que una persona deje sus datos o cuente qué necesita de forma ordenada." },
     maps: { title: "Maps", definition: "Permite mostrar una ubicación o indicar cómo llegar a un negocio desde una página." },
     animaciones: { title: "Animaciones", definition: "Son movimientos visuales sutiles que ayudan a guiar la atención sin dificultar la lectura." },
-    agenda: { title: "Agenda", definition: "Es una herramienta para consultar disponibilidad y organizar turnos o reservas." }
+    agenda: { title: "Agenda", definition: "Es una herramienta para consultar disponibilidad y organizar turnos o reservas." },
+    "web-profesional": { title: "Web profesional", definition: "Un sitio más amplio que una landing, pensado para presentar varias áreas de un negocio, servicios, información y contacto." },
+    reservas: { title: "Reservas / agenda", definition: "Una herramienta para que una persona pueda consultar disponibilidad y solicitar o confirmar un turno." }
 };
 
 const projects = [
@@ -263,11 +273,13 @@ function setupSolutionGuides() {
     const shortDefinition = document.getElementById("solution-guide-short");
     const whatIsIt = document.getElementById("solution-guide-what");
     const usefulFor = document.getElementById("solution-guide-useful-for");
+    const goodFit = document.getElementById("solution-guide-good-fit");
+    const notFit = document.getElementById("solution-guide-not-fit");
     const whenItMakesSense = document.getElementById("solution-guide-when");
     const examples = document.getElementById("solution-guide-examples");
     const moduleLink = document.getElementById("solution-guide-module");
     const briefLink = document.getElementById("solution-guide-brief");
-    if (!dialog || !title || !shortDefinition || !whatIsIt || !usefulFor || !whenItMakesSense || !examples || !moduleLink || !briefLink) return;
+    if (!dialog || !title || !shortDefinition || !whatIsIt || !usefulFor || !goodFit || !notFit || !whenItMakesSense || !examples || !moduleLink || !briefLink) return;
 
     let lastFocus = null;
     const fillList = (target, items) => {
@@ -296,6 +308,8 @@ function setupSolutionGuides() {
         moduleLink.href = guide.relatedModule;
         moduleLink.textContent = guide.ctaLabel;
         fillList(usefulFor, guide.usefulFor);
+        fillList(goodFit, guide.goodFit);
+        fillList(notFit, guide.notFit);
         fillList(examples, guide.examples);
         hideOtherModals(modal);
         modal.hidden = false;
@@ -428,14 +442,94 @@ function setupBriefForm() {
     const label = document.getElementById("brief-step-label");
     const progress = document.getElementById("brief-progress-value");
     if (!steps.length || !previous || !next || !submit || !status || !label || !progress) return;
+
     let currentStep = 1;
-    const choice = name => form.querySelector('[name="' + name + '"]:checked')?.value || "No indicado";
-    const choices = name => [...form.querySelectorAll('[name="' + name + '"]:checked')].map(input => input.value).join(", ") || "No indicado";
+    const conditionalTimers = new WeakMap();
+    const choice = name => form.querySelector('[name="' + name + '"]:checked')?.value || "";
+    const choices = name => [...form.querySelectorAll('[name="' + name + '"]:checked')].map(input => input.value).join(", ");
+    const value = name => typeof form.elements[name]?.value === "string" ? form.elements[name].value.trim() : "";
+    const isConditionalNameActive = name => {
+        const container = form.querySelector('[name="' + name + '"]')?.closest(".conditional-field");
+        return !container || container.dataset.active === "true";
+    };
+    const conditionalValue = name => isConditionalNameActive(name) ? value(name) : "";
+    const conditionalChoice = name => isConditionalNameActive(name) ? choice(name) : "";
+    const conditionalChoices = name => isConditionalNameActive(name) ? choices(name) : "";
+    const isConditionalActive = element => {
+        const container = element.closest(".conditional-field");
+        return !container || container.dataset.active === "true";
+    };
+    const isVisibleField = element => !element.closest("[hidden]") && isConditionalActive(element);
+    const setConditionalVisibility = (container, visible) => {
+        const wasActive = container.dataset.active === "true";
+        const pendingTimer = conditionalTimers.get(container);
+        if (pendingTimer) window.clearTimeout(pendingTimer);
+
+        if (visible) {
+            container.dataset.active = "true";
+            container.hidden = false;
+            container.inert = false;
+            window.requestAnimationFrame(() => {
+                if (container.dataset.active === "true") container.classList.add("is-visible");
+            });
+            return;
+        }
+
+        if (!wasActive && container.hidden) return;
+        delete container.dataset.active;
+        container.inert = true;
+        container.classList.remove("is-visible");
+        conditionalTimers.set(container, window.setTimeout(() => {
+            if (container.dataset.active !== "true") container.hidden = true;
+        }, 220));
+    };
+    const updateConditionalRequirements = () => {
+        form.querySelectorAll(".conditional-field").forEach(container => {
+            const active = container.dataset.active === "true";
+            container.querySelectorAll("input, textarea").forEach(field => field.disabled = !active);
+            container.querySelectorAll("[data-conditional-required]").forEach(field => field.required = active);
+        });
+    };
+    const updateConditionalFields = () => {
+        const currentValues = new Set([...form.querySelectorAll('[name="current"]:checked')].map(input => input.value));
+        const selectedNeed = choice("need");
+        form.querySelectorAll("[data-current-field]").forEach(container => {
+            setConditionalVisibility(container, currentValues.has(container.dataset.currentField));
+        });
+        form.querySelectorAll("[data-need-field]").forEach(container => {
+            setConditionalVisibility(container, selectedNeed === container.dataset.needField);
+        });
+        updateConditionalRequirements();
+    };
     const updateSummary = () => {
-        const values = { name: form.elements.name.value.trim() || "No indicado", business: form.elements.business.value.trim() || "No indicado", objective: choice("objective"), current: choices("current"), need: choice("need") };
-        Object.entries(values).forEach(([key, value]) => {
+        const values = {
+            name: value("name"),
+            business: value("business"),
+            whatsapp: value("whatsapp"),
+            email: value("email"),
+            objective: choice("objective"),
+            current: choices("current"),
+            current_social: conditionalValue("current_social"),
+            current_website: conditionalValue("current_website"),
+            old_website: conditionalValue("old_website"),
+            current_system: conditionalValue("current_system"),
+            current_other: conditionalValue("current_other"),
+            need: choice("need"),
+            landing_goal: conditionalChoice("landing_goal"),
+            website_sections: conditionalChoices("website_sections"),
+            booking_type: conditionalChoice("booking_type"),
+            automation_task: conditionalValue("automation_task"),
+            system_needs: conditionalChoices("system_needs"),
+            app_actions: conditionalValue("app_actions"),
+            details: value("details"),
+            date: value("date"),
+            budget: choice("budget")
+        };
+        Object.entries(values).forEach(([key, fieldValue]) => {
             const output = form.querySelector('[data-summary="' + key + '"]');
-            if (output) output.textContent = value;
+            const row = form.querySelector('[data-summary-row="' + key + '"]');
+            if (output) output.textContent = fieldValue;
+            if (row) row.hidden = !fieldValue;
         });
     };
     const keepFormHeaderVisible = () => {
@@ -448,6 +542,7 @@ function setupBriefForm() {
     };
     const showStep = (step, keepVisible = false) => {
         currentStep = Math.min(steps.length, Math.max(1, Number(step) || 1));
+        updateConditionalFields();
         steps.forEach(item => item.hidden = Number(item.dataset.step) !== currentStep);
         label.textContent = "Paso " + currentStep + " de " + steps.length;
         progress.style.width = (currentStep / steps.length) * 100 + "%";
@@ -458,34 +553,84 @@ function setupBriefForm() {
         if (currentStep === steps.length) updateSummary();
         if (keepVisible) window.requestAnimationFrame(keepFormHeaderVisible);
     };
-    const validate = () => {
-        const fields = [...steps[currentStep - 1].querySelectorAll("input, textarea")];
+    const validateCurrentStep = () => {
+        updateConditionalRequirements();
+        const step = steps[currentStep - 1];
+        const fields = [...step.querySelectorAll("input, textarea")].filter(isVisibleField);
         const invalid = fields.find(field => !field.checkValidity());
         if (!invalid) return true;
         status.textContent = "Completá los campos requeridos para continuar.";
         invalid.reportValidity();
         return false;
     };
+    const validate = () => {
+        if (!validateCurrentStep()) return false;
+        const step = steps[currentStep - 1];
+        const missingGroup = [...step.querySelectorAll("[data-required-group]")].find(group => group.dataset.active === "true" && !group.querySelector("input:checked"));
+        if (!missingGroup) return true;
+        status.textContent = "Elegí al menos una opción para continuar.";
+        missingGroup.querySelector("input")?.focus();
+        return false;
+    };
     next.addEventListener("click", () => {
         if (validate()) showStep(currentStep + 1, true);
     });
     previous.addEventListener("click", () => showStep(currentStep - 1, true));
+    form.addEventListener("change", event => {
+        if (event.target.name === "current") {
+            const nothing = form.querySelector('[name="current"][value="Nada todavía"]');
+            if (event.target === nothing && nothing.checked) {
+                form.querySelectorAll('[name="current"]').forEach(input => {
+                    if (input !== nothing) input.checked = false;
+                });
+            } else if (event.target.checked && nothing) {
+                nothing.checked = false;
+            }
+        }
+        updateConditionalFields();
+        if (currentStep === steps.length) updateSummary();
+    });
+    form.addEventListener("input", () => {
+        if (currentStep === steps.length) updateSummary();
+    });
     form.addEventListener("submit", event => {
         event.preventDefault();
         if (!validate()) return;
+        const current = choices("current");
+        const conditionalCurrent = [
+            ["Redes", conditionalValue("current_social")],
+            ["Web actual", conditionalValue("current_website")],
+            ["Web vieja", conditionalValue("old_website")],
+            ["Sistema actual", conditionalValue("current_system")],
+            ["Otro", conditionalValue("current_other")]
+        ];
+        const conditionalNeed = [
+            ["Acción principal", conditionalChoice("landing_goal")],
+            ["Secciones web", conditionalChoices("website_sections")],
+            ["Tipo de reserva", conditionalChoice("booking_type")],
+            ["Tarea a automatizar", conditionalValue("automation_task")],
+            ["Necesidades del sistema", conditionalChoices("system_needs")],
+            ["Acciones de la app", conditionalValue("app_actions")]
+        ];
+        const addOptionalLines = (lines, entries) => entries.forEach(([fieldLabel, fieldValue]) => {
+            if (fieldValue) lines.push(fieldLabel + ": " + fieldValue);
+        });
         const message = [
             "Hola! Quiero hablar sobre un proyecto para NODO.", "",
-            "Nombre: " + form.elements.name.value.trim(),
-            "Negocio: " + (form.elements.business.value.trim() || "No indicado"),
-            "WhatsApp: " + form.elements.whatsapp.value.trim(),
-            "Email: " + (form.elements.email.value.trim() || "No indicado"), "",
-            "Objetivo: " + choice("objective"),
-            "Actualmente tengo: " + choices("current"),
-            "Creo que necesito: " + choice("need"), "",
-            "Detalles: " + (form.elements.details.value.trim() || "No indicado"),
-            "Fecha ideal: " + (form.elements.date.value.trim() || "No indicada"), "",
-            "Origen: Formulario NODO"
-        ].join("\n");
+            "DATOS",
+            "Nombre: " + value("name"),
+            "Negocio: " + value("business"),
+            "WhatsApp: " + value("whatsapp"),
+            "Email: " + value("email"), "",
+            "OBJETIVO",
+            "Objetivo: " + choice("objective"), "",
+            "ACTUALMENTE TENGO",
+            "Actualmente tengo: " + (current || "No indicado")
+        ];
+        addOptionalLines(message, conditionalCurrent);
+        message.push("", "CREO QUE NECESITO", "Necesito: " + choice("need"));
+        addOptionalLines(message, conditionalNeed);
+        message.push("", "SOBRE EL PROYECTO", "Detalles: " + value("details"), "Fecha ideal: " + value("date"), "Presupuesto: " + choice("budget"), "", "Origen: Formulario NODO");
         window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(message), "_blank", "noopener");
     });
     showStep(currentStep);

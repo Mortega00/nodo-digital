@@ -343,6 +343,10 @@
                                 <li><button class="glossary-trigger" type="button" data-glossary="seo">SEO inicial <span aria-hidden="true">ⓘ</span></button></li>
                                 <li>1 ronda de ajustes</li>
                             </ul>
+                            <details class="progressive-details plan-details">
+                                <summary>Ver qué incluye en detalle</summary>
+                                <div><p>Hasta 5 secciones organiza lo esencial de una propuesta, por ejemplo: Inicio, Servicios, Sobre el negocio, FAQ y Contacto.</p><p>Necesitamos textos, imágenes, logo y los datos de contacto que quieras mostrar. Una ronda de ajustes permite revisar una vez la propuesta ya armada.</p></div>
+                            </details>
                             <a href="#brief" class="btn btn-secondary solution-btn">Quiero empezar</a>
                         </article>
                         <article class="solution-card solution-card-featured pricing-card reveal">
@@ -357,6 +361,10 @@
                                 <li><button class="glossary-trigger" type="button" data-glossary="formulario">Formulario <span aria-hidden="true">ⓘ</span></button>, <button class="glossary-trigger" type="button" data-glossary="maps">Maps <span aria-hidden="true">ⓘ</span></button> y <button class="glossary-trigger" type="button" data-glossary="animaciones">animaciones <span aria-hidden="true">ⓘ</span></button></li>
                                 <li>2 rondas de ajustes</li>
                             </ul>
+                            <details class="progressive-details plan-details">
+                                <summary>Ver qué incluye en detalle</summary>
+                                <div><p>Incluye un diseño más personalizado y recursos como formularios, Maps y animaciones sutiles cuando aportan a la experiencia.</p><p>Dos rondas de ajustes permiten revisar la propuesta en dos instancias después de presentar el primer diseño.</p></div>
+                            </details>
                             <a href="#brief" class="btn btn-primary solution-btn">Quiero impulsar mi web</a>
                         </article>
                         <article class="solution-card pricing-card reveal">
@@ -370,6 +378,10 @@
                                 <li>FAQ y <button class="glossary-trigger" type="button" data-glossary="analytics">Analytics básico <span aria-hidden="true">ⓘ</span></button></li>
                                 <li>3 rondas de ajustes</li>
                             </ul>
+                            <details class="progressive-details plan-details">
+                                <summary>Ver qué incluye en detalle</summary>
+                                <div><p>Puede incorporar agenda, integraciones básicas, Analytics y FAQ para acompañar un recorrido más completo.</p><p>Tres rondas de ajustes permiten afinar la propuesta en tres instancias luego de presentar el primer diseño.</p></div>
+                            </details>
                             <a href="#brief" class="btn btn-secondary solution-btn">Quiero una propuesta</a>
                         </article>
                     </div>
@@ -391,53 +403,61 @@
                             </div>
                         </div>
                         <fieldset class="brief-step" data-step="1">
-                            <legend>Sobre vos</legend>
+                            <legend>Primero, conozcámonos.</legend>
+                            <p class="brief-help brief-help-first">Estos datos nos ayudan a entender quién está detrás del proyecto y poder responderte con contexto.</p>
                             <div class="form-grid">
                                 <label>Nombre *<input name="name" autocomplete="name" required>
                                 </label>
-                                <label>Negocio / Proyecto<input name="business">
+                                <label>Negocio / Proyecto *<input name="business" required>
                                 </label>
                                 <label>WhatsApp *<input name="whatsapp" inputmode="tel" autocomplete="tel" required>
                                 </label>
-                                <label>Email<input name="email" type="email" autocomplete="email">
+                                <label>Email *<input name="email" type="email" autocomplete="email" required>
                                 </label>
                             </div>
+                            <details class="progressive-details brief-disclosure">
+                                <summary>¿Por qué pedimos estos datos?</summary>
+                                <p>Usamos estos datos para entender tu proyecto, poder contactarte y retomar la conversación con contexto. No reemplazan el brief: simplemente nos ayudan a saber quién sos y cómo responderte.</p>
+                            </details>
                         </fieldset>
                         <fieldset class="brief-step" data-step="2" hidden>
-                            <legend>¿Qué querés lograr?</legend>
+                            <legend>¿Qué querés conseguir?</legend>
+                            <p class="brief-help brief-help-first">No pienses todavía en tecnología. Elegí el resultado que más se parece a lo que buscás.</p>
                             <div class="choice-grid">
                                 <label class="choice-card">
                                     <input type="radio" name="objective" value="Conseguir más consultas" required>
-                                    <span>Conseguir más consultas</span>
+                                    <span class="choice-card-title">Conseguir más consultas</span><span class="choice-card-copy">Quiero que más personas me contacten.</span>
                                 </label>
                                 <label class="choice-card">
                                     <input type="radio" name="objective" value="Mostrar profesionalmente mi negocio">
-                                    <span>Mostrar profesionalmente mi negocio</span>
+                                    <span class="choice-card-title">Mostrar profesionalmente mi negocio</span><span class="choice-card-copy">Necesito presentar mejor lo que hago.</span>
                                 </label>
                                 <label class="choice-card">
                                     <input type="radio" name="objective" value="Vender un producto o servicio">
-                                    <span>Vender un producto o servicio</span>
+                                    <span class="choice-card-title">Vender un producto o servicio</span><span class="choice-card-copy">Quiero mostrar una propuesta y llevar a una acción.</span>
                                 </label>
                                 <label class="choice-card">
                                     <input type="radio" name="objective" value="Recibir reservas o turnos">
-                                    <span>Recibir reservas o turnos</span>
+                                    <span class="choice-card-title">Recibir reservas o turnos</span><span class="choice-card-copy">Necesito que las personas puedan reservar de forma más clara.</span>
                                 </label>
                                 <label class="choice-card">
                                     <input type="radio" name="objective" value="Digitalizar un proceso">
-                                    <span>Digitalizar un proceso</span>
+                                    <span class="choice-card-title">Digitalizar un proceso</span><span class="choice-card-copy">Hoy hago algo manual y quiero organizarlo.</span>
                                 </label>
                                 <label class="choice-card">
                                     <input type="radio" name="objective" value="Crear una herramienta">
-                                    <span>Crear una herramienta</span>
+                                    <span class="choice-card-title">Crear una herramienta</span><span class="choice-card-copy">Necesito funciones propias para resolver una tarea.</span>
                                 </label>
                                 <label class="choice-card">
                                     <input type="radio" name="objective" value="Tengo una idea y todavía no sé cómo resolverla">
-                                    <span>Tengo una idea y todavía no sé cómo resolverla</span>
+                                    <span class="choice-card-title">Tengo una idea y todavía no sé cómo resolverla</span><span class="choice-card-copy">Sé qué quiero lograr, pero todavía no sé qué solución necesito.</span>
                                 </label>
                             </div>
+                            <p class="brief-help">Elegí la opción que más se acerque. No tiene que ser perfecta.</p>
                         </fieldset>
                         <fieldset class="brief-step" data-step="3" hidden>
                             <legend>¿Qué tenés hoy?</legend>
+                            <p class="brief-help brief-help-first">Marcá todo lo que ya tengas. Según lo que elijas, te vamos a pedir un poco más de contexto.</p>
                             <div class="choice-grid choice-grid-compact">
                                 <label class="choice-card">
                                     <input type="checkbox" name="current" value="Nada todavía">
@@ -468,71 +488,93 @@
                                     <span>Otro</span>
                                 </label>
                             </div>
+                            <p class="brief-help">Podés marcar más de una opción.</p>
+                            <div class="conditional-fields" aria-live="polite">
+                                <div class="conditional-field" data-current-field="Instagram / redes" hidden>
+                                    <label for="current-social">Pasame el usuario o enlace de tus redes *<input id="current-social" name="current_social" autocomplete="url" data-conditional-required="true"></label>
+                                </div>
+                                <div class="conditional-field" data-current-field="Una web actual" hidden>
+                                    <label for="current-website">¿Cuál es la dirección de tu web actual? *<input id="current-website" name="current_website" type="url" placeholder="https://" data-conditional-required="true"></label>
+                                </div>
+                                <div class="conditional-field" data-current-field="Una web vieja" hidden>
+                                    <label for="old-website">¿Tenés todavía el enlace de esa web? *<input id="old-website" name="old_website" type="url" placeholder="https://" data-conditional-required="true"></label>
+                                </div>
+                                <div class="conditional-field" data-current-field="Un sistema / planilla" hidden>
+                                    <label for="current-system">¿Qué usás hoy y para qué? *<textarea id="current-system" name="current_system" rows="3" data-conditional-required="true"></textarea></label>
+                                </div>
+                                <div class="conditional-field" data-current-field="Otro" hidden>
+                                    <label for="current-other">Contanos qué tenés hoy *<textarea id="current-other" name="current_other" rows="3" data-conditional-required="true"></textarea></label>
+                                </div>
+                            </div>
                         </fieldset>
                         <fieldset class="brief-step" data-step="4" hidden>
                             <legend>¿Qué creés que necesitás?</legend>
+                            <p class="brief-help brief-help-first">No hace falta que lo sepas con certeza. Podés tocar el ícono de información para entender cada opción.</p>
                             <div class="choice-grid">
-                                <label class="choice-card">
-                                    <input type="radio" name="need" value="Landing Page" required>
-                                    <span>Landing Page</span>
-                                </label>
-                                <label class="choice-card">
-                                    <input type="radio" name="need" value="Web Profesional">
-                                    <span>Web Profesional</span>
-                                </label>
-                                <label class="choice-card">
-                                    <input type="radio" name="need" value="Reservas / agenda">
-                                    <span>Reservas / agenda</span>
-                                </label>
-                                <label class="choice-card">
-                                    <input type="radio" name="need" value="Automatización">
-                                    <span>Automatización</span>
-                                </label>
-                                <label class="choice-card">
-                                    <input type="radio" name="need" value="Sistema">
-                                    <span>Sistema</span>
-                                </label>
-                                <label class="choice-card">
-                                    <input type="radio" name="need" value="Aplicación">
-                                    <span>Aplicación</span>
-                                </label>
+                                <div class="choice-card choice-card-with-glossary"><input id="need-landing" type="radio" name="need" value="Landing Page" required><label for="need-landing">Landing Page</label><button class="glossary-trigger choice-card-info" type="button" data-glossary="landing-page" aria-label="Qué es una landing page">ⓘ</button></div>
+                                <div class="choice-card choice-card-with-glossary"><input id="need-web" type="radio" name="need" value="Web Profesional"><label for="need-web">Web Profesional</label><button class="glossary-trigger choice-card-info" type="button" data-glossary="web-profesional" aria-label="Qué es una web profesional">ⓘ</button></div>
+                                <div class="choice-card choice-card-with-glossary"><input id="need-booking" type="radio" name="need" value="Reservas / agenda"><label for="need-booking">Reservas / agenda</label><button class="glossary-trigger choice-card-info" type="button" data-glossary="reservas" aria-label="Qué son las reservas o agenda">ⓘ</button></div>
+                                <div class="choice-card choice-card-with-glossary"><input id="need-automation" type="radio" name="need" value="Automatización"><label for="need-automation">Automatización</label><button class="glossary-trigger choice-card-info" type="button" data-glossary="automatizacion" aria-label="Qué es una automatización">ⓘ</button></div>
+                                <div class="choice-card choice-card-with-glossary"><input id="need-system" type="radio" name="need" value="Sistema"><label for="need-system">Sistema</label><button class="glossary-trigger choice-card-info" type="button" data-glossary="sistema" aria-label="Qué es un sistema">ⓘ</button></div>
+                                <div class="choice-card choice-card-with-glossary"><input id="need-app" type="radio" name="need" value="Aplicación"><label for="need-app">Aplicación</label><button class="glossary-trigger choice-card-info" type="button" data-glossary="aplicacion" aria-label="Qué es una aplicación">ⓘ</button></div>
                                 <label class="choice-card">
                                     <input type="radio" name="need" value="No lo sé todavía">
-                                    <span>No lo sé todavía</span>
+                                    <span class="choice-card-title">No lo sé todavía</span><span class="choice-card-copy">También podemos ayudarte a definirlo.</span>
                                 </label>
                             </div>
-                            <p class="brief-help">Está perfecto si no lo sabés. Podemos recomendarte la opción más lógica según lo que nos contaste.</p>
+                            <p class="brief-help">Si dudás entre dos opciones, elegí la que más se acerque o marcá “No lo sé todavía”.</p>
+                            <div class="conditional-fields" aria-live="polite">
+                                <div class="conditional-field" data-need-field="Landing Page" hidden><p class="conditional-question">¿Cuál sería la acción principal que querés que haga la persona?</p><div class="choice-grid choice-grid-compact"><label class="choice-card"><input type="radio" name="landing_goal" value="Escribir por WhatsApp" data-conditional-required="true"><span>Escribir por WhatsApp</span></label><label class="choice-card"><input type="radio" name="landing_goal" value="Completar un formulario"><span>Completar un formulario</span></label><label class="choice-card"><input type="radio" name="landing_goal" value="Reservar"><span>Reservar</span></label><label class="choice-card"><input type="radio" name="landing_goal" value="Comprar"><span>Comprar</span></label><label class="choice-card"><input type="radio" name="landing_goal" value="Ver información"><span>Ver información</span></label><label class="choice-card"><input type="radio" name="landing_goal" value="Otro"><span>Otro</span></label></div></div>
+                                <div class="conditional-field" data-need-field="Web Profesional" data-required-group="website_sections" hidden><p class="conditional-question">¿Qué necesitás mostrar en tu web?</p><div class="choice-grid choice-grid-compact"><label class="choice-card"><input type="checkbox" name="website_sections" value="Servicios"><span>Servicios</span></label><label class="choice-card"><input type="checkbox" name="website_sections" value="Sobre nosotros"><span>Sobre nosotros</span></label><label class="choice-card"><input type="checkbox" name="website_sections" value="Contacto"><span>Contacto</span></label><label class="choice-card"><input type="checkbox" name="website_sections" value="Ubicación"><span>Ubicación</span></label><label class="choice-card"><input type="checkbox" name="website_sections" value="Portfolio / trabajos"><span>Portfolio / trabajos</span></label><label class="choice-card"><input type="checkbox" name="website_sections" value="Preguntas frecuentes"><span>Preguntas frecuentes</span></label><label class="choice-card"><input type="checkbox" name="website_sections" value="Otro"><span>Otro</span></label></div></div>
+                                <div class="conditional-field" data-need-field="Reservas / agenda" hidden><p class="conditional-question">¿Qué tipo de reserva necesitás?</p><div class="choice-grid choice-grid-compact"><label class="choice-card"><input type="radio" name="booking_type" value="Turnos individuales" data-conditional-required="true"><span>Turnos individuales</span></label><label class="choice-card"><input type="radio" name="booking_type" value="Clases"><span>Clases</span></label><label class="choice-card"><input type="radio" name="booking_type" value="Reuniones"><span>Reuniones</span></label><label class="choice-card"><input type="radio" name="booking_type" value="Servicios"><span>Servicios</span></label><label class="choice-card"><input type="radio" name="booking_type" value="Otro"><span>Otro</span></label></div></div>
+                                <div class="conditional-field" data-need-field="Automatización" hidden><label for="automation-task">¿Qué tarea repetitiva te gustaría evitar? *<textarea id="automation-task" name="automation_task" rows="4" placeholder="Ejemplo: recibir un formulario, guardar los datos y enviar una confirmación por WhatsApp." data-conditional-required="true"></textarea></label></div>
+                                <div class="conditional-field" data-need-field="Sistema" data-required-group="system_needs" hidden><p class="conditional-question">¿Qué necesitás organizar o gestionar?</p><div class="choice-grid choice-grid-compact"><label class="choice-card"><input type="checkbox" name="system_needs" value="Clientes"><span>Clientes</span></label><label class="choice-card"><input type="checkbox" name="system_needs" value="Pedidos"><span>Pedidos</span></label><label class="choice-card"><input type="checkbox" name="system_needs" value="Cobranzas"><span>Cobranzas</span></label><label class="choice-card"><input type="checkbox" name="system_needs" value="Turnos"><span>Turnos</span></label><label class="choice-card"><input type="checkbox" name="system_needs" value="Inventario"><span>Inventario</span></label><label class="choice-card"><input type="checkbox" name="system_needs" value="Tareas"><span>Tareas</span></label><label class="choice-card"><input type="checkbox" name="system_needs" value="Empleados"><span>Empleados</span></label><label class="choice-card"><input type="checkbox" name="system_needs" value="Reportes"><span>Reportes</span></label><label class="choice-card"><input type="checkbox" name="system_needs" value="Otro"><span>Otro</span></label></div></div>
+                                <div class="conditional-field" data-need-field="Aplicación" hidden><label for="app-actions">¿Qué debería poder hacer una persona dentro de la app? *<textarea id="app-actions" name="app_actions" rows="4" data-conditional-required="true"></textarea></label></div>
+                                <div class="conditional-field conditional-message" data-need-field="No lo sé todavía" hidden><p>Está perfecto. Con las respuestas anteriores podemos ayudarte a identificar qué opción tiene más sentido.</p></div>
+                            </div>
                         </fieldset>
                         <fieldset class="brief-step" data-step="5" hidden>
                             <legend>Contanos un poco más</legend>
-                            <label>¿Qué te gustaría que una persona pueda hacer, entender o resolver con tu proyecto?<textarea name="details" rows="5">
-                                </textarea>
-                            </label>
-                            <label>¿Tenés una fecha ideal?<input name="date" type="text">
-                            </label>
+                            <p class="brief-help brief-help-first">Cuanto más contexto tengamos, mejor podemos entender qué tiene sentido construir.</p>
+                            <label>¿Qué te gustaría que una persona pueda hacer, entender o resolver con tu proyecto? *<textarea name="details" rows="5" required></textarea></label>
+                            <details class="progressive-details brief-disclosure"><summary>Ver ejemplos de qué contarnos</summary><ul><li>Quiero que puedan conocer mis servicios y reservar.</li><li>Quiero ordenar pedidos que hoy manejo por WhatsApp.</li><li>Tengo una idea de app pero todavía no sé cómo construirla.</li><li>Quiero presentar mejor mi negocio y recibir más consultas.</li></ul></details>
+                            <label>¿Para cuándo te gustaría tenerlo listo? *<input name="date" type="text" placeholder="Ejemplo: octubre / lo antes posible / no tengo una fecha exacta" required></label>
+                            <div class="brief-budget"><p class="conditional-question">¿Tenés un presupuesto aproximado en mente? *</p><div class="choice-grid choice-grid-compact"><label class="choice-card"><input type="radio" name="budget" value="Hasta $60.000" required><span>Hasta $60.000</span></label><label class="choice-card"><input type="radio" name="budget" value="$60.000 a $100.000"><span>$60.000 a $100.000</span></label><label class="choice-card"><input type="radio" name="budget" value="$100.000 a $200.000"><span>$100.000 a $200.000</span></label><label class="choice-card"><input type="radio" name="budget" value="Más de $200.000"><span>Más de $200.000</span></label><label class="choice-card"><input type="radio" name="budget" value="Prefiero hablarlo"><span>Prefiero hablarlo</span></label></div></div>
+                            <p class="brief-help">Este resumen es lo que vamos a recibir para entender tu proyecto.</p>
                             <div class="brief-summary" id="brief-summary" aria-live="polite">
                                 <p>Resumen</p>
                                 <dl>
-                                    <div>
-                                        <dt>Nombre</dt>
+                                    <div data-summary-row="name"><dt>Nombre</dt>
                                         <dd data-summary="name"></dd>
                                     </div>
-                                    <div>
-                                        <dt>Negocio</dt>
+                                    <div data-summary-row="business"><dt>Negocio</dt>
                                         <dd data-summary="business"></dd>
                                     </div>
-                                    <div>
-                                        <dt>Objetivo</dt>
+                                    <div data-summary-row="whatsapp"><dt>WhatsApp</dt><dd data-summary="whatsapp"></dd></div>
+                                    <div data-summary-row="email"><dt>Email</dt><dd data-summary="email"></dd></div>
+                                    <div data-summary-row="objective"><dt>Objetivo</dt>
                                         <dd data-summary="objective"></dd>
                                     </div>
-                                    <div>
-                                        <dt>Actualmente tengo</dt>
+                                    <div data-summary-row="current"><dt>Actualmente tengo</dt>
                                         <dd data-summary="current"></dd>
                                     </div>
-                                    <div>
-                                        <dt>Creo que necesito</dt>
+                                    <div data-summary-row="current_social" hidden><dt>Redes</dt><dd data-summary="current_social"></dd></div>
+                                    <div data-summary-row="current_website" hidden><dt>Web actual</dt><dd data-summary="current_website"></dd></div>
+                                    <div data-summary-row="old_website" hidden><dt>Web vieja</dt><dd data-summary="old_website"></dd></div>
+                                    <div data-summary-row="current_system" hidden><dt>Sistema actual</dt><dd data-summary="current_system"></dd></div>
+                                    <div data-summary-row="current_other" hidden><dt>Otro</dt><dd data-summary="current_other"></dd></div>
+                                    <div data-summary-row="need"><dt>Creo que necesito</dt>
                                         <dd data-summary="need"></dd>
                                     </div>
+                                    <div data-summary-row="landing_goal" hidden><dt>Acción principal</dt><dd data-summary="landing_goal"></dd></div>
+                                    <div data-summary-row="website_sections" hidden><dt>Secciones web</dt><dd data-summary="website_sections"></dd></div>
+                                    <div data-summary-row="booking_type" hidden><dt>Tipo de reserva</dt><dd data-summary="booking_type"></dd></div>
+                                    <div data-summary-row="automation_task" hidden><dt>Tarea a automatizar</dt><dd data-summary="automation_task"></dd></div>
+                                    <div data-summary-row="system_needs" hidden><dt>Necesidades del sistema</dt><dd data-summary="system_needs"></dd></div>
+                                    <div data-summary-row="app_actions" hidden><dt>Acciones de la app</dt><dd data-summary="app_actions"></dd></div>
+                                    <div data-summary-row="details"><dt>Descripción del proyecto</dt><dd data-summary="details"></dd></div>
+                                    <div data-summary-row="date"><dt>Fecha ideal</dt><dd data-summary="date"></dd></div>
+                                    <div data-summary-row="budget"><dt>Presupuesto</dt><dd data-summary="budget"></dd></div>
                                 </dl>
                             </div>
                         </fieldset>
@@ -732,6 +774,14 @@
                     <section>
                         <h3>¿Para qué sirve?</h3>
                         <ul id="solution-guide-useful-for"></ul>
+                    </section>
+                    <section>
+                        <h3>Puede servirte si…</h3>
+                        <ul id="solution-guide-good-fit"></ul>
+                    </section>
+                    <section>
+                        <h3>Quizás no sea lo que necesitás si…</h3>
+                        <ul id="solution-guide-not-fit"></ul>
                     </section>
                     <section>
                         <h3>¿Cuándo tiene sentido?</h3>

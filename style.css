@@ -1849,11 +1849,133 @@ a:visited {
     cursor: pointer;
 }
 
+.choice-card-title {
+    display: block;
+    color: var(--text-white);
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.choice-card-copy {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    line-height: 1.45;
+    margin-top: 5px;
+}
+
+.choice-card-with-glossary {
+    display: flex !important;
+    align-items: center;
+    min-height: 56px;
+    padding: 0;
+}
+
+.choice-card-with-glossary input {
+    width: 1px;
+    height: 1px;
+    inset: auto;
+    left: 16px;
+    top: 16px;
+}
+
+.choice-card-with-glossary label {
+    width: 100%;
+    padding: 15px 48px 15px 16px;
+    color: var(--text-white);
+    cursor: pointer;
+}
+
+.choice-card-info.glossary-trigger {
+    display: grid;
+    place-items: center;
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    right: 14px;
+    width: 25px;
+    height: 25px;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    color: var(--primary-purple);
+    line-height: 1;
+    text-align: center;
+    transform: translateY(-50%);
+}
+
+.choice-card-info.glossary-trigger:hover,
+.choice-card-info.glossary-trigger:focus-visible {
+    border-color: var(--border-color-active);
+    color: var(--text-white);
+}
+
+.choice-card-with-glossary:has(input:focus-visible) {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 3px;
+}
+
 .brief-help,
 .form-status {
     color: var(--text-muted);
     font-size: 0.9rem;
     margin-top: 18px;
+}
+
+.brief-help-first {
+    margin-top: -8px;
+    margin-bottom: 20px;
+}
+
+.conditional-fields {
+    display: grid;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.conditional-field {
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.02);
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.22s ease, transform 0.22s ease, border-color 0.22s ease;
+}
+
+.conditional-field.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.conditional-field label {
+    display: grid;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.conditional-field .choice-grid {
+    margin-top: 12px;
+}
+
+.conditional-question {
+    color: var(--text-white);
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.conditional-message p {
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.brief-budget {
+    margin-top: 22px;
+}
+
+.brief-budget .choice-grid {
+    margin-top: 12px;
 }
 
 .form-status {
@@ -2198,6 +2320,95 @@ body.modal-open {
 
 .module-guide-link:hover {
     color: var(--text-white);
+}
+
+.progressive-details {
+    margin-top: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.progressive-details summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 16px;
+    color: var(--text-white);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    list-style: none;
+}
+
+.progressive-details summary::-webkit-details-marker {
+    display: none;
+}
+
+.progressive-details summary::after {
+    color: var(--primary-purple);
+    content: "+";
+    font-size: 1.15rem;
+    line-height: 1;
+    transition: transform 0.22s ease;
+}
+
+.progressive-details[open] summary::after {
+    content: "−";
+    transform: rotate(180deg);
+}
+
+.progressive-details > div,
+.progressive-details > p,
+.progressive-details > ul {
+    margin: 0 16px 16px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.progressive-details > div {
+    display: grid;
+    gap: 10px;
+}
+
+.progressive-details > ul {
+    display: grid;
+    gap: 7px;
+    padding-left: 18px;
+}
+
+.progressive-details[open] > :not(summary) {
+    animation: disclosure-reveal 0.22s ease both;
+}
+
+.brief-disclosure {
+    margin-top: 20px;
+}
+
+.module-disclosure {
+    margin-top: 12px;
+}
+
+.plan-details {
+    margin-top: 18px;
+}
+
+.comparison-details {
+    margin-top: 14px;
+}
+
+@keyframes disclosure-reveal {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .landing-comparison {
