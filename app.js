@@ -64,7 +64,7 @@ const glossaryTerms = {
 const projects = [
     // TODO NODO: revisar manualmente estados públicos de Planner, MyLuna y extensiones START antes del lanzamiento.
     { id: "nativa-estetica", title: "Nativa Estética", category: "Landing Pages", description: "Landing page diseñada para ordenar servicios de estética y facilitar consultas o reservas.", status: "available", statusLabel: "Disponible", url: NATIVA_ESTETICA_URL, tags: ["Responsive", "Reservas", "WhatsApp"], context: "NATIVA necesitaba una presencia digital que acompañara una experiencia de atención presencial.", challenge: "Ordenar tratamientos y transmitir confianza sin sumar fricción entre una visita y una consulta.", solution: "Diseñamos una landing clara, responsive y orientada al contacto directo.", objective: "Hacer más simple entender los servicios y dar el siguiente paso hacia una reserva.", technologies: ["Landing page", "Responsive", "WhatsApp"] },
-    { id: "start-program", title: "START", category: "Training", description: "Sistema de entrenamiento estructurado para progresar semana a semana.", status: "available", statusLabel: "Disponible", url: "#", tags: ["Training", "Método", "Progreso"], context: "START reúne una forma de planificar el entrenamiento sin depender de la improvisación.", challenge: "Convertir una rutina dispersa en un recorrido simple de seguir.", solution: "Estructuramos bloques de progresión y una experiencia fácil de consultar.", objective: "Ayudar a entrenar con un método sostenido en el tiempo.", technologies: ["Producto digital", "Planificación", "UX"] },
+    { id: "start-program", title: "START", category: "Training", description: "Sistema de entrenamiento estructurado para progresar semana a semana.", status: "available", statusLabel: "Disponible", url: "https://mortega00.github.io/start/", tags: ["Training", "Método", "Progreso"], context: "START reúne una forma de planificar el entrenamiento sin depender de la improvisación.", challenge: "Convertir una rutina dispersa en un recorrido simple de seguir.", solution: "Estructuramos bloques de progresión y una experiencia fácil de consultar.", objective: "Ayudar a entrenar con un método sostenido en el tiempo.", technologies: ["Producto digital", "Planificación", "UX"] },
     { id: "start-app", title: "START App", category: "Training", description: "Aplicación para seguimiento de cargas, descansos y métricas de rendimiento.", status: "development", statusLabel: "En desarrollo", url: "#", tags: ["App", "Métricas", "Training"], context: "Una extensión natural de START para acompañar el seguimiento diario.", challenge: "Reunir datos de entrenamiento sin volver compleja la experiencia.", solution: "Definimos una herramienta enfocada en registrar lo importante.", objective: "Dar visibilidad al progreso y facilitar los ajustes.", technologies: ["Aplicación", "Métricas", "Producto"] },
     { id: "start-nutrition", title: "START Nutrition", category: "Training", description: "Herramientas para acompañar hábitos nutricionales y entrenamiento.", status: "coming-soon", statusLabel: "Próximamente", url: "#", tags: ["Nutrición", "Hábitos", "Training"], context: "Un área futura dentro del ecosistema START.", challenge: "Conectar hábitos y entrenamiento con información simple de usar.", solution: "Estamos definiendo el alcance de las herramientas necesarias.", objective: "Acompañar el entrenamiento desde una mirada integral.", technologies: ["Producto", "Hábitos", "Planning"] },
     { id: "qarta", title: "QARTA", category: "Gastronomía", description: "Propuesta para ordenar cartas, promociones y comunicación en gastronomía.", status: "development", statusLabel: "En desarrollo", url: "#", tags: ["QR", "Menú", "Producto"], context: "QARTA nace alrededor de las necesidades cotidianas de comunicación en comercios gastronómicos.", challenge: "Actualizar la información de carta sin depender de soportes estáticos.", solution: "Estamos diseñando una experiencia de menú y comunicación pensada para cada comercio.", objective: "Hacer más clara la elección del cliente y más ágil la gestión del negocio.", technologies: ["QR", "Producto digital", "UX"] },
@@ -85,6 +85,18 @@ function escapeHtml(value) {
 
 function escapeAttribute(value) {
     return escapeHtml(value);
+}
+
+function syncModalOpenState() {
+    const hasOpenModal = Boolean(document.querySelector(".project-modal:not([hidden]), .educational-modal:not([hidden])"));
+    document.body.classList.toggle("modal-open", hasOpenModal);
+}
+
+function hideOtherModals(activeModal) {
+    document.querySelectorAll(".project-modal, .educational-modal").forEach(modal => {
+        if (modal !== activeModal) modal.hidden = true;
+    });
+    syncModalOpenState();
 }
 
 function setupLogo360() {
@@ -194,7 +206,7 @@ function setupProjectModal() {
     const close = () => {
         if (modal.hidden) return;
         modal.hidden = true;
-        document.body.classList.remove("modal-open");
+        syncModalOpenState();
         if (lastFocus) lastFocus.focus();
     };
     const open = card => {
@@ -219,8 +231,9 @@ function setupProjectModal() {
         const hasUrl = project.url && project.url !== "#";
         elements.link.hidden = !hasUrl;
         if (hasUrl) elements.link.href = project.url;
+        hideOtherModals(modal);
         modal.hidden = false;
-        document.body.classList.add("modal-open");
+        syncModalOpenState();
         dialog.focus();
     };
     cards.forEach(card => {
@@ -268,7 +281,7 @@ function setupSolutionGuides() {
     const close = () => {
         if (modal.hidden) return;
         modal.hidden = true;
-        document.body.classList.remove("modal-open");
+        syncModalOpenState();
         if (lastFocus) lastFocus.focus();
     };
     const open = trigger => {
@@ -284,8 +297,9 @@ function setupSolutionGuides() {
         moduleLink.textContent = guide.ctaLabel;
         fillList(usefulFor, guide.usefulFor);
         fillList(examples, guide.examples);
+        hideOtherModals(modal);
         modal.hidden = false;
-        document.body.classList.add("modal-open");
+        syncModalOpenState();
         dialog.focus();
     };
 
@@ -320,7 +334,7 @@ function setupGlossary() {
     const close = () => {
         if (modal.hidden) return;
         modal.hidden = true;
-        document.body.classList.remove("modal-open");
+        syncModalOpenState();
         if (lastFocus) lastFocus.focus();
     };
     const open = trigger => {
@@ -332,8 +346,9 @@ function setupGlossary() {
         definition.textContent = term.definition;
         example.textContent = term.optionalExample || "";
         example.hidden = !term.optionalExample;
+        hideOtherModals(modal);
         modal.hidden = false;
-        document.body.classList.add("modal-open");
+        syncModalOpenState();
         dialog.focus();
     };
 
@@ -412,7 +427,7 @@ function setupBriefForm() {
     const status = document.getElementById("brief-status");
     const label = document.getElementById("brief-step-label");
     const progress = document.getElementById("brief-progress-value");
-    if (!previous || !next || !submit || !status || !label || !progress) return;
+    if (!steps.length || !previous || !next || !submit || !status || !label || !progress) return;
     let currentStep = 1;
     const choice = name => form.querySelector('[name="' + name + '"]:checked')?.value || "No indicado";
     const choices = name => [...form.querySelectorAll('[name="' + name + '"]:checked')].map(input => input.value).join(", ") || "No indicado";
@@ -423,8 +438,16 @@ function setupBriefForm() {
             if (output) output.textContent = value;
         });
     };
-    const showStep = step => {
-        currentStep = step;
+    const keepFormHeaderVisible = () => {
+        const navbarHeight = document.getElementById("navbar")?.getBoundingClientRect().height || 0;
+        const formBounds = form.getBoundingClientRect();
+        const topOffset = navbarHeight + 16;
+        if (formBounds.top < topOffset || formBounds.top > window.innerHeight - 96) {
+            window.scrollTo({ top: Math.max(0, window.scrollY + formBounds.top - topOffset), behavior: "smooth" });
+        }
+    };
+    const showStep = (step, keepVisible = false) => {
+        currentStep = Math.min(steps.length, Math.max(1, Number(step) || 1));
         steps.forEach(item => item.hidden = Number(item.dataset.step) !== currentStep);
         label.textContent = "Paso " + currentStep + " de " + steps.length;
         progress.style.width = (currentStep / steps.length) * 100 + "%";
@@ -433,6 +456,7 @@ function setupBriefForm() {
         submit.hidden = currentStep !== steps.length;
         status.textContent = "";
         if (currentStep === steps.length) updateSummary();
+        if (keepVisible) window.requestAnimationFrame(keepFormHeaderVisible);
     };
     const validate = () => {
         const fields = [...steps[currentStep - 1].querySelectorAll("input, textarea")];
@@ -443,9 +467,9 @@ function setupBriefForm() {
         return false;
     };
     next.addEventListener("click", () => {
-        if (validate()) showStep(currentStep + 1);
+        if (validate()) showStep(currentStep + 1, true);
     });
-    previous.addEventListener("click", () => showStep(currentStep - 1));
+    previous.addEventListener("click", () => showStep(currentStep - 1, true));
     form.addEventListener("submit", event => {
         event.preventDefault();
         if (!validate()) return;
@@ -461,7 +485,7 @@ function setupBriefForm() {
             "Detalles: " + (form.elements.details.value.trim() || "No indicado"),
             "Fecha ideal: " + (form.elements.date.value.trim() || "No indicada"), "",
             "Origen: Formulario NODO"
-        ].join("\\n");
+        ].join("\n");
         window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(message), "_blank", "noopener");
     });
     showStep(currentStep);

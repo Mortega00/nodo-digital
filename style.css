@@ -23,6 +23,10 @@
     padding: 0;
 }
 
+[hidden] {
+    display: none !important;
+}
+
 body {
     background-color: var(--bg-dark);
     color: var(--text-white);
@@ -1937,10 +1941,6 @@ a:visited {
     color: var(--text-white);
 }
 
-.project-modal[hidden] {
-    display: none;
-}
-
 .project-modal {
     position: fixed;
     z-index: 2000;
@@ -2258,10 +2258,6 @@ body.modal-open {
 
 .glossary-trigger:focus-visible {
     border-radius: 2px;
-}
-
-.educational-modal[hidden] {
-    display: none;
 }
 
 .educational-modal {
