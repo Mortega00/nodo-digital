@@ -1486,7 +1486,6 @@ a:visited {
 
 .what-we-do-card,
 .process-card {
-    min-height: 220px;
     padding: 26px;
     background: rgba(255, 255, 255, 0.025);
     border: 1px solid var(--border-color);
@@ -2798,5 +2797,262 @@ body.modal-open {
 @media (prefers-reduced-motion: reduce) {
     .brand-marquee.is-static .brand-item {
         animation: none;
+    }
+}
+
+/* Pulido de ritmo vertical y alineación entre componentes repetidos */
+.what-we-do-grid,
+.process-grid,
+.hub-categories-grid,
+.projects-grid,
+.module-grid,
+.solutions-grid {
+    align-items: stretch;
+    grid-auto-rows: 1fr;
+}
+
+.what-we-do-card,
+.process-card,
+.hub-category-card,
+.project-card,
+.project-module-card,
+.solution-card {
+    min-width: 0;
+    height: 100%;
+}
+
+.what-we-do-card,
+.process-card,
+.hub-category-card,
+.project-card,
+.project-module-card,
+.solution-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.what-we-do-card,
+.process-card {
+    min-height: 0;
+}
+
+.what-we-do-card > span:not(.guide-card-cta),
+.process-card > span {
+    flex: 0 0 auto;
+    margin-bottom: 32px;
+}
+
+.what-we-do-card h3,
+.process-card h3,
+.hub-category-card h3,
+.project-title,
+.module-card-title,
+.solution-card h3 {
+    overflow-wrap: anywhere;
+}
+
+.what-we-do-card p,
+.process-card p,
+.hub-category-card p,
+.project-desc,
+.module-card-desc,
+.solution-desc,
+.modal-intro,
+.modal-details p,
+.brief-summary dd {
+    overflow-wrap: anywhere;
+}
+
+.what-we-do-card .solution-concept {
+    margin: auto 0 0;
+}
+
+.what-we-do-card .guide-card-cta,
+.category-link-arrow,
+.module-guide-link,
+.project-btn,
+.module-footer a,
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    white-space: nowrap;
+}
+
+.what-we-do-card .guide-card-cta {
+    margin: 12px 0 0;
+    letter-spacing: normal;
+}
+
+.hub-category-card p {
+    margin-bottom: 0;
+}
+
+.hub-category-card .category-link-arrow {
+    margin-top: auto;
+    padding-top: 20px;
+}
+
+.project-card .project-tags,
+.project-module-card .project-tags {
+    margin-top: auto;
+}
+
+.project-card .project-btn,
+.project-module-card .project-btn {
+    flex: 0 0 auto;
+    width: 100%;
+    justify-content: center;
+    margin-top: 0;
+    white-space: nowrap;
+}
+
+.project-card-header,
+.module-card-header {
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.status-badge {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.solution-card .solution-price {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    margin-bottom: 22px;
+}
+
+.solution-card .plan-details {
+    margin-top: auto;
+}
+
+.solution-card .solution-btn {
+    width: 100%;
+}
+
+.progressive-details summary {
+    min-height: 48px;
+    line-height: 1.35;
+}
+
+.progressive-details summary::after {
+    display: grid;
+    flex: 0 0 auto;
+    width: 1.15rem;
+    height: 1.15rem;
+    place-items: center;
+    margin-left: auto;
+}
+
+.modal-details {
+    align-items: stretch;
+}
+
+.modal-details section {
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-details p {
+    line-height: 1.55;
+}
+
+.module-hero > .section-eyebrow {
+    margin-bottom: 16px;
+}
+
+.module-guide,
+.landing-comparison {
+    min-width: 0;
+}
+
+.brief-step label,
+.conditional-field label {
+    line-height: 1.45;
+}
+
+.form-grid,
+.choice-grid,
+.brief-summary dl,
+.footer-content {
+    align-items: stretch;
+}
+
+.footer-col {
+    min-width: 0;
+}
+
+@media (max-width: 900px) {
+    .hero-title {
+        max-width: 100%;
+        font-size: clamp(2.1rem, 6vw, 3rem);
+        overflow-wrap: anywhere;
+        white-space: normal;
+    }
+
+    .hero-title br {
+        display: none !important;
+    }
+}
+
+@media (min-width: 1200px) {
+    .what-we-do-card h3 {
+        min-height: 2.5em;
+    }
+
+    .what-we-do-card > p:not(.solution-concept) {
+        min-height: 4.65em;
+        line-height: 1.55;
+    }
+
+    .solution-card .solution-desc {
+        min-height: 6em;
+    }
+
+    .solutions-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+    .what-we-do-grid,
+    .process-grid,
+    .solutions-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 767px) {
+    .solutions-grid {
+        display: grid !important;
+        overflow-x: visible;
+        scroll-snap-type: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .what-we-do-card h3,
+    .what-we-do-card > p:not(.solution-concept) {
+        min-height: 0;
+    }
+
+    .what-we-do-card .guide-card-cta,
+    .hub-category-card .category-link-arrow {
+        padding-top: 16px;
+    }
+
+    .project-card,
+    .project-module-card,
+    .solution-card {
+        padding: 24px 20px;
+    }
+
+    .progressive-details summary {
+        min-height: 44px;
     }
 }
