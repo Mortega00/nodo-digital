@@ -85,8 +85,8 @@ const projects = [
 ];
 
 const partnerBrands = [
-    // Cuando exista el asset, reemplazar null por "assets/brands/nativa.png".
-    { name: "NATIVA Estética", logo: null, url: NATIVA_ESTETICA_URL }
+    // TODO: copiar logo adjunto de NATIVA a assets/brands/nativa.png.
+    { name: "NATIVA Estética", type: "Proyecto para cliente", logo: null, url: NATIVA_ESTETICA_URL }
 ];
 
 function escapeHtml(value) {
@@ -383,7 +383,15 @@ function setupBrandMarquee() {
         item.href = brand.url;
         item.target = "_blank";
         item.rel = "noopener noreferrer";
-        item.textContent = brand.name;
+        const content = document.createElement("span");
+        content.className = "brand-item-content";
+        const name = document.createElement("span");
+        name.className = "brand-item-name";
+        name.textContent = brand.name;
+        const type = document.createElement("span");
+        type.className = "brand-item-type";
+        type.textContent = brand.type;
+        content.append(name, type);
         if (duplicate) {
             item.setAttribute("aria-hidden", "true");
             item.tabIndex = -1;
@@ -393,7 +401,9 @@ function setupBrandMarquee() {
             image.src = brand.logo;
             image.alt = brand.name;
             image.addEventListener("error", () => image.remove());
-            item.replaceChildren(image);
+            item.append(image, content);
+        } else {
+            item.append(content);
         }
         return item;
     };
@@ -404,6 +414,43 @@ function setupBrandMarquee() {
     if (useMarquee) {
         partnerBrands.forEach(brand => track.appendChild(createItem(brand, true)));
     }
+}
+
+function setupPlanSelection() {
+    const cards = [...document.querySelectorAll("[data-plan]")];
+    const form = document.getElementById("brief-form");
+    const selectedPlan = form?.elements.selected_plan;
+    if (!cards.length || !selectedPlan) return;
+
+    const updateVisualSelection = selectedCard => {
+        cards.forEach(card => {
+            const selected = card === selectedCard;
+            card.classList.toggle("selected-plan", selected);
+            const copy = card.querySelector("[data-plan-selection]");
+            if (copy) copy.textContent = selected ? card.dataset.planContext || "" : "";
+        });
+    };
+    const selectPlan = (card, includeInBrief) => {
+        updateVisualSelection(card);
+        if (!includeInBrief) return;
+        selectedPlan.value = card.dataset.planLabel || "";
+        form.dispatchEvent(new Event("input", { bubbles: true }));
+    };
+    const positioning = cards.find(card => card.dataset.plan === "positioning");
+    if (positioning) updateVisualSelection(positioning);
+
+    cards.forEach(card => {
+        card.addEventListener("click", event => {
+            const nestedControl = event.target.closest("a, button, summary, input, details");
+            if (nestedControl && !nestedControl.matches("[data-plan-cta]")) return;
+            selectPlan(card, true);
+        });
+        card.addEventListener("keydown", event => {
+            if (event.target !== card || (event.key !== "Enter" && event.key !== " ")) return;
+            event.preventDefault();
+            selectPlan(card, true);
+        });
+    });
 }
 
 function setupVideo() {
@@ -453,8 +500,9 @@ function setupBriefForm() {
     let navigationLocked = false;
     const conditionalTimers = new WeakMap();
     const objectives = [...form.querySelectorAll('[name="objective"]')];
+    const needInputs = [...form.querySelectorAll('[name="need"]')];
     const choice = name => form.querySelector('[name="' + name + '"]:checked')?.value || "";
-    const choices = name => [...form.querySelectorAll('[name="' + name + '"]:checked')].map(input => input.value).join(", ");
+    const selectedValues = name => [...form.querySelectorAll('[name="' + name + '"]:checked')].map(input => input.value);
     const value = name => typeof form.elements[name]?.value === "string" ? form.elements[name].value.trim() : "";
     const projectIsUnnamed = () => Boolean(form.elements.project_unnamed?.checked);
     const businessValue = () => projectIsUnnamed() ? "Todavía sin nombre" : value("business");
@@ -464,7 +512,7 @@ function setupBriefForm() {
     };
     const conditionalValue = name => isConditionalNameActive(name) ? value(name) : "";
     const conditionalChoice = name => isConditionalNameActive(name) ? choice(name) : "";
-    const conditionalChoices = name => isConditionalNameActive(name) ? choices(name) : "";
+    const conditionalSelectedValues = name => isConditionalNameActive(name) ? selectedValues(name) : [];
     const isConditionalActive = element => {
         const container = element.closest(".conditional-field");
         return !container || container.dataset.active === "true";
@@ -525,29 +573,79 @@ function setupBriefForm() {
         });
         updateConditionalRequirements();
     };
+    const getBriefData = () => ({
+        name: value("name"),
+        business: businessValue(),
+        whatsapp: value("whatsapp"),
+        email: value("email"),
+        selected_plan: value("selected_plan"),
+        objective: selectedValues("objective"),
+        current: selectedValues("current"),
+        current_social: conditionalValue("current_social"),
+        current_website: conditionalValue("current_website"),
+        old_website: conditionalValue("old_website"),
+        current_system: conditionalValue("current_system"),
+        current_other: conditionalValue("current_other"),
+        need: choice("need"),
+        landing_goal: conditionalChoice("landing_goal"),
+        website_sections: conditionalSelectedValues("website_sections"),
+        booking_type: conditionalChoice("booking_type"),
+        automation_task: conditionalValue("automation_task"),
+        system_needs: conditionalSelectedValues("system_needs"),
+        app_actions: conditionalValue("app_actions"),
+        details: value("details"),
+        date: value("date"),
+        budget: choice("budget")
+    });
+    const buildWhatsAppMessage = data => {
+        const addOptionalLines = (lines, entries) => entries.forEach(([fieldLabel, fieldValue]) => {
+            if (fieldValue) lines.push(fieldLabel + ": " + fieldValue);
+        });
+        const addBulletedLines = (lines, items) => items.filter(Boolean).forEach(item => lines.push("• " + item));
+        const addOptionalList = (lines, fieldLabel, items) => {
+            if (!items.length) return;
+            lines.push(fieldLabel + ":");
+            addBulletedLines(lines, items);
+        };
+        const lines = [
+            "Hola! Quiero hablar sobre un proyecto para NODO.", "",
+            "*DATOS*",
+            "Nombre: " + data.name,
+            "Negocio / marca / idea: " + data.business,
+            "WhatsApp: " + data.whatsapp,
+            "Email: " + data.email
+        ];
+        if (data.selected_plan) lines.push("Plan de interés: " + data.selected_plan);
+        lines.push("", "*OBJETIVOS*");
+        addBulletedLines(lines, data.objective);
+        lines.push("", "*ACTUALMENTE TENGO*");
+        addBulletedLines(lines, data.current);
+        lines.push("", "*CREO QUE NECESITO*", data.need);
+        addOptionalLines(lines, [
+            ["Acción principal", data.landing_goal],
+            ["Tipo de reserva", data.booking_type],
+            ["Tarea a automatizar", data.automation_task],
+            ["Acciones de la app", data.app_actions]
+        ]);
+        addOptionalList(lines, "Secciones web", data.website_sections);
+        addOptionalList(lines, "Necesidades del sistema", data.system_needs);
+        lines.push("", "*SOBRE EL PROYECTO*");
+        addOptionalLines(lines, [
+            ["Detalles", data.details],
+            ["Fecha ideal", data.date],
+            ["Presupuesto", data.budget]
+        ]);
+        lines.push("", "Origen: Formulario NODO");
+        return lines.join("\n");
+    };
     const updateSummary = () => {
+        const data = getBriefData();
         const values = {
-            name: value("name"),
-            business: businessValue(),
-            whatsapp: value("whatsapp"),
-            email: value("email"),
-            objective: choices("objective"),
-            current: choices("current"),
-            current_social: conditionalValue("current_social"),
-            current_website: conditionalValue("current_website"),
-            old_website: conditionalValue("old_website"),
-            current_system: conditionalValue("current_system"),
-            current_other: conditionalValue("current_other"),
-            need: choice("need"),
-            landing_goal: conditionalChoice("landing_goal"),
-            website_sections: conditionalChoices("website_sections"),
-            booking_type: conditionalChoice("booking_type"),
-            automation_task: conditionalValue("automation_task"),
-            system_needs: conditionalChoices("system_needs"),
-            app_actions: conditionalValue("app_actions"),
-            details: value("details"),
-            date: value("date"),
-            budget: choice("budget")
+            ...data,
+            objective: data.objective.join(", "),
+            current: data.current.join(", "),
+            website_sections: data.website_sections.join(", "),
+            system_needs: data.system_needs.join(", ")
         };
         Object.entries(values).forEach(([key, fieldValue]) => {
             const output = form.querySelector('[data-summary="' + key + '"]');
@@ -610,6 +708,9 @@ function setupBriefForm() {
         if (currentStep === 3 && !form.querySelector('[name="current"]:checked')) {
             return showMissingData(form.querySelector('[name="current"]'), "Elegí al menos una opción. Si todavía no tenés nada, podés marcar “Nada todavía”.");
         }
+        if (currentStep === 4 && !needInputs.some(input => input.checked)) {
+            return showMissingData(needInputs[0], "Elegí una opción o marcá “No lo sé todavía” para continuar.");
+        }
         const fields = [...step.querySelectorAll("input, textarea")].filter(isVisibleField);
         const invalid = fields.find(field => !field.checkValidity());
         if (invalid) return showMissingData(invalid);
@@ -647,6 +748,18 @@ function setupBriefForm() {
                 nothing.checked = false;
             }
         }
+        if (event.target.name === "need") {
+            const unsure = form.querySelector('[name="need"][value="No lo sé todavía"]');
+            if (event.target === unsure && unsure.checked) {
+                needInputs.forEach(input => {
+                    if (input !== unsure) input.checked = false;
+                });
+            } else if (event.target.checked) {
+                needInputs.forEach(input => {
+                    if (input !== event.target) input.checked = false;
+                });
+            }
+        }
         updateConditionalFields();
         if (currentStep === steps.length) updateSummary();
     });
@@ -656,41 +769,7 @@ function setupBriefForm() {
     form.addEventListener("submit", event => {
         event.preventDefault();
         if (currentStep !== steps.length || navigationLocked || !validate()) return;
-        const current = choices("current");
-        const conditionalCurrent = [
-            ["Redes", conditionalValue("current_social")],
-            ["Web actual", conditionalValue("current_website")],
-            ["Web vieja", conditionalValue("old_website")],
-            ["Sistema actual", conditionalValue("current_system")],
-            ["Otro", conditionalValue("current_other")]
-        ];
-        const conditionalNeed = [
-            ["Acción principal", conditionalChoice("landing_goal")],
-            ["Secciones web", conditionalChoices("website_sections")],
-            ["Tipo de reserva", conditionalChoice("booking_type")],
-            ["Tarea a automatizar", conditionalValue("automation_task")],
-            ["Necesidades del sistema", conditionalChoices("system_needs")],
-            ["Acciones de la app", conditionalValue("app_actions")]
-        ];
-        const addOptionalLines = (lines, entries) => entries.forEach(([fieldLabel, fieldValue]) => {
-            if (fieldValue) lines.push(fieldLabel + ": " + fieldValue);
-        });
-        const message = [
-            "Hola! Quiero hablar sobre un proyecto para NODO.", "",
-            "DATOS",
-            "Nombre: " + value("name"),
-            "Negocio / marca / idea: " + businessValue(),
-            "WhatsApp: " + value("whatsapp"),
-            "Email: " + value("email"), "",
-            "OBJETIVO",
-            "Objetivos: " + choices("objective"), "",
-            "ACTUALMENTE TENGO",
-            "Actualmente tengo: " + current
-        ];
-        addOptionalLines(message, conditionalCurrent);
-        message.push("", "CREO QUE NECESITO", "Necesito: " + choice("need"));
-        addOptionalLines(message, conditionalNeed);
-        message.push("", "SOBRE EL PROYECTO", "Detalles: " + value("details"), "Fecha ideal: " + value("date"), "Presupuesto: " + choice("budget"), "", "Origen: Formulario NODO");
+        const message = buildWhatsAppMessage(getBriefData());
         window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(message), "_blank", "noopener");
     });
     updateProjectNameState();
@@ -724,6 +803,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupBrandMarquee();
     setupVideo();
     setupBriefForm();
+    setupPlanSelection();
     setupFaq();
     setupCurrentYear();
 });
