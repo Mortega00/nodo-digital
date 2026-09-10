@@ -92,10 +92,10 @@ const advisorSteps = [
         max: 3,
         options: [
             { id: "professional", label: "Que mi negocio se vea más profesional", text: "Quiero tener un lugar claro donde mostrar quién soy y qué hago." },
-            { id: "messages", label: "Que más personas me escriban", text: "Quiero recibir consultas por WhatsApp, formulario o redes." },
-            { id: "services", label: "Mostrar mis servicios", text: "Quiero explicar de forma simple qué ofrezco." },
+            { id: "messages", label: "Que más personas me escriban", text: "Quiero recibir consultas por WhatsApp o formulario." },
+            { id: "services", label: "Mostrar mis servicios", text: "Quiero que puedan ver fácilmente qué ofrezco." },
             { id: "bookings", label: "Recibir reservas o turnos", text: "Quiero que puedan elegir un día u horario." },
-            { id: "products", label: "Mostrar productos", text: "Quiero que puedan ver lo que vendo." },
+            { id: "products", label: "Mostrar productos", text: "Quiero enseñar lo que vendo, aunque la compra no sea online." },
             { id: "sell", label: "Vender por internet", text: "Quiero recibir pedidos o pagos desde la web." },
             { id: "unsure", label: "Todavía no estoy seguro", text: "Prefiero que me orienten.", exclusive: true }
         ]
@@ -111,7 +111,7 @@ const advisorSteps = [
             { id: "whatsapp", label: "WhatsApp" },
             { id: "current-page", label: "Ya tengo una página", group: "page-state" },
             { id: "old-page", label: "Tengo una página vieja", group: "page-state" },
-            { id: "starting", label: "Estoy empezando de cero", exclusive: true },
+            { id: "starting", label: "Estoy empezando de cero", group: "page-state" },
             { id: "idea", label: "Estoy armando una idea" }
         ]
     },
@@ -174,6 +174,12 @@ function selectedFor(step) {
     return state.answers[step.id] || [];
 }
 
+function goalSelectionStatus(selectedCount, max) {
+    if (!selectedCount) return { count: "Podés elegir hasta " + max, note: "" };
+    if (selectedCount === max) return { count: "Elegiste " + selectedCount + " de " + max, note: "Ya elegiste " + max + ". Podés quitar una si querés cambiarla." };
+    return { count: "Elegiste " + selectedCount + " de " + max, note: "" };
+}
+
 function labelFor(stepId, optionId) {
     const step = advisorSteps.find(item => item.id === stepId);
     return step?.options.find(option => option.id === optionId)?.label || "";
@@ -193,7 +199,7 @@ function toggleOption(step, option) {
         if (isSelected) {
             next = next.filter(id => id !== option.id);
         } else if (step.max && next.length >= step.max) {
-            state.message = "Podés elegir hasta " + step.max + " opciones. Si querés, cambiá una de las que ya marcaste.";
+            state.message = "";
             renderAdvisor();
             return;
         } else {
@@ -224,6 +230,14 @@ function goNext() {
         state.currentStep += 1;
     }
     renderAdvisor();
+    resetAdvisorScroll();
+}
+
+function resetAdvisorScroll() {
+    const card = advisor.closest(".advisor-card");
+    if (!card?.scrollTo) return;
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    card.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
 }
 
 function getRecommendation(answers) {
@@ -246,22 +260,61 @@ function getReasons(planKey) {
     const start = (state.answers.start || [])[0];
     const reasons = [];
 
-    if (goals.has("messages")) reasons.push("Nos dijiste que querés facilitar que más personas te escriban.");
-    if (goals.has("services")) reasons.push("También querés mostrar lo que ofrecés de una forma clara.");
-    if (goals.has("products") || content.has("products")) reasons.push("Querés que las personas puedan recorrer productos con tranquilidad.");
+    if (goals.has("messages") || today.has("whatsapp")) reasons.push("Nos dijiste que querés facilitar que las personas te contacten.");
+    if (goals.has("services") || content.has("services")) reasons.push("También querés mostrar tus servicios de una forma clara.");
+    if (goals.has("products") || content.has("products")) reasons.push("Querés que las personas puedan recorrer lo que vendés con tranquilidad.");
     if (goals.has("sell") || start === "commerce") reasons.push("Buscás una página que acompañe pedidos, compras o consultas.");
     if (today.has("current-page") || today.has("old-page")) reasons.push("Nos contaste que ya tenés una página y querés mejorar lo que mostrás.");
     if (content.has("location") || content.has("promotions") || start === "complete") reasons.push("Necesitás más espacio para ordenar información importante de tu negocio.");
     if (start === "simple" || today.has("starting")) reasons.push("Querés empezar con una presencia clara y sin sumar cosas que hoy no necesitás.");
+    if (planKey === "custom") reasons.push("Tu idea necesita funciones más específicas antes de definir una propuesta.");
+    if (!reasons.length && goals.has("professional")) reasons.push("Querés que tu negocio se vea más profesional y sea fácil de entender.");
+    if (!reasons.length && start === "recommend") reasons.push("Preferís recibir una guía clara para elegir por dónde empezar.");
 
     const closing = {
-        launch: "NODO Lanzamiento cubre ese primer paso con claridad.",
-        positioning: "NODO Posicionamiento reúne esas necesidades sin sumar complejidad innecesaria.",
-        conversion: "NODO Conversión ayuda a ordenar ese recorrido de compra, pedido o consulta.",
-        custom: "Una propuesta personalizada nos permite definir primero qué necesita tu idea."
+        launch: "Por eso una presencia simple y clara tiene sentido para empezar.",
+        positioning: "Por eso una web más completa tiene más sentido que una página básica.",
+        conversion: "Por eso conviene priorizar un recorrido claro hacia consultas, pedidos o compras.",
+        custom: "Por eso primero necesitamos definir el alcance antes de presupuestar."
     };
-    reasons.push(closing[planKey]);
-    return reasons.slice(0, 3);
+    return [...reasons.slice(0, 2), closing[planKey]];
+}
+
+function joinNeeds(needs) {
+    if (needs.length < 2) return needs[0] || "empezar con una presencia clara";
+    if (needs.length === 2) return needs.join(" y ");
+    return needs.slice(0, -1).join(", ") + " y " + needs.at(-1);
+}
+
+function getRecommendationSummary(planKey) {
+    const goals = new Set(state.answers.goals || []);
+    const today = new Set(state.answers.today || []);
+    const content = new Set(state.answers.content || []);
+    const start = (state.answers.start || [])[0];
+
+    if (planKey === "custom") return "Tu necesidad requiere algo más específico. Primero entendemos bien el alcance y después te presentamos una propuesta.";
+    if (planKey === "conversion") return "Querés mostrar lo que vendés y hacer más fácil que una persona avance hacia una compra o pedido.";
+
+    if (planKey === "positioning") {
+        const needs = [];
+        if (goals.has("services") || content.has("services")) needs.push("mostrar mejor tus servicios");
+        if (goals.has("messages") || today.has("whatsapp")) needs.push("facilitar que te contacten");
+        if (today.has("current-page") || today.has("old-page") || start === "complete") needs.push("ordenar la información de tu negocio");
+        if (content.has("location") || content.has("promotions")) needs.push("dar lugar a información importante");
+        return "Querés " + joinNeeds(needs) + ". Esta opción cubre eso sin sumar cosas que hoy no necesitás.";
+    }
+
+    if (today.has("starting")) {
+        return goals.has("messages") || today.has("whatsapp")
+            ? "Estás empezando y necesitás una presencia clara para mostrar tu negocio y recibir consultas."
+            : "Estás empezando y necesitás una presencia clara para mostrar tu negocio.";
+    }
+
+    const needs = [];
+    if (goals.has("professional")) needs.push("mostrar tu negocio con claridad");
+    if (goals.has("messages") || today.has("whatsapp")) needs.push("recibir consultas");
+    if (goals.has("services")) needs.push("explicar lo que ofrecés");
+    return "Querés " + joinNeeds(needs) + ". Esta opción te permite empezar de forma simple y clara.";
 }
 
 function renderStart() {
@@ -283,7 +336,6 @@ function renderStep() {
     const meta = createElement("div", "advisor-meta");
     meta.setAttribute("aria-live", "polite");
     meta.append(createElement("span", "", "Paso " + (state.currentStep + 1) + " de " + advisorSteps.length));
-    meta.append(createElement("span", "", "Tu ritmo"));
     view.append(meta);
 
     const progress = createElement("div", "progress-track");
@@ -299,12 +351,30 @@ function renderStep() {
     choices.setAttribute("role", step.selection === "single" ? "radiogroup" : "group");
     choices.setAttribute("aria-label", step.question);
     const selected = selectedFor(step);
+    const isGoalStep = step.id === "goals";
+    const isAtGoalLimit = isGoalStep && selected.length >= step.max;
+
+    if (isGoalStep) {
+        const selectionStatus = goalSelectionStatus(selected.length, step.max);
+        const status = createElement("div", "advisor-selection-status");
+        status.id = "goal-selection-status";
+        status.setAttribute("aria-live", "polite");
+        status.append(createElement("span", "advisor-selection-count", selectionStatus.count));
+        status.append(createElement("span", "advisor-selection-note", selectionStatus.note));
+        view.append(status);
+        choices.setAttribute("aria-describedby", status.id);
+    }
+
     step.options.forEach(option => {
-        const choice = createButton("", "choice-card" + (selected.includes(option.id) ? " is-selected" : ""), () => toggleOption(step, option));
-        choice.setAttribute("aria-pressed", String(selected.includes(option.id)));
+        const isSelected = selected.includes(option.id);
+        const isUnavailable = isAtGoalLimit && !isSelected;
+        const choiceClass = "choice-card" + (option.text ? " choice-card-detailed" : " choice-card-compact") + (isSelected ? " is-selected" : "") + (isUnavailable ? " is-unavailable" : "");
+        const choice = createButton("", choiceClass, () => toggleOption(step, option));
+        choice.setAttribute("aria-pressed", String(isSelected));
         const label = createElement("strong", "", option.label);
         choice.append(label);
         if (option.text) choice.append(createElement("span", "", option.text));
+        choice.append(createElement("span", "choice-indicator", "✓"));
         choices.append(choice);
     });
     view.append(choices);
@@ -316,8 +386,13 @@ function renderStep() {
         if (state.currentStep === 0) state.screen = "start";
         else state.currentStep -= 1;
         renderAdvisor();
+        resetAdvisorScroll();
     });
-    const next = createButton(state.currentStep === advisorSteps.length - 1 ? "Ver mi opción" : "Continuar", "button button-primary", goNext);
+    const next = createButton(state.currentStep === advisorSteps.length - 1 ? "Ver mi opción" : "Continuar", "button button-primary advisor-next", goNext);
+    if (isGoalStep && !hasValidAnswer(step)) {
+        next.disabled = true;
+        next.setAttribute("aria-disabled", "true");
+    }
     nav.append(previous, next);
     view.append(nav);
     return view;
@@ -341,6 +416,7 @@ function renderDetails(title, content) {
 function renderResult() {
     const key = getRecommendation(state.answers);
     const plan = plans[key];
+    const isCustomPlan = key === "custom";
     const view = createElement("div", "advisor-view");
     view.setAttribute("aria-live", "polite");
     view.append(createElement("p", "result-eyebrow", "UNA OPCIÓN PARA VOS"));
@@ -348,8 +424,10 @@ function renderResult() {
 
     const card = createElement("article", "plan-result");
     card.append(createElement("h3", "", plan.name));
-    card.append(createElement("p", "", plan.description));
+    card.append(createElement("p", "plan-summary", getRecommendationSummary(key)));
     card.append(createElement("p", "plan-price", plan.price));
+    card.append(createElement("p", "plan-price-context", isCustomPlan ? "Valor definido según el alcance" : "Valor estimado inicial"));
+    card.append(createElement("p", "plan-price-note", isCustomPlan ? "Primero definimos juntos el contenido y las funciones necesarias." : "El valor final se confirma cuando definimos juntos el contenido y las funciones necesarias."));
     card.append(createElement("p", "plan-time", plan.delivery));
     if (plan.note) card.append(createElement("p", "plan-note", plan.note));
     const benefits = createElement("ul", "plan-facts");
@@ -360,13 +438,13 @@ function renderResult() {
     const details = createElement("div", "result-details");
     details.append(renderDetails("¿Por qué te recomendamos esta opción?", getReasons(key)));
     details.append(renderDetails("Ver qué incluye", plan.includes));
-    details.append(renderDetails("Sobre la entrega estimada", "Los tiempos pueden variar según el alcance del proyecto y la disponibilidad de textos, imágenes y datos necesarios."));
+    details.append(renderDetails("¿De qué depende el tiempo?", "El tiempo puede variar según el alcance y qué tan rápido tengamos textos, imágenes y la información necesaria."));
     view.append(details);
 
     const actions = createElement("div", "result-actions");
-    const proceed = createElement("a", "button button-primary", "Quiero avanzar →");
+    const proceed = createElement("a", "button button-primary", isCustomPlan ? "Contarnos el proyecto →" : "Quiero avanzar →");
     proceed.href = "index.html?recommended_plan=" + encodeURIComponent(plan.name) + "#brief";
-    const talk = createElement("a", "button button-secondary", "Quiero hablarlo primero ↗");
+    const talk = createElement("a", "button button-secondary", isCustomPlan ? "Hablar con NODO ↗" : "Quiero hablarlo primero ↗");
     talk.href = "https://wa.me/5491130700900";
     talk.target = "_blank";
     talk.rel = "noopener noreferrer";
@@ -413,6 +491,61 @@ function setupPageChrome() {
     window.addEventListener("scroll", updateHeader, { passive: true });
 }
 
+function setupFaqAccordion() {
+    const items = [...document.querySelectorAll(".faq-list details")];
+    items.forEach(item => item.addEventListener("toggle", () => {
+        if (!item.open) return;
+        items.forEach(other => {
+            if (other !== item && other.open) other.open = false;
+        });
+    }));
+}
+
+const themeStorageKey = "nodo_web_theme";
+
+function preferredTheme() {
+    try {
+        const savedTheme = window.localStorage.getItem(themeStorageKey);
+        if (savedTheme === "dark" || savedTheme === "light") return savedTheme;
+    } catch {
+        // La página sigue funcionando aunque el navegador bloquee localStorage.
+    }
+
+    return window.matchMedia?.("(prefers-color-scheme: light)").matches ? "light" : "dark";
+}
+
+function applyTheme(theme, persist = false) {
+    const nextTheme = theme === "light" ? "light" : "dark";
+    const toggle = document.getElementById("theme-toggle");
+    document.documentElement.dataset.theme = nextTheme;
+
+    if (toggle) {
+        const isLight = nextTheme === "light";
+        toggle.setAttribute("aria-pressed", String(isLight));
+        toggle.setAttribute("aria-label", isLight ? "Activar modo oscuro" : "Activar modo claro");
+        toggle.title = isLight ? "Activar modo oscuro" : "Activar modo claro";
+        toggle.querySelector(".theme-toggle-icon").textContent = isLight ? "☾" : "☀";
+    }
+
+    if (persist) {
+        try {
+            window.localStorage.setItem(themeStorageKey, nextTheme);
+        } catch {
+            // La preferencia visual es opcional si el navegador bloquea almacenamiento.
+        }
+    }
+}
+
+function setupThemeToggle() {
+    applyTheme(preferredTheme());
+    const toggle = document.getElementById("theme-toggle");
+    toggle?.addEventListener("click", () => {
+        applyTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light", true);
+    });
+}
+
 window.NodoWebAdvisor = { plans, getRecommendation };
+setupThemeToggle();
 renderAdvisor();
 setupPageChrome();
+setupFaqAccordion();
