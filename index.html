@@ -282,28 +282,61 @@
                 <div class="container">
                     <div class="section-header text-center reveal">
                         <p class="section-eyebrow">EL SISTEMA NODO</p>
-                        <h2 class="section-title">De una idea a algo listo para usar.</h2>
+                        <h2 class="section-title">De una idea a una solución publicada.</h2>
+                        <p class="section-subtitle">Un proceso claro para entender, ordenar, construir y lanzar sin sumar complejidad innecesaria.</p>
                     </div>
                     <div class="process-grid">
-                        <article class="process-card reveal">
-                            <span>01</span>
+                        <article class="process-card reveal" data-process-step="understand" role="button" tabindex="0" aria-label="Ver etapa 01: Entendemos">
+                            <div class="process-media">
+                                <div class="process-media-fallback" aria-hidden="true" style="background-image: linear-gradient(145deg, rgba(162, 89, 255, 0.22), rgba(9, 9, 11, 0.18)), url('assets/process/01-entendemos-poster.jpg');"><span></span></div>
+                                <video muted loop playsinline preload="metadata" poster="assets/process/01-entendemos-poster.jpg" aria-hidden="true">
+                                    <source src="assets/process/01-entendemos.mp4" type="video/mp4">
+                                </video>
+                                <noscript><style>.process-media video { display: none; }.process-media-fallback { display: grid; }</style></noscript>
+                            </div>
+                            <p class="process-number">01 · ENTENDEMOS</p>
                             <h3>Entendemos</h3>
-                            <p>Qué hacés, cuál es el problema, a quién querés llegar y qué debería conseguir la solución.</p>
+                            <p class="process-copy">Entendemos la idea, el contexto y el objetivo.</p>
+                            <span class="process-card-cta" aria-hidden="true">Ver esta etapa <span>→</span></span>
                         </article>
-                        <article class="process-card reveal">
-                            <span>02</span>
+                        <article class="process-card reveal" data-process-step="structure" role="button" tabindex="0" aria-label="Ver etapa 02: Estructuramos">
+                            <div class="process-media">
+                                <div class="process-media-fallback" aria-hidden="true" style="background-image: linear-gradient(145deg, rgba(59, 130, 246, 0.2), rgba(9, 9, 11, 0.18)), url('assets/process/02-estructuramos-poster.jpg');"><span></span></div>
+                                <video muted loop playsinline preload="metadata" poster="assets/process/02-estructuramos-poster.jpg" aria-hidden="true">
+                                    <source src="assets/process/02-estructuramos.mp4" type="video/mp4">
+                                </video>
+                                <noscript><style>.process-media video { display: none; }.process-media-fallback { display: grid; }</style></noscript>
+                            </div>
+                            <p class="process-number">02 · ESTRUCTURAMOS</p>
                             <h3>Estructuramos</h3>
-                            <p>Ordenamos contenido, recorridos, funcionalidades y prioridades.</p>
+                            <p class="process-copy">Ordenamos la información y definimos el camino.</p>
+                            <span class="process-card-cta" aria-hidden="true">Ver esta etapa <span>→</span></span>
                         </article>
-                        <article class="process-card reveal">
-                            <span>03</span>
+                        <article class="process-card reveal" data-process-step="build" role="button" tabindex="0" aria-label="Ver etapa 03: Construimos">
+                            <div class="process-media">
+                                <div class="process-media-fallback" aria-hidden="true" style="background-image: linear-gradient(145deg, rgba(162, 89, 255, 0.18), rgba(59, 130, 246, 0.14)), url('assets/process/03-construimos-poster.jpg');"><span></span></div>
+                                <video muted loop playsinline preload="metadata" poster="assets/process/03-construimos-poster.jpg" aria-hidden="true">
+                                    <source src="assets/process/03-construimos.mp4" type="video/mp4">
+                                </video>
+                                <noscript><style>.process-media video { display: none; }.process-media-fallback { display: grid; }</style></noscript>
+                            </div>
+                            <p class="process-number">03 · CONSTRUIMOS</p>
                             <h3>Construimos</h3>
-                            <p>Diseñamos y desarrollamos una experiencia responsive, clara y funcional.</p>
+                            <p class="process-copy">Convertimos esa estructura en una solución real.</p>
+                            <span class="process-card-cta" aria-hidden="true">Ver esta etapa <span>→</span></span>
                         </article>
-                        <article class="process-card reveal">
-                            <span>04</span>
+                        <article class="process-card reveal" data-process-step="publish" role="button" tabindex="0" aria-label="Ver etapa 04: Publicamos">
+                            <div class="process-media">
+                                <div class="process-media-fallback" aria-hidden="true" style="background-image: linear-gradient(145deg, rgba(59, 130, 246, 0.2), rgba(162, 89, 255, 0.12)), url('assets/process/04-publicamos-poster.jpg');"><span></span></div>
+                                <video muted loop playsinline preload="metadata" poster="assets/process/04-publicamos-poster.jpg" aria-hidden="true">
+                                    <source src="assets/process/04-publicamos.mp4" type="video/mp4">
+                                </video>
+                                <noscript><style>.process-media video { display: none; }.process-media-fallback { display: grid; }</style></noscript>
+                            </div>
+                            <p class="process-number">04 · PUBLICAMOS</p>
                             <h3>Publicamos</h3>
-                            <p>Probamos, ajustamos, conectamos las herramientas necesarias y dejamos todo listo.</p>
+                            <p class="process-copy">Ajustamos, lanzamos y dejamos todo listo para crecer.</p>
+                            <span class="process-card-cta" aria-hidden="true">Ver esta etapa <span>→</span></span>
                         </article>
                     </div>
                 </div>
@@ -834,6 +867,21 @@
                 <h2 id="glossary-title"></h2>
                 <p class="glossary-definition" id="glossary-definition"></p>
                 <p class="glossary-example" id="glossary-example" hidden></p>
+            </section>
+        </div>
+        <div class="educational-modal process-modal" id="process-modal" hidden>
+            <div class="educational-modal-backdrop" data-process-modal-close></div>
+            <section class="educational-modal-dialog process-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="process-modal-title" tabindex="-1">
+                <button class="modal-close" type="button" data-process-modal-close aria-label="Cerrar etapa">×</button>
+                <p class="section-eyebrow" id="process-modal-number"></p>
+                <h2 id="process-modal-title"></h2>
+                <p class="process-modal-short" id="process-modal-short"></p>
+                <div class="process-modal-media" id="process-modal-media"></div>
+                <p class="process-modal-detail" id="process-modal-detail"></p>
+                <div class="process-audio" id="process-audio" hidden>
+                    <button class="process-audio-button" id="process-audio-button" type="button"><span aria-hidden="true">▶</span> Escuchar esta etapa</button>
+                    <span class="process-audio-duration" id="process-audio-duration" hidden></span>
+                </div>
             </section>
         </div>
         <script src="app.js"></script>

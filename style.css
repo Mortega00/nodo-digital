@@ -3056,3 +3056,261 @@ body.modal-open {
         min-height: 44px;
     }
 }
+
+/* Sistema NODO: proceso audiovisual con disclosure progresivo */
+.process-grid {
+    grid-auto-rows: 1fr;
+}
+
+.process-card {
+    min-width: 0;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.process-card:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 4px;
+}
+
+.process-media,
+.process-modal-media {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: calc(var(--radius-md) - 2px);
+    background:
+        radial-gradient(circle at 82% 18%, rgba(59, 130, 246, 0.18), transparent 36%),
+        linear-gradient(145deg, rgba(162, 89, 255, 0.16), rgba(18, 18, 21, 0.96));
+}
+
+.process-media {
+    flex: 0 0 auto;
+    margin-bottom: 20px;
+}
+
+.process-media-fallback {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    z-index: 0;
+    background-color: var(--bg-card);
+    background-position: center;
+    background-size: cover;
+}
+
+.process-media-fallback::before {
+    position: absolute;
+    inset: 16%;
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    border-radius: 50%;
+    content: "";
+    opacity: 0.8;
+}
+
+.process-media-fallback span {
+    width: 38%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+    box-shadow: 0 0 20px rgba(162, 89, 255, 0.55);
+}
+
+.process-media::after,
+.process-modal-media::after {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 48%, rgba(9, 9, 11, 0.25));
+    content: "";
+    pointer-events: none;
+}
+
+.process-media video,
+.process-modal-media video {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.25s ease, transform 0.3s ease;
+}
+
+.process-media video.is-ready,
+.process-modal-media video.is-ready {
+    opacity: 1;
+}
+
+.process-number {
+    flex: 0 0 auto;
+    margin: 0 0 12px;
+    color: var(--primary-purple) !important;
+    font-size: 0.74rem !important;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    line-height: 1.35;
+}
+
+.process-card .process-copy {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.55;
+}
+
+.process-card > .process-card-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    margin: auto 0 0;
+    padding-top: 20px;
+    color: var(--primary-purple);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: normal;
+    line-height: 1.3;
+    white-space: nowrap;
+}
+
+.process-card > .process-card-cta span {
+    transition: transform 0.2s ease;
+}
+
+.process-modal-dialog {
+    width: min(820px, 100%);
+}
+
+.process-modal-short {
+    margin-bottom: 22px;
+    color: var(--text-white);
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+.process-modal-media {
+    margin-bottom: 22px;
+}
+
+.process-modal-detail {
+    color: var(--text-muted);
+    line-height: 1.65;
+}
+
+.process-audio {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 26px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border-color);
+}
+
+.process-audio-source {
+    display: none;
+}
+
+.process-audio-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 44px;
+    padding: 10px 14px;
+    border: 1px solid var(--border-color-active);
+    border-radius: 999px;
+    background: rgba(162, 89, 255, 0.08);
+    color: var(--text-white);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+.process-audio-button:hover,
+.process-audio-button:focus-visible {
+    border-color: var(--primary-purple);
+    background: rgba(162, 89, 255, 0.15);
+}
+
+.process-audio-button:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 3px;
+}
+
+.process-audio-duration {
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    font-variant-numeric: tabular-nums;
+}
+
+@media (hover: hover) {
+    .process-card:hover {
+        border-color: var(--border-color-active);
+        background: rgba(162, 89, 255, 0.06);
+        transform: translateY(-3px);
+    }
+
+    .process-card:hover .process-media video.is-ready {
+        transform: scale(1.015);
+    }
+
+    .process-card:hover .process-card-cta {
+        color: var(--text-white);
+    }
+
+    .process-card:hover .process-card-cta span {
+        transform: translateX(3px);
+    }
+}
+
+@media (hover: none) {
+    .process-card:hover {
+        transform: none;
+    }
+}
+
+@media (max-width: 767px) {
+    .process-card {
+        height: auto;
+        padding: 24px 20px;
+    }
+
+    .process-media {
+        margin-bottom: 18px;
+    }
+
+    .process-card > .process-card-cta {
+        padding-top: 18px;
+    }
+
+    .process-modal-dialog {
+        max-height: calc(100dvh - 24px);
+        padding: 20px 16px max(28px, calc(env(safe-area-inset-bottom) + 16px));
+    }
+
+    .process-modal-short {
+        font-size: 1rem;
+    }
+
+    .process-modal-media {
+        margin-bottom: 20px;
+    }
+
+    .process-audio-button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .process-media video,
+    .process-modal-media video,
+    .process-card > .process-card-cta span {
+        transition: none;
+    }
+}

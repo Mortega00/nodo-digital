@@ -1,6 +1,53 @@
 const WHATSAPP_NUMBER = "5491130700900";
 const NATIVA_ESTETICA_URL = "https://mortega00.github.io/estetica-natalia/#inicio";
 
+const processSteps = {
+    understand: {
+        number: "01",
+        title: "Entendemos",
+        short: "Entendemos la idea, el contexto y el objetivo.",
+        detail: "Antes de construir, buscamos entender qué querés lograr, qué problema necesitás resolver y cuál es el contexto del proyecto. No empezamos eligiendo tecnología: empezamos entendiendo la necesidad.",
+        video: "assets/process/01-entendemos.mp4",
+        poster: "assets/process/01-entendemos-poster.jpg",
+        audio: "assets/process/audio/01-entendemos.mp3",
+        // Guion futuro de narración: “Entendemos la idea, el contexto y el objetivo.”
+        audioScript: "Entendemos la idea, el contexto y el objetivo."
+    },
+    structure: {
+        number: "02",
+        title: "Estructuramos",
+        short: "Ordenamos la información y definimos el camino.",
+        detail: "Con el objetivo claro, ordenamos contenido, funciones y prioridades. Definimos qué hace falta, qué puede esperar y cuál es el recorrido más simple para convertir la idea en una solución.",
+        video: "assets/process/02-estructuramos.mp4",
+        poster: "assets/process/02-estructuramos-poster.jpg",
+        audio: "assets/process/audio/02-estructuramos.mp3",
+        // Guion futuro de narración: “Ordenamos la información y definimos el camino.”
+        audioScript: "Ordenamos la información y definimos el camino."
+    },
+    build: {
+        number: "03",
+        title: "Construimos",
+        short: "Convertimos esa estructura en una solución real.",
+        detail: "Transformamos esa estructura en algo real. Diseñamos, desarrollamos e integramos las piezas necesarias cuidando funcionalidad, claridad, responsive y experiencia de uso.",
+        video: "assets/process/03-construimos.mp4",
+        poster: "assets/process/03-construimos-poster.jpg",
+        audio: "assets/process/audio/03-construimos.mp3",
+        // Guion futuro de narración: “Convertimos esa estructura en una solución real.”
+        audioScript: "Convertimos esa estructura en una solución real."
+    },
+    publish: {
+        number: "04",
+        title: "Publicamos",
+        short: "Ajustamos, lanzamos y dejamos todo listo para crecer.",
+        detail: "Antes de lanzar revisamos funcionamiento, contenido y experiencia. Ajustamos lo necesario, publicamos la solución y dejamos una base preparada para seguir mejorando.",
+        video: "assets/process/04-publicamos.mp4",
+        poster: "assets/process/04-publicamos-poster.jpg",
+        audio: "assets/process/audio/04-publicamos.mp3",
+        // Guion futuro de narración: “Ajustamos, lanzamos y dejamos todo listo para crecer.”
+        audioScript: "Ajustamos, lanzamos y dejamos todo listo para crecer."
+    }
+};
+
 const solutionGuides = {
     web: {
         title: "Web / Landing Pages",
@@ -104,7 +151,10 @@ function syncModalOpenState() {
 
 function hideOtherModals(activeModal) {
     document.querySelectorAll(".project-modal, .educational-modal").forEach(modal => {
-        if (modal !== activeModal) modal.hidden = true;
+        if (modal !== activeModal) {
+            modal.hidden = true;
+            modal.dispatchEvent(new CustomEvent("nodo:modalhidden"));
+        }
     });
     syncModalOpenState();
 }
@@ -371,6 +421,209 @@ function setupGlossary() {
     document.addEventListener("keydown", event => {
         if (event.key === "Escape" && !modal.hidden) close();
     });
+}
+
+function setupProcessExperience() {
+    const cards = [...document.querySelectorAll("[data-process-step]")];
+    const modal = document.getElementById("process-modal");
+    if (!cards.length || !modal) return;
+
+    const dialog = modal.querySelector(".process-modal-dialog");
+    const elements = {
+        number: document.getElementById("process-modal-number"),
+        title: document.getElementById("process-modal-title"),
+        short: document.getElementById("process-modal-short"),
+        media: document.getElementById("process-modal-media"),
+        detail: document.getElementById("process-modal-detail"),
+        audio: document.getElementById("process-audio"),
+        audioButton: document.getElementById("process-audio-button"),
+        audioDuration: document.getElementById("process-audio-duration")
+    };
+    if (!dialog || Object.values(elements).some(element => !element)) return;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const inlineVideos = cards.map(card => card.querySelector(".process-media video")).filter(Boolean);
+    let lastFocus = null;
+    let activeAudio = null;
+
+    const setAudioButtonState = playing => {
+        elements.audioButton.innerHTML = playing
+            ? '<span aria-hidden="true">❚❚</span> Pausar narración'
+            : '<span aria-hidden="true">▶</span> Escuchar esta etapa';
+    };
+
+    const stopAudio = () => {
+        if (!activeAudio) return;
+        activeAudio.pause();
+        activeAudio.currentTime = 0;
+        activeAudio = null;
+        setAudioButtonState(false);
+    };
+
+    const stopModalMedia = () => {
+        elements.media.querySelectorAll("video").forEach(video => {
+            video.pause();
+            video.currentTime = 0;
+        });
+    };
+
+    const clearAudio = () => {
+        stopAudio();
+        elements.audio.querySelectorAll("audio").forEach(audio => {
+            audio.pause();
+            audio.removeAttribute("src");
+            audio.load();
+        });
+        elements.audio.replaceChildren();
+        elements.audio.hidden = true;
+        elements.audioDuration.hidden = true;
+        elements.audioDuration.textContent = "";
+    };
+
+    const close = () => {
+        if (modal.hidden) return;
+        stopModalMedia();
+        clearAudio();
+        modal.hidden = true;
+        syncModalOpenState();
+        if (lastFocus) lastFocus.focus();
+    };
+
+    const buildMedia = step => {
+        const fallback = document.createElement("div");
+        fallback.className = "process-media-fallback";
+        fallback.setAttribute("aria-hidden", "true");
+        fallback.style.backgroundImage = "linear-gradient(145deg, rgba(162, 89, 255, 0.18), rgba(59, 130, 246, 0.16)), url('" + step.poster + "')";
+        fallback.appendChild(document.createElement("span"));
+
+        const video = document.createElement("video");
+        video.muted = true;
+        video.loop = true;
+        video.playsInline = true;
+        video.preload = "metadata";
+        video.poster = step.poster;
+        video.setAttribute("aria-label", "Video de la etapa " + step.title);
+
+        const source = document.createElement("source");
+        source.src = step.video;
+        source.type = "video/mp4";
+        video.appendChild(source);
+        video.addEventListener("loadeddata", () => video.classList.add("is-ready"), { once: true });
+        video.addEventListener("error", () => video.remove(), { once: true });
+
+        elements.media.replaceChildren(fallback, video);
+        if (!reducedMotion) video.play().catch(() => {});
+    };
+
+    const formatDuration = seconds => {
+        const wholeSeconds = Math.floor(seconds);
+        const minutes = Math.floor(wholeSeconds / 60);
+        return minutes + ":" + String(wholeSeconds % 60).padStart(2, "0");
+    };
+
+    const prepareAudio = step => {
+        clearAudio();
+        const audio = document.createElement("audio");
+        audio.className = "process-audio-source";
+        audio.preload = "metadata";
+        audio.src = step.audio;
+
+        audio.addEventListener("loadedmetadata", () => {
+            activeAudio = audio;
+            elements.audio.hidden = false;
+            if (Number.isFinite(audio.duration) && audio.duration > 0) {
+                elements.audioDuration.textContent = formatDuration(audio.duration);
+                elements.audioDuration.hidden = false;
+            }
+        }, { once: true });
+        audio.addEventListener("ended", () => {
+            setAudioButtonState(false);
+            audio.currentTime = 0;
+        });
+        audio.addEventListener("error", () => {
+            if (activeAudio === audio) activeAudio = null;
+            audio.remove();
+            elements.audio.hidden = true;
+        }, { once: true });
+
+        elements.audio.appendChild(audio);
+        audio.load();
+    };
+
+    const open = card => {
+        const step = processSteps[card.dataset.processStep];
+        if (!step) return;
+
+        lastFocus = card;
+        stopModalMedia();
+        clearAudio();
+        elements.number.textContent = "PASO " + step.number;
+        elements.title.textContent = step.title;
+        elements.short.textContent = step.short;
+        elements.detail.textContent = step.detail;
+        hideOtherModals(modal);
+        modal.hidden = false;
+        syncModalOpenState();
+        buildMedia(step);
+        prepareAudio(step);
+        dialog.focus();
+    };
+
+    cards.forEach(card => {
+        card.addEventListener("click", event => {
+            if (!event.target.closest("a, button, input, label")) open(card);
+        });
+        card.addEventListener("keydown", event => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                open(card);
+            }
+        });
+    });
+
+    elements.audioButton.addEventListener("click", () => {
+        if (!activeAudio) return;
+        if (activeAudio.paused) {
+            activeAudio.play().then(() => setAudioButtonState(true)).catch(() => setAudioButtonState(false));
+        } else {
+            activeAudio.pause();
+            setAudioButtonState(false);
+        }
+    });
+
+    modal.querySelectorAll("[data-process-modal-close]").forEach(control => control.addEventListener("click", close));
+    modal.addEventListener("nodo:modalhidden", () => {
+        stopModalMedia();
+        clearAudio();
+    });
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && !modal.hidden) close();
+    });
+
+    if (reducedMotion || !("IntersectionObserver" in window)) return;
+
+    const visibleVideos = new Set();
+    const pauseInlineVideos = () => inlineVideos.forEach(video => video.pause());
+    const updateInlinePlayback = () => {
+        pauseInlineVideos();
+        if (document.hidden || !visibleVideos.size) return;
+        const activeVideo = [...visibleVideos].sort((first, second) => {
+            const firstDistance = Math.abs(first.getBoundingClientRect().top + first.clientHeight / 2 - window.innerHeight / 2);
+            const secondDistance = Math.abs(second.getBoundingClientRect().top + second.clientHeight / 2 - window.innerHeight / 2);
+            return firstDistance - secondDistance;
+        })[0];
+        activeVideo.play().catch(() => {});
+    };
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) visibleVideos.add(entry.target);
+            else visibleVideos.delete(entry.target);
+        });
+        updateInlinePlayback();
+    }, { rootMargin: "160px 0px", threshold: 0.15 });
+
+    inlineVideos.forEach(video => observer.observe(video));
+    document.addEventListener("visibilitychange", updateInlinePlayback);
 }
 
 function setupBrandMarquee() {
@@ -800,6 +1053,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupProjectModal();
     setupSolutionGuides();
     setupGlossary();
+    setupProcessExperience();
     setupBrandMarquee();
     setupVideo();
     setupBriefForm();
