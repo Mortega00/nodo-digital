@@ -1,16 +1,21 @@
 :root {
-    --light-bg: #f4f2f7;
-    --light-bg-secondary: #eeeaf3;
+    --light-bg: #f4f1f7;
+    --light-bg-soft: #eeeaf3;
+    --light-bg-muted: #e8e4ef;
     --light-surface: rgba(255, 255, 255, 0.72);
-    --light-surface-strong: rgba(255, 255, 255, 0.9);
-    --light-text: #242129;
-    --light-text-secondary: #6f6878;
-    --light-muted: #8f8799;
+    --light-surface-strong: #f9f7fb;
+    --light-surface-soft: rgba(248, 246, 250, 0.82);
+    --light-text: #25222a;
+    --light-text-secondary: #6e6875;
+    --light-text-muted: #8a8391;
     --light-lilac: #b8a7d6;
-    --light-purple: #9b6cff;
-    --light-blue: #789bff;
-    --light-border: rgba(54, 45, 68, 0.1);
-    --light-shadow: 0 18px 50px rgba(61, 45, 82, 0.08);
+    --light-purple: #8f6bde;
+    --light-purple-strong: #805be0;
+    --light-blue: #7898e8;
+    --light-dark-accent: #29252f;
+    --light-border: rgba(63, 52, 73, 0.1);
+    --light-border-strong: rgba(105, 82, 137, 0.17);
+    --light-shadow-soft: 0 18px 50px rgba(72, 55, 88, 0.07);
     --web-bg: #101014;
     --web-surface: #16161c;
     --web-card: #1c1b22;
@@ -31,20 +36,20 @@
 
 html[data-theme="light"] {
     --web-bg: var(--light-bg);
-    --web-surface: #ece8f1;
+    --web-surface: var(--light-bg-soft);
     --web-card: var(--light-surface);
     --web-card-strong: var(--light-surface-strong);
     --web-text: var(--light-text);
     --web-muted: var(--light-text-secondary);
-    --web-dim: var(--light-muted);
-    --web-lilac: #8367af;
+    --web-dim: var(--light-text-muted);
+    --web-lilac: #74568e;
     --web-purple: var(--light-purple);
     --web-blue: var(--light-blue);
     --web-border: var(--light-border);
-    --web-border-active: rgba(117, 91, 157, 0.52);
-    --web-shadow: var(--light-shadow);
-    --web-header-bg: rgba(244, 242, 247, 0.78);
-    --web-header-scrolled-bg: rgba(244, 242, 247, 0.92);
+    --web-border-active: rgba(105, 82, 137, 0.52);
+    --web-shadow: var(--light-shadow-soft);
+    --web-header-bg: rgba(244, 241, 247, 0.78);
+    --web-header-scrolled-bg: rgba(244, 241, 247, 0.92);
 }
 
 * { box-sizing: border-box; }
@@ -265,7 +270,7 @@ h2 {
     background: linear-gradient(145deg, rgba(155, 108, 255, 0.08), rgba(91, 140, 255, 0.045) 48%, transparent 78%);
 }
 
-.advisor-shell { max-width: 860px; }
+.advisor-shell { max-width: 940px; }
 
 .advisor-intro { max-width: 640px; margin-bottom: 18px; }
 .advisor-intro > p:last-child, .faq-heading > p { margin-bottom: 0; color: var(--web-muted); }
@@ -323,6 +328,15 @@ h2 {
 }
 
 .choice-grid { display: grid; gap: 8px; }
+
+.commerce-needs {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid var(--web-border);
+}
+
+.commerce-needs-title { margin: 0 0 4px; font-size: 1.05rem; letter-spacing: -0.02em; line-height: 1.3; }
+.commerce-needs-help { margin: 0 0 12px; color: var(--web-muted); font-size: 0.88rem; }
 
 .choice-card {
     display: flex;
@@ -389,18 +403,18 @@ h2 {
 .advisor-next:disabled { box-shadow: none; cursor: not-allowed; filter: saturate(0.55); opacity: 0.5; }
 
 .result-eyebrow { color: var(--web-lilac); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.13em; }
-.result-title { margin: 10px 0 16px; font-size: clamp(1.55rem, 6vw, 2.2rem); letter-spacing: -0.04em; line-height: 1.13; }
+.result-title { margin: 8px 0 12px; font-size: clamp(1.55rem, 6vw, 2.2rem); letter-spacing: -0.04em; line-height: 1.13; }
 
 .plan-result {
-    margin: 0 0 22px;
-    padding: 20px;
+    margin: 0 0 16px;
+    padding: 18px;
     border: 1px solid var(--web-border-active);
     border-radius: 17px;
     background: var(--web-card-strong);
 }
 
 .plan-result h3 { margin-bottom: 10px; font-size: clamp(1.55rem, 5.5vw, 1.9rem); letter-spacing: -0.04em; line-height: 1.12; }
-.plan-result p { margin-bottom: 17px; color: var(--web-muted); }
+.plan-result p { margin-bottom: 13px; color: var(--web-muted); }
 .plan-summary { max-width: 650px; color: var(--web-text) !important; font-size: 1rem; line-height: 1.55; }
 
 .plan-facts { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; color: var(--web-text); font-size: 0.9rem; }
@@ -408,11 +422,11 @@ h2 {
 .plan-facts li::before { content: "✓"; color: var(--web-lilac); font-weight: 800; }
 .plan-price { margin: 0 0 4px; color: var(--web-text); font-size: 1.15rem; font-weight: 800; }
 .plan-price-context { margin: 0 0 4px !important; color: var(--web-lilac) !important; font-size: 0.77rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; }
-.plan-price-note { max-width: 610px; margin: 0 0 15px !important; color: var(--web-dim) !important; font-size: 0.81rem; line-height: 1.45; }
+.plan-price-note { max-width: 610px; margin: 0 0 12px !important; color: var(--web-dim) !important; font-size: 0.81rem; line-height: 1.45; }
 .plan-time { margin: 0; color: var(--web-lilac); font-size: 0.88rem; font-weight: 650; }
 .plan-note { margin: 15px 0 0 !important; color: var(--web-dim) !important; font-size: 0.82rem; }
 
-.result-details { display: grid; gap: 10px; margin-bottom: 22px; }
+.result-details { display: grid; gap: 8px; margin-bottom: 16px; }
 .result-details details { overflow: hidden; border: 1px solid var(--web-border); border-radius: 13px; background: rgba(255, 255, 255, 0.025); }
 summary { cursor: pointer; }
 .result-details summary { display: flex; align-items: center; min-height: 54px; padding: 15px; color: var(--web-text); font-size: 0.9rem; font-weight: 750; }
@@ -422,6 +436,52 @@ summary { cursor: pointer; }
 
 .result-actions { align-items: stretch; flex-direction: column; gap: 8px; }
 .result-actions .button { width: 100%; }
+
+.contact-recommendation {
+    display: grid;
+    gap: 2px;
+    margin-bottom: 18px;
+    padding: 14px 16px;
+    border: 1px solid var(--web-border);
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.contact-recommendation p { margin: 0; }
+.contact-recommendation-label { color: var(--web-lilac); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+.contact-recommendation-plan { color: var(--web-text); font-size: 1.05rem; font-weight: 800; }
+.contact-recommendation-price { color: var(--web-muted); font-size: 0.87rem; font-weight: 650; }
+
+.contact-title { margin: 0 0 8px; font-size: clamp(1.55rem, 5.5vw, 2rem); letter-spacing: -0.04em; line-height: 1.14; }
+.contact-intro { max-width: 660px; margin-bottom: 18px; color: var(--web-muted); }
+.contact-form { display: grid; gap: 12px; max-width: 760px; }
+.contact-field { display: grid; gap: 6px; }
+.contact-label { color: var(--web-text); font-size: 0.88rem; font-weight: 750; }
+
+.contact-control {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 13px;
+    border: 1px solid var(--web-border);
+    border-radius: 12px;
+    outline: 0;
+    background: rgba(255, 255, 255, 0.035);
+    color: var(--web-text);
+    font: inherit;
+    line-height: 1.4;
+    transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+}
+
+textarea.contact-control { min-height: 112px; resize: vertical; }
+.contact-control::placeholder { color: var(--web-dim); opacity: 1; }
+.contact-control:disabled { cursor: not-allowed; opacity: 0.55; }
+.contact-control:focus { border-color: var(--web-border-active); box-shadow: 0 0 0 3px rgba(155, 108, 255, 0.16); }
+
+.contact-checkbox { display: flex; align-items: center; gap: 9px; color: var(--web-muted); font-size: 0.86rem; font-weight: 650; cursor: pointer; }
+.contact-checkbox input { width: 17px; height: 17px; accent-color: var(--web-purple); }
+.contact-validation { min-height: 2.9em; margin: 0; color: #e4c7ff; font-size: 0.86rem; line-height: 1.45; }
+.contact-actions { display: grid; gap: 7px; margin-top: 2px; }
+.contact-actions .button { width: 100%; }
 
 .faq-section { padding-top: 72px; }
 .faq-shell { max-width: 860px; }
@@ -505,6 +565,10 @@ summary { cursor: pointer; }
         padding: 24px;
         scroll-padding-bottom: 78px;
     }
+    .advisor-card.advisor-card-expanded {
+        max-height: none;
+        overflow: visible;
+    }
     .advisor-start { min-height: 270px; }
     .faq-section { padding-top: 72px; }
     .final-section { padding: 40px 0 56px; }
@@ -529,13 +593,33 @@ summary { cursor: pointer; }
 }
 
 html[data-theme="light"] body {
-    background: linear-gradient(135deg, #f6f3f9 0%, #eeeaf5 100%);
+    background: var(--light-bg);
+}
+
+html[data-theme="light"] .hero {
+    background:
+        radial-gradient(circle at 84% 12%, rgba(184, 167, 214, 0.22), transparent 27rem),
+        linear-gradient(135deg, #f7f4f9 0%, #f1edf5 100%);
+}
+
+html[data-theme="light"] .simple-section,
+html[data-theme="light"] .faq-section {
+    background: var(--light-bg-soft);
+}
+
+html[data-theme="light"] .advisor-section {
+    background: var(--light-bg);
 }
 
 html[data-theme="light"] .theme-toggle {
     border-color: var(--light-border);
     background: var(--light-surface);
-    color: #76529f;
+    color: var(--light-purple-strong);
+}
+
+html[data-theme="light"] .button-primary {
+    background: linear-gradient(135deg, #9270e6, #7394ea);
+    box-shadow: 0 12px 26px rgba(115, 148, 234, 0.2);
 }
 
 html[data-theme="light"] .button-secondary {
@@ -543,83 +627,130 @@ html[data-theme="light"] .button-secondary {
 }
 
 html[data-theme="light"] .simple-list li {
-    border-color: rgba(54, 45, 68, 0.09);
+    border-color: var(--light-border);
     background: rgba(255, 255, 255, 0.66);
-    box-shadow: 0 8px 22px rgba(61, 45, 82, 0.035);
+    box-shadow: 0 8px 22px rgba(72, 55, 88, 0.035);
 }
 
 html[data-theme="light"] .simple-list span {
     background: rgba(184, 167, 214, 0.32);
-    color: #6f4e94;
-}
-
-html[data-theme="light"] .advisor-section {
-    background: linear-gradient(145deg, rgba(155, 108, 255, 0.055), rgba(120, 155, 255, 0.03) 48%, transparent 78%);
+    color: var(--light-purple-strong);
 }
 
 html[data-theme="light"] .advisor-card {
-    border-color: rgba(117, 91, 157, 0.12);
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(238, 234, 245, 0.82));
-    box-shadow: 0 24px 70px rgba(61, 45, 82, 0.1);
+    border-color: rgba(105, 82, 137, 0.14);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(242, 238, 247, 0.88));
+    box-shadow: 0 24px 70px rgba(72, 55, 88, 0.1);
 }
 
 html[data-theme="light"] .progress-track {
-    background: rgba(117, 91, 157, 0.13);
+    background: rgba(105, 82, 137, 0.13);
 }
 
 html[data-theme="light"] .choice-card {
-    border-color: rgba(54, 45, 68, 0.1);
+    border-color: var(--light-border);
     background: rgba(255, 255, 255, 0.72);
 }
 
 html[data-theme="light"] .choice-card.is-selected {
-    border-color: rgba(117, 91, 157, 0.58);
+    border-color: var(--light-purple);
     background: rgba(184, 167, 214, 0.22);
-    box-shadow: inset 0 0 0 1px rgba(117, 91, 157, 0.1);
+    box-shadow: inset 0 0 0 1px rgba(143, 107, 222, 0.1);
 }
 
 html[data-theme="light"] .advisor-message {
-    color: #76529f;
+    color: var(--light-purple-strong);
 }
 
 html[data-theme="light"] .advisor-nav {
-    background: linear-gradient(to bottom, rgba(245, 243, 249, 0), rgba(245, 243, 249, 0.97) 34%);
+    background: linear-gradient(to bottom, rgba(244, 241, 247, 0), rgba(244, 241, 247, 0.97) 34%);
+}
+
+html[data-theme="light"] .contact-recommendation,
+html[data-theme="light"] .contact-control {
+    border-color: var(--light-border);
+    background: rgba(255, 255, 255, 0.76);
+}
+
+html[data-theme="light"] .contact-control:focus {
+    box-shadow: 0 0 0 3px rgba(143, 107, 222, 0.14);
+}
+
+html[data-theme="light"] .contact-validation {
+    color: var(--light-purple-strong);
 }
 
 html[data-theme="light"] .plan-result,
 html[data-theme="light"] .result-details details {
     background: var(--light-surface-strong);
-    box-shadow: 0 10px 28px rgba(61, 45, 82, 0.045);
+    box-shadow: 0 10px 28px rgba(72, 55, 88, 0.045);
 }
 
 html[data-theme="light"] .faq-list details {
-    border-color: rgba(54, 45, 68, 0.09);
+    border-color: var(--light-border);
     background: rgba(255, 255, 255, 0.7);
-    box-shadow: 0 10px 32px rgba(61, 45, 82, 0.05);
+    box-shadow: 0 10px 32px rgba(72, 55, 88, 0.05);
 }
 
 html[data-theme="light"] .faq-list details[open] {
-    border-color: rgba(117, 91, 157, 0.38);
-    background: rgba(255, 255, 255, 0.84);
-    box-shadow: 0 12px 34px rgba(117, 91, 157, 0.08);
+    border-color: var(--light-border-strong);
+    background: var(--light-surface-strong);
+    box-shadow: 0 12px 34px rgba(105, 82, 137, 0.08);
 }
 
 html[data-theme="light"] .faq-list details > div {
-    border-top-color: rgba(54, 45, 68, 0.08);
+    border-top-color: rgba(63, 52, 73, 0.08);
 }
 
 html[data-theme="light"] .final-card {
-    background: linear-gradient(135deg, rgba(232, 224, 244, 0.9), rgba(236, 238, 249, 0.95));
+    border-color: var(--light-border-strong);
+    background: linear-gradient(135deg, rgba(232, 224, 244, 0.9), rgba(232, 238, 251, 0.95));
 }
 
 html[data-theme="light"] .site-footer {
-    background: #ece8f1;
+    border-top-color: rgba(255, 255, 255, 0.1);
+    background: var(--light-dark-accent);
+    color: #f9f7fb;
+}
+
+html[data-theme="light"] .site-footer .brand,
+html[data-theme="light"] .site-footer .footer-label {
+    color: #f9f7fb !important;
+}
+
+html[data-theme="light"] .site-footer p {
+    color: #c8c1ce;
+}
+
+html[data-theme="light"] .site-footer .text-link {
+    color: #d7c9f1;
+}
+
+.hero,
+.simple-section,
+.advisor-section,
+.faq-section,
+.final-card,
+.site-footer,
+.simple-list li,
+.advisor-card,
+.choice-card,
+.faq-list details,
+.plan-result,
+.result-details details,
+.contact-recommendation,
+.contact-control {
+    transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease;
 }
 
 @media (hover: hover) {
     html[data-theme="light"] .theme-toggle:hover {
-        border-color: rgba(117, 91, 157, 0.38);
+        border-color: rgba(143, 107, 222, 0.38);
         background: rgba(255, 255, 255, 0.94);
+    }
+
+    html[data-theme="light"] .button-primary:hover {
+        box-shadow: 0 16px 32px rgba(115, 148, 234, 0.28);
     }
 
     html[data-theme="light"] .button-secondary:hover {
@@ -627,15 +758,15 @@ html[data-theme="light"] .site-footer {
     }
 
     html[data-theme="light"] .choice-card:hover {
-        border-color: rgba(117, 91, 157, 0.34);
+        border-color: rgba(143, 107, 222, 0.34);
         background: rgba(255, 255, 255, 0.9);
-        box-shadow: inset 0 0 0 1px rgba(117, 91, 157, 0.06);
+        box-shadow: inset 0 0 0 1px rgba(143, 107, 222, 0.06);
     }
 
     html[data-theme="light"] .faq-list details:hover {
-        border-color: rgba(117, 91, 157, 0.28);
+        border-color: rgba(105, 82, 137, 0.28);
         background: rgba(255, 255, 255, 0.8);
-        box-shadow: 0 12px 34px rgba(61, 45, 82, 0.065);
+        box-shadow: 0 12px 34px rgba(72, 55, 88, 0.065);
     }
 }
 

@@ -147,11 +147,28 @@ const advisorSteps = [
     }
 ];
 
+const commerceNeedOptions = [
+    { id: "commerce-basic", label: "Mostrar productos y recibir pedidos", text: "Quiero que vean lo que vendo y puedan hacerme un pedido o consulta." },
+    { id: "payments", label: "Cobrar desde la página", text: "Quiero que una persona pueda pagar online." },
+    { id: "stock", label: "Llevar control de stock", text: "Necesito controlar qué productos hay disponibles." },
+    { id: "users", label: "Que cada cliente tenga su cuenta", text: "Necesito que algunas personas puedan ingresar con sus propios datos." },
+    { id: "special", label: "Necesito algo más específico", text: "Mi idea tiene funciones particulares y prefiero explicarlas." },
+    { id: "commerce-unsure", label: "Todavía no estoy seguro", text: "Prefiero que me orienten." }
+];
+
 const state = {
     screen: "start",
     currentStep: 0,
     answers: {},
-    message: ""
+    message: "",
+    contact: {
+        name: "",
+        whatsapp: "",
+        business: "",
+        noBusinessName: false,
+        comment: ""
+    },
+    contactMessage: ""
 };
 
 const advisor = document.getElementById("advisor");
@@ -191,6 +208,7 @@ function toggleOption(step, option) {
 
     if (step.selection === "single") {
         state.answers[step.id] = isSelected ? [] : [option.id];
+        if (step.id === "start" && (isSelected || option.id !== "commerce")) delete state.answers.commerceNeeds;
     } else if (option.exclusive) {
         state.answers[step.id] = isSelected ? [] : [option.id];
     } else {
@@ -212,14 +230,27 @@ function toggleOption(step, option) {
     renderAdvisor();
 }
 
+function selectedCommerceNeed() {
+    return state.answers.commerceNeeds || "";
+}
+
+function toggleCommerceNeed(option) {
+    const selected = selectedCommerceNeed();
+    if (selected === option.id) delete state.answers.commerceNeeds;
+    else state.answers.commerceNeeds = option.id;
+    state.message = "";
+    renderAdvisor();
+}
+
 function hasValidAnswer(step) {
     return selectedFor(step).length >= step.min;
 }
 
 function goNext() {
     const step = advisorSteps[state.currentStep];
-    if (!hasValidAnswer(step)) {
-        state.message = "Elegí al menos una opción para seguir.";
+    const needsCommerceAnswer = step.id === "start" && selectedFor(step)[0] === "commerce" && !selectedCommerceNeed();
+    if (!hasValidAnswer(step) || needsCommerceAnswer) {
+        state.message = needsCommerceAnswer ? "Elegí una opción para que podamos orientarte mejor." : "Elegí al menos una opción para seguir.";
         renderAdvisor();
         return;
     }
@@ -240,15 +271,23 @@ function resetAdvisorScroll() {
     card.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
 }
 
+function scrollToAdvisor() {
+    const section = document.getElementById("asesor");
+    if (!section) return;
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    section.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+}
+
 function getRecommendation(answers) {
     const goals = new Set(answers.goals || []);
     const today = new Set(answers.today || []);
     const content = new Set(answers.content || []);
     const start = (answers.start || [])[0];
+    const commerceNeed = answers.commerceNeeds || "";
 
-    const customSignals = ["payments", "stock", "users", "system", "application", "automation", "special"].some(signal => goals.has(signal) || today.has(signal) || content.has(signal));
-    if (customSignals) return "custom";
-    if (start === "commerce" || goals.has("sell") || (goals.has("products") && content.has("products"))) return "conversion";
+    const customSignals = ["payments", "stock", "users", "special"];
+    if (customSignals.includes(commerceNeed)) return "custom";
+    if ((start === "commerce" && commerceNeed === "commerce-basic") || goals.has("sell") || (goals.has("products") && content.has("products"))) return "conversion";
     if (start === "complete" || today.has("current-page") || today.has("old-page") || content.has("location") || content.has("promotions") || (goals.has("services") && content.size >= 3)) return "positioning";
     return "launch";
 }
@@ -258,16 +297,28 @@ function getReasons(planKey) {
     const today = new Set(state.answers.today || []);
     const content = new Set(state.answers.content || []);
     const start = (state.answers.start || [])[0];
+    const commerceNeed = state.answers.commerceNeeds || "";
+    const customReasons = {
+        payments: "Necesitás que las personas puedan pagar desde la página.",
+        stock: "También necesitás controlar la disponibilidad de productos.",
+        users: "Tu idea necesita que cada cliente pueda ingresar con sus propios datos.",
+        special: "Nos contaste que necesitás funciones particulares."
+    };
+
+    if (planKey === "custom") {
+        return [customReasons[commerceNeed] || "Tu idea necesita funciones más específicas antes de definir una propuesta.", "Por eso primero necesitamos definir el alcance antes de presupuestar."];
+    }
+
     const reasons = [];
 
     if (goals.has("messages") || today.has("whatsapp")) reasons.push("Nos dijiste que querés facilitar que las personas te contacten.");
     if (goals.has("services") || content.has("services")) reasons.push("También querés mostrar tus servicios de una forma clara.");
     if (goals.has("products") || content.has("products")) reasons.push("Querés que las personas puedan recorrer lo que vendés con tranquilidad.");
-    if (goals.has("sell") || start === "commerce") reasons.push("Buscás una página que acompañe pedidos, compras o consultas.");
+    if (commerceNeed === "commerce-basic") reasons.push("Querés mostrar lo que vendés y facilitar que una persona haga un pedido o consulta.");
+    else if (goals.has("sell") || start === "commerce") reasons.push("Buscás una página que acompañe pedidos, compras o consultas.");
     if (today.has("current-page") || today.has("old-page")) reasons.push("Nos contaste que ya tenés una página y querés mejorar lo que mostrás.");
     if (content.has("location") || content.has("promotions") || start === "complete") reasons.push("Necesitás más espacio para ordenar información importante de tu negocio.");
     if (start === "simple" || today.has("starting")) reasons.push("Querés empezar con una presencia clara y sin sumar cosas que hoy no necesitás.");
-    if (planKey === "custom") reasons.push("Tu idea necesita funciones más específicas antes de definir una propuesta.");
     if (!reasons.length && goals.has("professional")) reasons.push("Querés que tu negocio se vea más profesional y sea fácil de entender.");
     if (!reasons.length && start === "recommend") reasons.push("Preferís recibir una guía clara para elegir por dónde empezar.");
 
@@ -291,8 +342,10 @@ function getRecommendationSummary(planKey) {
     const today = new Set(state.answers.today || []);
     const content = new Set(state.answers.content || []);
     const start = (state.answers.start || [])[0];
+    const commerceNeed = state.answers.commerceNeeds || "";
 
     if (planKey === "custom") return "Tu necesidad requiere algo más específico. Primero entendemos bien el alcance y después te presentamos una propuesta.";
+    if (planKey === "conversion" && commerceNeed === "commerce-basic") return "Querés mostrar lo que vendés y facilitar que una persona haga un pedido o consulta.";
     if (planKey === "conversion") return "Querés mostrar lo que vendés y hacer más fácil que una persona avance hacia una compra o pedido.";
 
     if (planKey === "positioning") {
@@ -317,6 +370,123 @@ function getRecommendationSummary(planKey) {
     return "Querés " + joinNeeds(needs) + ". Esta opción te permite empezar de forma simple y clara.";
 }
 
+const NODO_WHATSAPP = "5491130700900";
+
+function whatsappUrl(lines) {
+    return "https://wa.me/" + NODO_WHATSAPP + "?text=" + encodeURIComponent(lines.join("\n"));
+}
+
+const staticWhatsAppMessages = {
+    help: [
+        "Hola NODO! Necesito ayuda para saber qué tipo de página puede servirle a mi negocio.",
+        "",
+        "Me gustaría que me orienten para empezar.",
+        "",
+        "Origen: Ayuda NODO Web"
+    ],
+    hero: [
+        "Hola NODO! Me gustaría que me orienten para comenzar a realizar mi página web.",
+        "",
+        "Todavía no completé el asesor y prefiero contarles directamente qué necesito.",
+        "",
+        "Origen: Inicio NODO Web"
+    ],
+    final: [
+        "Hola NODO! Todavía no tengo claro qué tipo de página necesito.",
+        "",
+        "Me gustaría contarles qué quiero hacer para que me orienten.",
+        "",
+        "Origen: Ayuda final NODO Web"
+    ],
+    business: [
+        "Hola NODO! Quiero consultarles por un proyecto de mayor alcance.",
+        "",
+        "Me gustaría contarles lo que necesitamos y conversar una propuesta personalizada.",
+        "",
+        "Origen: Empresas NODO Web"
+    ]
+};
+
+function consultationMessage(plan) {
+    if (plan === plans.custom) {
+        return whatsappUrl([
+            "Hola NODO! Completé el asesor y mi proyecto quedó como NODO Personalizado.",
+            "",
+            "Me gustaría contarles mejor la idea para que podamos definir qué necesito y recibir una propuesta.",
+            "",
+            "Origen: Recomendación NODO Web"
+        ]);
+    }
+
+    return whatsappUrl([
+        "Hola NODO! Completé el asesor y antes de avanzar me gustaría hablar con ustedes.",
+        "",
+        "Me recomendaron:",
+        plan.name,
+        "",
+        "Valor orientativo:",
+        plan.price,
+        "",
+        "Quisiera consultarles algunas cosas antes de seguir.",
+        "",
+        "Origen: Recomendación NODO Web"
+    ]);
+}
+
+function projectMessage(plan) {
+    const contact = state.contact;
+    const business = contact.noBusinessName ? "Todavía sin nombre" : contact.business.trim();
+    const lines = [
+        "Hola NODO! Completé el asesor y quiero avanzar con mi página web.",
+        "",
+        "DATOS",
+        "Nombre: " + contact.name.trim(),
+        "WhatsApp: " + contact.whatsapp.trim(),
+        "Negocio / marca: " + business,
+        "",
+        "RECOMENDACIÓN",
+        "Plan: " + plan.name,
+        "Valor orientativo: " + plan.price
+    ];
+
+    if (contact.comment.trim()) lines.push("", "COMENTARIO", contact.comment.trim());
+    lines.push("", "Origen: Asesor NODO Web");
+    return whatsappUrl(lines);
+}
+
+function createContactField(labelText, id, value, options = {}) {
+    const field = createElement("label", "contact-field");
+    const label = createElement("span", "contact-label", labelText);
+    const control = document.createElement(options.multiline ? "textarea" : "input");
+    control.className = "contact-control";
+    control.id = id;
+    control.name = id;
+    control.value = value;
+    control.required = Boolean(options.required);
+    control.disabled = Boolean(options.disabled);
+    if (!options.multiline) control.type = options.type || "text";
+    if (options.placeholder) control.placeholder = options.placeholder;
+    if (options.autocomplete) control.autocomplete = options.autocomplete;
+    if (options.multiline) control.rows = 4;
+    control.addEventListener("input", () => {
+        state.contact[id] = control.value;
+        state.contactMessage = "";
+    });
+    field.append(label, control);
+    return field;
+}
+
+function validateContact() {
+    const contact = state.contact;
+    const missing = [];
+    if (!contact.name.trim()) missing.push("tu nombre");
+    if (!contact.whatsapp.trim()) missing.push("tu WhatsApp");
+    if (!contact.noBusinessName && !contact.business.trim()) missing.push("el nombre de tu negocio, marca o idea");
+    if (!missing.length) return true;
+    state.contactMessage = "Completá " + missing.join(", ") + " para enviar la consulta.";
+    return false;
+}
+
 function renderStart() {
     const view = createElement("div", "advisor-view advisor-start");
     view.append(createElement("p", "eyebrow", "EMPEZAMOS CUANDO QUIERAS"));
@@ -328,6 +498,31 @@ function renderStart() {
         renderAdvisor();
     }));
     return view;
+}
+
+function renderCommerceNeeds() {
+    const section = createElement("section", "commerce-needs");
+    section.append(createElement("h4", "commerce-needs-title", "¿Qué necesitás que pueda hacer la página?"));
+    section.append(createElement("p", "commerce-needs-help", "Elegí lo que más se parezca a tu idea."));
+
+    const choices = createElement("div", "choice-grid commerce-needs-grid");
+    choices.setAttribute("role", "radiogroup");
+    choices.setAttribute("aria-label", "¿Qué necesitás que pueda hacer la página?");
+    const selected = selectedCommerceNeed();
+
+    commerceNeedOptions.forEach(option => {
+        const isSelected = selected === option.id;
+        const choiceClass = "choice-card choice-card-detailed" + (isSelected ? " is-selected" : "");
+        const choice = createButton("", choiceClass, () => toggleCommerceNeed(option));
+        choice.setAttribute("aria-pressed", String(isSelected));
+        choice.append(createElement("strong", "", option.label));
+        choice.append(createElement("span", "", option.text));
+        choice.append(createElement("span", "choice-indicator", "✓"));
+        choices.append(choice);
+    });
+
+    section.append(choices);
+    return section;
 }
 
 function renderStep() {
@@ -378,6 +573,7 @@ function renderStep() {
         choices.append(choice);
     });
     view.append(choices);
+    if (step.id === "start" && selected.includes("commerce")) view.append(renderCommerceNeeds());
     view.append(createElement("p", "advisor-message", state.message));
 
     const nav = createElement("div", "advisor-nav");
@@ -413,6 +609,16 @@ function renderDetails(title, content) {
     return details;
 }
 
+function setupDetailsAccordion(container) {
+    const items = [...container.querySelectorAll("details")];
+    items.forEach(item => item.addEventListener("toggle", () => {
+        if (!item.open) return;
+        items.forEach(other => {
+            if (other !== item && other.open) other.open = false;
+        });
+    }));
+}
+
 function renderResult() {
     const key = getRecommendation(state.answers);
     const plan = plans[key];
@@ -440,12 +646,17 @@ function renderResult() {
     details.append(renderDetails("Ver qué incluye", plan.includes));
     details.append(renderDetails("¿De qué depende el tiempo?", "El tiempo puede variar según el alcance y qué tan rápido tengamos textos, imágenes y la información necesaria."));
     view.append(details);
+    setupDetailsAccordion(details);
 
     const actions = createElement("div", "result-actions");
-    const proceed = createElement("a", "button button-primary", isCustomPlan ? "Contarnos el proyecto →" : "Quiero avanzar →");
-    proceed.href = "index.html?recommended_plan=" + encodeURIComponent(plan.name) + "#brief";
+    const proceed = createButton(isCustomPlan ? "Contarnos el proyecto" : "Quiero avanzar", "button button-primary", () => {
+        state.screen = "contact";
+        state.contactMessage = "";
+        renderAdvisor();
+        resetAdvisorScroll();
+    });
     const talk = createElement("a", "button button-secondary", isCustomPlan ? "Hablar con NODO ↗" : "Quiero hablarlo primero ↗");
-    talk.href = "https://wa.me/5491130700900";
+    talk.href = consultationMessage(plan);
     talk.target = "_blank";
     talk.rel = "noopener noreferrer";
     const reset = createButton("Empezar de nuevo", "button button-text", () => {
@@ -453,17 +664,90 @@ function renderResult() {
         state.currentStep = 0;
         state.answers = {};
         state.message = "";
+        state.contact = { name: "", whatsapp: "", business: "", noBusinessName: false, comment: "" };
+        state.contactMessage = "";
         renderAdvisor();
+        resetAdvisorScroll();
+        scrollToAdvisor();
     });
     actions.append(proceed, talk, reset);
     view.append(actions);
     return view;
 }
 
+function renderContact() {
+    const key = getRecommendation(state.answers);
+    const plan = plans[key];
+    const contact = state.contact;
+    const view = createElement("div", "advisor-view advisor-contact");
+    view.setAttribute("aria-live", "polite");
+
+    const recommendation = createElement("div", "contact-recommendation");
+    recommendation.append(createElement("p", "contact-recommendation-label", "Tu recomendación"));
+    recommendation.append(createElement("p", "contact-recommendation-plan", plan.name));
+    recommendation.append(createElement("p", "contact-recommendation-price", plan.price));
+    view.append(recommendation);
+
+    view.append(createElement("h3", "contact-title", "Perfecto. Sigamos desde acá."));
+    view.append(createElement("p", "contact-intro", "Ya sabemos qué opción puede tener más sentido para vos. Ahora necesitamos unos datos básicos para poder orientarte mejor."));
+
+    const form = createElement("form", "contact-form");
+    form.noValidate = true;
+    form.append(createContactField("Nombre *", "name", contact.name, { required: true, autocomplete: "name" }));
+    form.append(createContactField("WhatsApp *", "whatsapp", contact.whatsapp, { required: true, type: "tel", autocomplete: "tel" }));
+    form.append(createContactField(contact.noBusinessName ? "Nombre de tu negocio, marca o idea" : "Nombre de tu negocio, marca o idea *", "business", contact.business, { required: !contact.noBusinessName, disabled: contact.noBusinessName }));
+
+    const noBusinessLabel = createElement("label", "contact-checkbox");
+    const noBusiness = document.createElement("input");
+    noBusiness.type = "checkbox";
+    noBusiness.checked = contact.noBusinessName;
+    noBusiness.addEventListener("change", () => {
+        state.contact.noBusinessName = noBusiness.checked;
+        state.contactMessage = "";
+        renderAdvisor();
+    });
+    noBusinessLabel.append(noBusiness, createElement("span", "", "Todavía no tiene nombre"));
+    form.append(noBusinessLabel);
+
+    form.append(createContactField("¿Querés contarnos algo más?", "comment", contact.comment, {
+        multiline: true,
+        placeholder: "Por ejemplo: qué hacés, qué te gustaría mostrar o alguna idea que ya tengas."
+    }));
+
+    const validation = createElement("p", "contact-validation", state.contactMessage);
+    validation.setAttribute("role", "status");
+    form.append(validation);
+
+    const actions = createElement("div", "contact-actions");
+    const submit = createButton("Enviar consulta", "button button-primary", () => {});
+    submit.type = "submit";
+    const back = createButton("Volver a mi recomendación", "button button-text", () => {
+        state.screen = "result";
+        state.contactMessage = "";
+        renderAdvisor();
+        resetAdvisorScroll();
+    });
+    actions.append(submit, back);
+    form.append(actions);
+    form.addEventListener("submit", event => {
+        event.preventDefault();
+        if (!validateContact()) {
+            renderAdvisor();
+            return;
+        }
+        window.open(projectMessage(plan), "_blank", "noopener,noreferrer");
+    });
+    view.append(form);
+    return view;
+}
+
 function renderAdvisor() {
     advisor.replaceChildren();
+    const card = advisor.closest(".advisor-card");
+    card?.classList.toggle("advisor-card-expanded", state.screen === "result" || state.screen === "contact");
     if (state.screen === "start") advisor.append(renderStart());
     else if (state.screen === "result") advisor.append(renderResult());
+    else if (state.screen === "contact") advisor.append(renderContact());
     else advisor.append(renderStep());
 }
 
@@ -501,6 +785,13 @@ function setupFaqAccordion() {
     }));
 }
 
+function setupStaticWhatsAppLinks() {
+    document.querySelectorAll("[data-whatsapp-context]").forEach(link => {
+        const lines = staticWhatsAppMessages[link.dataset.whatsappContext];
+        if (lines) link.href = whatsappUrl(lines);
+    });
+}
+
 const themeStorageKey = "nodo_web_theme";
 
 function preferredTheme() {
@@ -511,7 +802,7 @@ function preferredTheme() {
         // La página sigue funcionando aunque el navegador bloquee localStorage.
     }
 
-    return window.matchMedia?.("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    return "light";
 }
 
 function applyTheme(theme, persist = false) {
@@ -549,3 +840,4 @@ setupThemeToggle();
 renderAdvisor();
 setupPageChrome();
 setupFaqAccordion();
+setupStaticWhatsAppLinks();
