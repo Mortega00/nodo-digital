@@ -268,7 +268,7 @@ function renderStart() {
     const view = createElement("div", "advisor-view advisor-start");
     view.append(createElement("p", "eyebrow", "EMPEZAMOS CUANDO QUIERAS"));
     view.append(createElement("h3", "", "Vamos a encontrar una opción para vos."));
-    view.append(createElement("p", "", "Son cuatro preguntas simples. No hay respuestas técnicas ni tenés que saber qué tipo de web necesitás."));
+    view.append(createElement("p", "", "Son cuatro preguntas simples. Elegí lo que más se parezca a tu caso."));
     view.append(createButton("Empezar", "button button-primary", () => {
         state.screen = "steps";
         state.currentStep = 0;
@@ -389,5 +389,30 @@ function renderAdvisor() {
     else advisor.append(renderStep());
 }
 
+function setupPageChrome() {
+    const header = document.querySelector(".site-header");
+    const start = document.getElementById("inicio");
+    const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const scrollToStart = () => start?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
+    const spinMark = mark => {
+        if (prefersReducedMotion()) return;
+        mark.classList.remove("is-spinning");
+        void mark.offsetWidth;
+        mark.classList.add("is-spinning");
+    };
+    const updateHeader = () => header?.classList.toggle("header--scrolled", window.scrollY > 20);
+
+    document.querySelectorAll("[data-scroll-top]").forEach(link => link.addEventListener("click", event => {
+        event.preventDefault();
+        const mark = event.target.closest(".brand-mark");
+        if (mark) spinMark(mark);
+        scrollToStart();
+    }));
+    document.querySelectorAll(".brand-mark").forEach(mark => mark.addEventListener("animationend", () => mark.classList.remove("is-spinning")));
+    updateHeader();
+    window.addEventListener("scroll", updateHeader, { passive: true });
+}
+
 window.NodoWebAdvisor = { plans, getRecommendation };
 renderAdvisor();
+setupPageChrome();
