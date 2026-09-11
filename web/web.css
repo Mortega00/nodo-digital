@@ -654,7 +654,8 @@ textarea.contact-control { min-height: 112px; resize: vertical; }
 .site-footer .text-link { color: var(--footer-accent); }
 .footer-label-spaced { margin-top: 23px; }
 
-body.team-modal-open { overflow: hidden; }
+body.team-modal-open,
+body.team-photo-viewer-open { overflow: hidden; }
 .team-modal[hidden] { display: none; }
 .team-modal { position: fixed; inset: 0; z-index: 400; display: grid; place-items: center; padding: 20px; }
 .team-modal-backdrop { position: absolute; inset: 0; background: rgba(16, 16, 20, 0.68); backdrop-filter: blur(6px); }
@@ -689,30 +690,64 @@ body.team-modal-open { overflow: hidden; }
     font-size: 1.35rem;
     line-height: 1;
 }
-.team-modal-media {
+.team-photo-button {
     position: relative;
     display: grid;
     width: 96px;
     height: 96px;
     place-items: center;
     margin: 0 0 20px;
+    padding: 0;
     overflow: hidden;
-    border: 1px solid var(--web-border-active);
-    border-radius: 28px;
+    border: 0;
+    border-radius: 22px;
     background: linear-gradient(135deg, rgba(155, 108, 255, 0.3), rgba(91, 140, 255, 0.22));
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    cursor: zoom-in;
 }
 .team-modal-placeholder { color: #fff; font-size: 1.5rem; font-weight: 800; letter-spacing: 0.04em; }
-.team-modal-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 180ms ease; }
-.team-modal-media.has-photo .team-modal-photo { opacity: 1; }
-.team-modal-media.has-photo .team-modal-placeholder { opacity: 0; }
+.team-modal-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 0; transition: opacity 180ms ease; }
+.team-photo-button.has-photo .team-modal-photo { opacity: 1; }
+.team-photo-button.has-photo .team-modal-placeholder { opacity: 0; }
 .team-modal-eyebrow { margin-bottom: 6px; color: var(--web-lilac); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; }
 .team-modal-dialog h2 { margin-bottom: 5px; font-size: clamp(1.7rem, 7vw, 2.2rem); letter-spacing: -0.04em; }
 .team-modal-role { margin-bottom: 16px; color: var(--web-lilac); font-weight: 700; }
 .team-modal-dialog > p:last-child { margin-bottom: 0; color: var(--web-muted); }
 
+.team-photo-viewer[hidden] { display: none; }
+.team-photo-viewer { position: fixed; inset: 0; z-index: 410; display: grid; place-items: center; padding: 30px; }
+.team-photo-viewer-backdrop { position: absolute; inset: 0; background: rgba(15, 12, 20, 0.82); backdrop-filter: blur(8px); }
+.team-photo-viewer-dialog { position: relative; z-index: 1; display: grid; max-width: min(78vw, 820px); max-height: 82vh; }
+.team-photo-viewer-image { display: block; max-width: min(78vw, 820px); max-height: 82vh; width: auto; height: auto; object-fit: contain; border-radius: 18px; box-shadow: 0 28px 70px rgba(0, 0, 0, 0.34); }
+.team-photo-viewer-close {
+    position: absolute;
+    z-index: 2;
+    top: 18px;
+    right: 18px;
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 50%;
+    background: rgba(20, 17, 27, 0.66);
+    color: #fff;
+    cursor: pointer;
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
 :focus-visible { outline: 3px solid var(--web-blue); outline-offset: 3px; }
 
 #asesor { scroll-margin-top: 78px; }
+
+@media (max-width: 639px) {
+    .team-photo-viewer { padding: 18px; }
+    .team-photo-viewer-dialog,
+    .team-photo-viewer-image { max-width: 92vw; max-height: 78vh; }
+    .team-photo-viewer-close { top: 12px; right: 12px; }
+}
 
 @media (min-width: 640px) {
     .shell { width: min(100% - 56px, 1120px); }
@@ -769,6 +804,7 @@ body.team-modal-open { overflow: hidden; }
     .simple-card:hover { border-color: rgba(185, 167, 216, 0.5); background: rgba(185, 167, 216, 0.08); box-shadow: 0 12px 26px rgba(155, 108, 255, 0.08); transform: translateY(-2px); }
     .footer-person-trigger:hover, .footer-grid .footer-location:hover { color: #fff; }
     .team-modal-close:hover { border-color: var(--web-border-active); background: rgba(155, 108, 255, 0.12); }
+    .team-photo-viewer-close:hover { border-color: rgba(255, 255, 255, 0.34); background: rgba(35, 30, 45, 0.86); }
 }
 
 html[data-theme="light"] body {
@@ -902,6 +938,10 @@ html[data-theme="light"] .faq-list details[open] summary::after {
 
 html[data-theme="light"] .faq-list details > div {
     border-top-color: rgba(63, 52, 73, 0.08);
+}
+
+html[data-theme="light"] .team-photo-button {
+    box-shadow: 0 6px 20px rgba(72, 55, 88, 0.12);
 }
 
 html[data-theme="light"] .final-card {

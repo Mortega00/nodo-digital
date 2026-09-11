@@ -147,7 +147,7 @@
         <div class="team-modal-backdrop" data-team-modal-close></div>
         <section class="team-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="team-modal-maximiliano-title" tabindex="-1">
             <button class="team-modal-close" type="button" data-team-modal-close aria-label="Cerrar perfil de Maximiliano Ortega">×</button>
-            <div class="team-modal-media"><span class="team-modal-placeholder" aria-hidden="true">MO</span><img class="team-modal-photo" src="assets/team/maximiliano.jpg" alt="Retrato de Maximiliano Ortega"></div>
+            <button class="team-photo-button" type="button" data-team-photo-viewer data-team-photo-full="assets/team/maximiliano-ortega-full.png" aria-label="Ver foto de Maximiliano Ortega"><span class="team-modal-placeholder" aria-hidden="true">MO</span><img class="team-modal-photo" src="assets/team/maximiliano-ortega.png" alt="Retrato de Maximiliano Ortega"></button>
             <p class="team-modal-eyebrow">EQUIPO NODO</p>
             <h2 id="team-modal-maximiliano-title">Maximiliano Ortega</h2>
             <p class="team-modal-role">Desarrollo y soluciones digitales</p>
@@ -159,12 +159,18 @@
         <div class="team-modal-backdrop" data-team-modal-close></div>
         <section class="team-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="team-modal-rosario-title" tabindex="-1">
             <button class="team-modal-close" type="button" data-team-modal-close aria-label="Cerrar perfil de Rosario Michienzi">×</button>
-            <div class="team-modal-media"><span class="team-modal-placeholder" aria-hidden="true">RM</span><img class="team-modal-photo" src="assets/team/rosario.jpg" alt="Retrato de Rosario Michienzi"></div>
+            <button class="team-photo-button" type="button" data-team-photo-viewer data-team-photo-full="assets/team/rosario-michienzi-full.png" aria-label="Ver foto de Rosario Michienzi"><span class="team-modal-placeholder" aria-hidden="true">RM</span><img class="team-modal-photo" src="assets/team/rosario-michienzi.png" alt="Retrato de Rosario Michienzi"></button>
             <p class="team-modal-eyebrow">EQUIPO NODO</p>
             <h2 id="team-modal-rosario-title">Rosario Michienzi</h2>
             <p class="team-modal-role">Diseño y experiencia visual</p>
             <p>Combina sensibilidad, criterio visual y atención al detalle para transformar ideas en experiencias más claras, atractivas y cercanas.</p>
         </section>
+    </div>
+
+    <div class="team-photo-viewer" id="team-photo-viewer" hidden>
+        <div class="team-photo-viewer-backdrop" data-team-photo-viewer-close></div>
+        <button class="team-photo-viewer-close" type="button" data-team-photo-viewer-close aria-label="Cerrar foto ampliada">×</button>
+        <section class="team-photo-viewer-dialog" role="dialog" aria-modal="true" aria-label="Foto ampliada" tabindex="-1"><img class="team-photo-viewer-image" id="team-photo-viewer-image" alt=""></section>
     </div>
 
     <script src="web/web.js"></script>

@@ -802,11 +802,89 @@ function setupAdvisorScrollLinks() {
 function setupTeamModals() {
     const triggers = [...document.querySelectorAll("[data-team-modal]")];
     const modals = [...document.querySelectorAll(".team-modal")];
+    const photoViewer = document.getElementById("team-photo-viewer");
+    const photoViewerImage = document.getElementById("team-photo-viewer-image");
     let activeModal = null;
     let triggerBeforeOpen = null;
+    let photoViewerTrigger = null;
+    let photoViewerParentDialog = null;
+    let photoRequestId = 0;
+
+    const isPhotoViewerOpen = () => Boolean(photoViewer && !photoViewer.hidden);
+
+    const getFocusable = container => [...container.querySelectorAll("button:not([disabled]), [href], [tabindex]:not([tabindex=\"-1\"])")]
+        .filter(element => !element.hidden);
+
+    const trapFocus = (container, event) => {
+        const focusable = getFocusable(container);
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable.at(-1);
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        }
+    };
+
+    const closePhotoViewer = (restoreFocus = true) => {
+        if (!isPhotoViewerOpen()) return;
+        photoRequestId += 1;
+        photoViewer.hidden = true;
+        document.body.classList.remove("team-photo-viewer-open");
+        if (photoViewerImage) {
+            photoViewerImage.removeAttribute("src");
+            photoViewerImage.alt = "";
+        }
+        if (photoViewerParentDialog) {
+            photoViewerParentDialog.removeAttribute("aria-hidden");
+            photoViewerParentDialog.setAttribute("aria-modal", "true");
+            photoViewerParentDialog.inert = false;
+        }
+        const focusTarget = photoViewerTrigger;
+        photoViewerTrigger = null;
+        photoViewerParentDialog = null;
+        if (restoreFocus) focusTarget?.focus();
+    };
+
+    const openPhotoViewer = trigger => {
+        const thumbnail = trigger.querySelector(".team-modal-photo");
+        if (!photoViewer || !photoViewerImage || !thumbnail) return;
+
+        const thumbnailSrc = thumbnail.currentSrc || thumbnail.src;
+        if (!thumbnailSrc) return;
+
+        const fullSrc = trigger.dataset.teamPhotoFull || thumbnailSrc;
+        const requestId = ++photoRequestId;
+        photoViewerTrigger = trigger;
+        photoViewerParentDialog = trigger.closest(".team-modal-dialog");
+        if (photoViewerParentDialog) {
+            photoViewerParentDialog.setAttribute("aria-hidden", "true");
+            photoViewerParentDialog.setAttribute("aria-modal", "false");
+            photoViewerParentDialog.inert = true;
+        }
+        photoViewerImage.alt = thumbnail.alt;
+        photoViewerImage.src = thumbnailSrc;
+        photoViewer.hidden = false;
+        document.body.classList.add("team-photo-viewer-open");
+        photoViewer.querySelector("button[data-team-photo-viewer-close]")?.focus();
+
+        if (fullSrc === thumbnailSrc) return;
+        const fullImage = new Image();
+        fullImage.addEventListener("load", () => {
+            if (requestId === photoRequestId && isPhotoViewerOpen()) photoViewerImage.src = fullSrc;
+        }, { once: true });
+        fullImage.addEventListener("error", () => {
+            if (requestId === photoRequestId && isPhotoViewerOpen()) photoViewerImage.src = thumbnailSrc;
+        }, { once: true });
+        fullImage.src = fullSrc;
+    };
 
     const closeModal = (modal, restoreFocus = true) => {
         if (!modal || modal.hidden) return;
+        if (isPhotoViewerOpen()) closePhotoViewer(false);
         modal.hidden = true;
         document.body.classList.remove("team-modal-open");
         if (activeModal === modal) activeModal = null;
@@ -822,7 +900,7 @@ function setupTeamModals() {
         triggerBeforeOpen = trigger;
         modal.hidden = false;
         document.body.classList.add("team-modal-open");
-        modal.querySelector("[data-team-modal-close]")?.focus();
+        modal.querySelector("button[data-team-modal-close]")?.focus();
     };
 
     triggers.forEach(trigger => trigger.addEventListener("click", () => {
@@ -832,34 +910,27 @@ function setupTeamModals() {
     modals.forEach(modal => {
         modal.querySelectorAll("[data-team-modal-close]").forEach(control => control.addEventListener("click", () => closeModal(modal)));
         modal.querySelectorAll(".team-modal-photo").forEach(photo => {
-            const media = photo.closest(".team-modal-media");
-            const showPhoto = () => media?.classList.add("has-photo");
+            const button = photo.closest(".team-photo-button");
+            const showPhoto = () => button?.classList.add("has-photo");
             if (photo.complete && photo.naturalWidth > 0) showPhoto();
             else photo.addEventListener("load", showPhoto, { once: true });
         });
+        modal.querySelectorAll("[data-team-photo-viewer]").forEach(button => button.addEventListener("click", () => openPhotoViewer(button)));
     });
 
+    photoViewer?.querySelectorAll("[data-team-photo-viewer-close]").forEach(control => control.addEventListener("click", () => closePhotoViewer()));
+
     document.addEventListener("keydown", event => {
-        if (!activeModal) return;
+        const focusContainer = isPhotoViewerOpen() ? photoViewer : activeModal;
+        if (!focusContainer) return;
         if (event.key === "Escape") {
             event.preventDefault();
-            closeModal(activeModal);
+            if (isPhotoViewerOpen()) closePhotoViewer();
+            else closeModal(activeModal);
             return;
         }
         if (event.key !== "Tab") return;
-
-        const focusable = [...activeModal.querySelectorAll("button:not([disabled]), [href], [tabindex]:not([tabindex=\"-1\"])")]
-            .filter(element => !element.hidden);
-        if (!focusable.length) return;
-        const first = focusable[0];
-        const last = focusable.at(-1);
-        if (event.shiftKey && document.activeElement === first) {
-            event.preventDefault();
-            last.focus();
-        } else if (!event.shiftKey && document.activeElement === last) {
-            event.preventDefault();
-            first.focus();
-        }
+        trapFocus(focusContainer, event);
     });
 }
 
