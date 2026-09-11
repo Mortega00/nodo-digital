@@ -743,10 +743,98 @@ body.team-photo-viewer-open { overflow: hidden; }
 #asesor { scroll-margin-top: 78px; }
 
 @media (max-width: 639px) {
-    .team-photo-viewer { padding: 18px; }
+    .shell { width: calc(100vw - 40px); }
+    .site-header { padding: 10px 0; }
+    .header-content { min-width: 0; gap: 8px; }
+    .header-actions { display: flex; flex: 1 1 auto; min-width: 0; justify-content: flex-end; gap: 6px; }
+    .brand { gap: 7px; font-size: .88rem; }
+    .brand-mark { width: 28px; height: 28px; }
+    .theme-toggle { width: 38px; height: 38px; border-radius: 11px; }
+    .header-help { display: block; flex: 0 1 112px; min-width: 0; max-width: 112px; font-size: .78rem; line-height: 1.2; overflow-wrap: anywhere; text-align: right; }
+
+    .hero { padding: 44px 0 30px; }
+    .hero .eyebrow { margin-bottom: 9px; }
+    .hero h1 { max-width: 100%; margin-bottom: 14px; font-size: clamp(1.9rem, 8.2vw, 2.25rem); line-height: 1.06; overflow-wrap: anywhere; text-wrap: wrap; }
+    .hero-copy { max-width: 100%; margin-bottom: 20px; font-size: .98rem; overflow-wrap: anywhere; }
+    .hero-actions { gap: 12px; }
+    .hero-actions .button { width: 100%; max-width: 350px; }
+    .hero-note { margin-top: 16px; }
+
+    .section { padding: 52px 0; }
+    .simple-section { padding: 12px 0 42px; }
+    .simple-heading { margin-bottom: 14px; }
+    .simple-list {
+        display: flex;
+        width: calc(100% + 20px);
+        gap: 10px;
+        margin-right: -20px;
+        padding: 2px 14px 4px 1px;
+        overflow-x: auto;
+        scroll-padding-inline: 1px;
+        scroll-snap-type: x mandatory;
+        overscroll-behavior-x: contain;
+        overscroll-behavior-inline: contain;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        -webkit-overflow-scrolling: touch;
+    }
+    .simple-list::-webkit-scrollbar { display: none; }
+    .simple-list li { flex: 0 0 82%; min-width: 0; scroll-snap-align: start; }
+    .simple-card { min-height: 70px; padding: 12px; }
+
+    .advisor-section { padding-top: 44px; }
+    .advisor-intro { margin-bottom: 14px; }
+    .advisor-card { padding: 14px; border-radius: 18px; }
+    .advisor-start { min-height: 236px; }
+    .advisor-message { min-height: 2.7em; }
+    .question-title { font-size: clamp(1.35rem, 6.5vw, 1.7rem); }
+    .question-help { margin-bottom: 12px; }
+    .choice-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .choice-card { min-height: 56px; padding: 10px 33px 10px 11px; }
+    .choice-card strong { font-size: .86rem; }
+    .choice-card-detailed { grid-column: 1 / -1; min-height: 68px; padding: 11px 34px 11px 12px; }
+    .choice-card-detailed strong { font-size: .9rem; }
+    .choice-card-detailed span { font-size: .78rem; }
+    .advisor-nav { gap: 8px; padding-top: 10px; }
+    .advisor-nav .button { flex: 1; min-width: 0; min-height: 48px; padding-inline: 12px; }
+
+    .plan-result { padding: 15px; }
+    .result-actions { gap: 9px; }
+    .result-actions .button { min-height: 50px; }
+
+    .contact-section { padding-top: 48px; }
+    .contact-control { min-height: 50px; }
+    textarea.contact-control { min-height: 112px; }
+    .contact-checkbox { min-height: 44px; }
+
+    .faq-section { padding-top: 52px; }
+    .faq-heading { margin-bottom: 18px; }
+    .faq-list { gap: 8px; }
+    .faq-list details { border-radius: 14px; }
+    .faq-list summary { min-height: 54px; padding: 13px 14px; font-size: .92rem; }
+    .faq-list summary::after { width: 26px; height: 26px; }
+    .faq-list details > div { padding: 0 14px 14px; font-size: .9rem; }
+
+    .final-section { padding: 18px 0 40px; }
+    .final-card { padding: 24px 20px; text-align: center; }
+    .final-card .button { width: 100%; }
+
+    .site-footer { padding: 38px 0 28px; }
+    .footer-grid { gap: 0; }
+    .footer-grid > div { width: 100%; max-width: none; padding: 20px 0; }
+    .footer-grid > div + div { border-top: 1px solid var(--web-border); }
+    .footer-grid .footer-label { font-size: .76rem; }
+    .footer-person { display: grid; min-height: 44px; margin-bottom: 10px; }
+    .footer-person-trigger { display: inline-flex; width: fit-content; min-height: 44px; align-items: center; text-align: left; }
+    .footer-label-spaced { margin-top: 12px; padding-top: 20px; border-top: 1px solid var(--web-border); }
+
+    .team-modal { padding: 12px; }
+    .team-modal-dialog { width: min(94vw, 510px); max-height: calc(100vh - 24px); padding: 22px 18px 18px; border-radius: 18px; }
+    .team-modal-close { width: 38px; height: 38px; top: 10px; right: 10px; }
+    .team-photo-viewer { padding: 12px; }
     .team-photo-viewer-dialog,
-    .team-photo-viewer-image { max-width: 92vw; max-height: 78vh; }
-    .team-photo-viewer-close { top: 12px; right: 12px; }
+    .team-photo-viewer-image { max-width: 94vw; max-height: 82vh; }
+    .team-photo-viewer-close { top: 10px; right: 10px; }
 }
 
 @media (min-width: 640px) {
@@ -784,6 +872,10 @@ body.team-photo-viewer-open { overflow: hidden; }
     .footer-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 34px 42px; }
 }
 
+@media (min-width: 768px) and (max-width: 1023px) {
+    .advisor-card { max-height: none; overflow: visible; }
+}
+
 @media (min-width: 1024px) {
     .simple-list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .simple-card { min-height: 62px; }
@@ -791,6 +883,14 @@ body.team-photo-viewer-open { overflow: hidden; }
     .advisor-card { min-height: 0; }
     .hero h1 { font-size: clamp(3.3rem, 5vw, 4.25rem); }
     .footer-grid { grid-template-columns: 1.1fr 0.95fr 1.25fr 1.15fr; gap: 34px; }
+}
+
+@media (max-width: 1023px) and (orientation: landscape) and (max-height: 520px) {
+    .site-header { padding: 7px 0; }
+    .hero { padding: 30px 0 24px; }
+    .team-modal { padding: 8px; }
+    .team-modal-dialog { max-height: calc(100vh - 16px); }
+    .team-photo-viewer { padding: 8px; }
 }
 
 @media (hover: hover) {
