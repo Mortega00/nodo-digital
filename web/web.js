@@ -286,9 +286,15 @@ function getRecommendation(answers) {
     const commerceNeed = answers.commerceNeeds || "";
 
     const customSignals = ["payments", "stock", "users", "special"];
+    const commercialNeeds = ["commerce-basic", "commerce-unsure"];
+    const relevantContent = ["business-info", "services", "photos", "prices", "location", "products", "promotions"];
+    const relevantContentCount = relevantContent.filter(item => content.has(item)).length;
+    const hasCommercialIntent = goals.has("sell") || (start === "commerce" && commercialNeeds.includes(commerceNeed));
+    const hasCatalog = goals.has("products") && content.has("products");
+
     if (customSignals.includes(commerceNeed)) return "custom";
-    if ((start === "commerce" && commerceNeed === "commerce-basic") || goals.has("sell") || (goals.has("products") && content.has("products"))) return "conversion";
-    if (start === "complete" || today.has("current-page") || today.has("old-page") || content.has("location") || content.has("promotions") || (goals.has("services") && content.size >= 3)) return "positioning";
+    if (hasCommercialIntent) return "conversion";
+    if (goals.has("bookings") || hasCatalog || start === "complete" || today.has("current-page") || today.has("old-page") || content.has("location") || content.has("promotions") || relevantContentCount >= 4) return "positioning";
     return "launch";
 }
 
@@ -298,6 +304,9 @@ function getReasons(planKey) {
     const content = new Set(state.answers.content || []);
     const start = (state.answers.start || [])[0];
     const commerceNeed = state.answers.commerceNeeds || "";
+    const relevantContent = ["business-info", "services", "photos", "prices", "location", "products", "promotions"];
+    const relevantContentCount = relevantContent.filter(item => content.has(item)).length;
+    const hasCommercialIntent = goals.has("sell") || (start === "commerce" && ["commerce-basic", "commerce-unsure"].includes(commerceNeed));
     const customReasons = {
         payments: "Necesitás que las personas puedan pagar desde la página.",
         stock: "También necesitás controlar la disponibilidad de productos.",
@@ -311,13 +320,14 @@ function getReasons(planKey) {
 
     const reasons = [];
 
+    if (goals.has("bookings")) reasons.push("Querés que las personas puedan reservar o elegir un turno.");
     if (goals.has("messages") || today.has("whatsapp")) reasons.push("Nos dijiste que querés facilitar que las personas te contacten.");
     if (goals.has("services") || content.has("services")) reasons.push("También querés mostrar tus servicios de una forma clara.");
-    if (goals.has("products") || content.has("products")) reasons.push("Querés que las personas puedan recorrer lo que vendés con tranquilidad.");
+    if (goals.has("products") || content.has("products")) reasons.push("Querés mostrar tus productos de una forma clara y ordenada.");
     if (commerceNeed === "commerce-basic") reasons.push("Querés mostrar lo que vendés y facilitar que una persona haga un pedido o consulta.");
-    else if (goals.has("sell") || start === "commerce") reasons.push("Buscás una página que acompañe pedidos, compras o consultas.");
+    else if (hasCommercialIntent) reasons.push("Buscás una página que acompañe pedidos, compras o consultas.");
     if (today.has("current-page") || today.has("old-page")) reasons.push("Nos contaste que ya tenés una página y querés mejorar lo que mostrás.");
-    if (content.has("location") || content.has("promotions") || start === "complete") reasons.push("Necesitás más espacio para ordenar información importante de tu negocio.");
+    if (relevantContentCount >= 4 || content.has("location") || content.has("promotions") || start === "complete") reasons.push("Necesitás más espacio para ordenar información importante de tu negocio.");
     if (start === "simple" || today.has("starting")) reasons.push("Querés empezar con una presencia clara y sin sumar cosas que hoy no necesitás.");
     if (!reasons.length && goals.has("professional")) reasons.push("Querés que tu negocio se vea más profesional y sea fácil de entender.");
     if (!reasons.length && start === "recommend") reasons.push("Preferís recibir una guía clara para elegir por dónde empezar.");
@@ -343,17 +353,22 @@ function getRecommendationSummary(planKey) {
     const content = new Set(state.answers.content || []);
     const start = (state.answers.start || [])[0];
     const commerceNeed = state.answers.commerceNeeds || "";
+    const relevantContent = ["business-info", "services", "photos", "prices", "location", "products", "promotions"];
+    const relevantContentCount = relevantContent.filter(item => content.has(item)).length;
 
     if (planKey === "custom") return "Tu necesidad requiere algo más específico. Primero entendemos bien el alcance y después te presentamos una propuesta.";
     if (planKey === "conversion" && commerceNeed === "commerce-basic") return "Querés mostrar lo que vendés y facilitar que una persona haga un pedido o consulta.";
-    if (planKey === "conversion") return "Querés mostrar lo que vendés y hacer más fácil que una persona avance hacia una compra o pedido.";
+    if (planKey === "conversion" && goals.has("sell")) return "Querés hacer más fácil que una persona avance hacia una compra o pedido.";
+    if (planKey === "conversion") return "Querés explorar una forma clara de recibir pedidos o consultas desde tu página.";
 
     if (planKey === "positioning") {
         const needs = [];
+        if (goals.has("bookings")) needs.push("recibir reservas o turnos");
         if (goals.has("services") || content.has("services")) needs.push("mostrar mejor tus servicios");
         if (goals.has("messages") || today.has("whatsapp")) needs.push("facilitar que te contacten");
+        if (goals.has("products") && content.has("products")) needs.push("mostrar tus productos de forma clara y darles más espacio dentro de tu web");
         if (today.has("current-page") || today.has("old-page") || start === "complete") needs.push("ordenar la información de tu negocio");
-        if (content.has("location") || content.has("promotions")) needs.push("dar lugar a información importante");
+        if (relevantContentCount >= 4 || content.has("location") || content.has("promotions")) needs.push("dar lugar a información importante");
         return "Querés " + joinNeeds(needs) + ". Esta opción cubre eso sin sumar cosas que hoy no necesitás.";
     }
 
