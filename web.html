@@ -8,6 +8,13 @@
     <link rel="stylesheet" href="web/web.css">
 </head>
 <body>
+    <div class="nodo-intro" id="nodo-intro" aria-hidden="true">
+        <div class="nodo-intro-network">
+            <span class="nodo-intro-line nodo-intro-line-1"></span><span class="nodo-intro-line nodo-intro-line-2"></span><span class="nodo-intro-line nodo-intro-line-3"></span><span class="nodo-intro-line nodo-intro-line-4"></span><span class="nodo-intro-line nodo-intro-line-5"></span><span class="nodo-intro-line nodo-intro-line-6"></span>
+            <span class="nodo-intro-node nodo-intro-node-1"></span><span class="nodo-intro-node nodo-intro-node-2"></span><span class="nodo-intro-node nodo-intro-node-3"></span><span class="nodo-intro-node nodo-intro-node-4"></span><span class="nodo-intro-node nodo-intro-node-5"></span><span class="nodo-intro-node nodo-intro-node-6"></span>
+            <img class="nodo-intro-mark" src="assets/logo.png" alt="">
+        </div>
+    </div>
     <header class="site-header">
         <div class="shell header-content">
             <a class="brand" href="#inicio" data-scroll-top aria-label="Volver al inicio">
@@ -41,10 +48,10 @@
                     <h2 id="simple-title">Así de simple</h2>
                 </div>
                 <ol class="simple-list">
-                    <li><span>1</span><p>Nos contás qué necesitás.</p></li>
-                    <li><span>2</span><p>Te recomendamos una opción.</p></li>
-                    <li><span>3</span><p>Definimos juntos los detalles.</p></li>
-                    <li><span>4</span><p>Construimos y publicamos.</p></li>
+                    <li><a class="simple-card" href="#asesor" data-scroll-advisor><span>1</span><p>Nos contás qué necesitás.</p></a></li>
+                    <li><a class="simple-card" href="#asesor" data-scroll-advisor><span>2</span><p>Te recomendamos una opción.</p></a></li>
+                    <li><a class="simple-card" href="#asesor" data-scroll-advisor><span>3</span><p>Definimos juntos los detalles.</p></a></li>
+                    <li><a class="simple-card" href="#asesor" data-scroll-advisor><span>4</span><p>Construimos y publicamos.</p></a></li>
                 </ol>
             </div>
         </section>
@@ -115,17 +122,50 @@
                 <p>Diseñamos y construimos soluciones digitales de forma clara.</p>
             </div>
             <div class="footer-block">
+                <p class="footer-label">Equipo NODO</p>
+                <div class="footer-person"><button class="footer-person-name footer-person-trigger" type="button" data-team-modal="team-modal-maximiliano">Maximiliano Ortega</button><p class="footer-person-role">Desarrollo y soluciones digitales</p></div>
+                <div class="footer-person"><button class="footer-person-name footer-person-trigger" type="button" data-team-modal="team-modal-rosario">Rosario Michienzi</button><p class="footer-person-role">Diseño y experiencia visual</p></div>
+            </div>
+            <div class="footer-block">
+                <p class="footer-label">Ubicación y modalidad</p>
+                <a class="footer-location" href="https://www.google.com/maps/search/?api=1&amp;query=Lomas%20de%20Zamora%2C%20Buenos%20Aires%2C%20Argentina" target="_blank" rel="noopener noreferrer">Lomas de Zamora · Buenos Aires · Argentina</a>
+                <p>Trabajamos de forma remota y también podemos coordinar encuentros presenciales en Zona Sur y CABA.</p>
+                <p>Si estás en otra ciudad o país, podemos reunirnos online sin problema.</p>
+            </div>
+            <div class="footer-block footer-contact">
                 <p class="footer-label">¿Buscás algo más que una página web?</p>
                 <p>Sistemas, aplicaciones, automatizaciones y proyectos a medida.</p>
                 <a class="text-link" href="index.html">Conocer Ecosistema NODO <span aria-hidden="true">→</span></a>
-            </div>
-            <div class="footer-block">
-                <p class="footer-label">¿Sos empresa o necesitás un proyecto de mayor alcance?</p>
+                <p class="footer-label footer-label-spaced">¿Sos empresa o necesitás un proyecto de mayor alcance?</p>
                 <p>Hablanos y armamos una propuesta personalizada.</p>
                 <a class="text-link" data-whatsapp-context="business" target="_blank" rel="noopener noreferrer">Contactar NODO <span aria-hidden="true">↗</span></a>
             </div>
         </div>
     </footer>
+
+    <div class="team-modal" id="team-modal-maximiliano" hidden>
+        <div class="team-modal-backdrop" data-team-modal-close></div>
+        <section class="team-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="team-modal-maximiliano-title" tabindex="-1">
+            <button class="team-modal-close" type="button" data-team-modal-close aria-label="Cerrar perfil de Maximiliano Ortega">×</button>
+            <div class="team-modal-media"><span class="team-modal-placeholder" aria-hidden="true">MO</span><img class="team-modal-photo" src="assets/team/maximiliano.jpg" alt="Retrato de Maximiliano Ortega"></div>
+            <p class="team-modal-eyebrow">EQUIPO NODO</p>
+            <h2 id="team-modal-maximiliano-title">Maximiliano Ortega</h2>
+            <p class="team-modal-role">Desarrollo y soluciones digitales</p>
+            <p>Convierte necesidades reales en soluciones web claras, funcionales y listas para usar, con foco en simplicidad, velocidad y resultados.</p>
+        </section>
+    </div>
+
+    <div class="team-modal" id="team-modal-rosario" hidden>
+        <div class="team-modal-backdrop" data-team-modal-close></div>
+        <section class="team-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="team-modal-rosario-title" tabindex="-1">
+            <button class="team-modal-close" type="button" data-team-modal-close aria-label="Cerrar perfil de Rosario Michienzi">×</button>
+            <div class="team-modal-media"><span class="team-modal-placeholder" aria-hidden="true">RM</span><img class="team-modal-photo" src="assets/team/rosario.jpg" alt="Retrato de Rosario Michienzi"></div>
+            <p class="team-modal-eyebrow">EQUIPO NODO</p>
+            <h2 id="team-modal-rosario-title">Rosario Michienzi</h2>
+            <p class="team-modal-role">Diseño y experiencia visual</p>
+            <p>Combina sensibilidad, criterio visual y atención al detalle para transformar ideas en experiencias más claras, atractivas y cercanas.</p>
+        </section>
+    </div>
 
     <script src="web/web.js"></script>
 </body>

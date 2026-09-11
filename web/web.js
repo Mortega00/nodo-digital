@@ -792,6 +792,109 @@ function setupStaticWhatsAppLinks() {
     });
 }
 
+function setupAdvisorScrollLinks() {
+    document.querySelectorAll("[data-scroll-advisor]").forEach(link => link.addEventListener("click", event => {
+        event.preventDefault();
+        scrollToAdvisor();
+    }));
+}
+
+function setupTeamModals() {
+    const triggers = [...document.querySelectorAll("[data-team-modal]")];
+    const modals = [...document.querySelectorAll(".team-modal")];
+    let activeModal = null;
+    let triggerBeforeOpen = null;
+
+    const closeModal = (modal, restoreFocus = true) => {
+        if (!modal || modal.hidden) return;
+        modal.hidden = true;
+        document.body.classList.remove("team-modal-open");
+        if (activeModal === modal) activeModal = null;
+        const focusTarget = triggerBeforeOpen;
+        triggerBeforeOpen = null;
+        if (restoreFocus) focusTarget?.focus();
+    };
+
+    const openModal = (modal, trigger) => {
+        if (!modal) return;
+        if (activeModal && activeModal !== modal) closeModal(activeModal, false);
+        activeModal = modal;
+        triggerBeforeOpen = trigger;
+        modal.hidden = false;
+        document.body.classList.add("team-modal-open");
+        modal.querySelector("[data-team-modal-close]")?.focus();
+    };
+
+    triggers.forEach(trigger => trigger.addEventListener("click", () => {
+        openModal(document.getElementById(trigger.dataset.teamModal), trigger);
+    }));
+
+    modals.forEach(modal => {
+        modal.querySelectorAll("[data-team-modal-close]").forEach(control => control.addEventListener("click", () => closeModal(modal)));
+        modal.querySelectorAll(".team-modal-photo").forEach(photo => {
+            const media = photo.closest(".team-modal-media");
+            const showPhoto = () => media?.classList.add("has-photo");
+            if (photo.complete && photo.naturalWidth > 0) showPhoto();
+            else photo.addEventListener("load", showPhoto, { once: true });
+        });
+    });
+
+    document.addEventListener("keydown", event => {
+        if (!activeModal) return;
+        if (event.key === "Escape") {
+            event.preventDefault();
+            closeModal(activeModal);
+            return;
+        }
+        if (event.key !== "Tab") return;
+
+        const focusable = [...activeModal.querySelectorAll("button:not([disabled]), [href], [tabindex]:not([tabindex=\"-1\"])")]
+            .filter(element => !element.hidden);
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable.at(-1);
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        }
+    });
+}
+
+const introStorageKey = "nodo_intro_seen";
+
+function setupNodoIntro() {
+    const intro = document.getElementById("nodo-intro");
+    if (!intro) return;
+
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    let hasSeenIntro = false;
+    try {
+        hasSeenIntro = window.sessionStorage.getItem(introStorageKey) === "true";
+    } catch {
+        // La intro sigue siendo opcional si el navegador bloquea sessionStorage.
+    }
+
+    if (hasSeenIntro || reduceMotion) {
+        intro.remove();
+        return;
+    }
+
+    try {
+        window.sessionStorage.setItem(introStorageKey, "true");
+    } catch {
+        // Si no se puede persistir, la página sigue siendo usable.
+    }
+
+    document.documentElement.classList.add("nodo-intro-active");
+    window.setTimeout(() => {
+        document.documentElement.classList.remove("nodo-intro-active");
+        intro.remove();
+    }, 1650);
+}
+
 const themeStorageKey = "nodo_web_theme";
 
 function preferredTheme() {
@@ -837,7 +940,10 @@ function setupThemeToggle() {
 
 window.NodoWebAdvisor = { plans, getRecommendation };
 setupThemeToggle();
+setupNodoIntro();
 renderAdvisor();
 setupPageChrome();
 setupFaqAccordion();
 setupStaticWhatsAppLinks();
+setupAdvisorScrollLinks();
+setupTeamModals();
