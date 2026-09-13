@@ -163,15 +163,23 @@ const state = {
     message: "",
     contact: {
         name: "",
+        email: "",
         whatsapp: "",
         business: "",
         noBusinessName: false,
-        comment: ""
+        comment: "",
+        marketingEmailConsent: false
     },
-    contactMessage: ""
+    contactMessage: "",
+    isSubmitting: false,
+    submitError: false,
+    emailConfirmationSent: null
 };
 
 const advisor = document.getElementById("advisor");
+
+const SUPABASE_URL = "https://pmrrudtwsgqyncstfdrm.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_XhjenDP8bMVfuEUl02h6XA_ZkJLCnn_";
 
 function createElement(tag, className, text) {
     const element = document.createElement(tag);
@@ -486,20 +494,177 @@ function createContactField(labelText, id, value, options = {}) {
     control.addEventListener("input", () => {
         state.contact[id] = control.value;
         state.contactMessage = "";
+        state.submitError = false;
     });
     field.append(label, control);
     return field;
+}
+
+function createContactHoneypot() {
+    const field = createElement("label", "contact-honeypot");
+    field.setAttribute("aria-hidden", "true");
+    const control = document.createElement("input");
+    control.type = "text";
+    control.name = "website";
+    control.autocomplete = "off";
+    control.tabIndex = -1;
+    field.append(createElement("span", "", "No completar"), control);
+    return field;
+}
+
+function isValidEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
 function validateContact() {
     const contact = state.contact;
     const missing = [];
     if (!contact.name.trim()) missing.push("tu nombre");
+    if (!contact.email.trim()) missing.push("tu email");
     if (!contact.whatsapp.trim()) missing.push("tu WhatsApp");
     if (!contact.noBusinessName && !contact.business.trim()) missing.push("el nombre de tu negocio, marca o idea");
-    if (!missing.length) return true;
-    state.contactMessage = "Completá " + missing.join(", ") + " para enviar la consulta.";
-    return false;
+    if (missing.length) {
+        state.contactMessage = "Completá " + missing.join(", ") + " para enviar la consulta.";
+        return false;
+    }
+    if (!isValidEmail(contact.email.trim())) {
+        state.contactMessage = "Ingresá un email válido para continuar.";
+        return false;
+    }
+    return true;
+}
+
+function buildLeadPayload(planKey, plan) {
+    const contact = state.contact;
+    const marketingEmailConsent = Boolean(contact.marketingEmailConsent);
+
+    return {
+        name: contact.name.trim(),
+        email: contact.email.trim().toLowerCase(),
+        whatsapp: contact.whatsapp.trim(),
+        business_name: contact.noBusinessName ? null : contact.business.trim(),
+        no_business_name: Boolean(contact.noBusinessName),
+        comment: contact.comment.trim() || null,
+        advisor_goals: state.answers.goals || [],
+        advisor_today: state.answers.today || [],
+        advisor_content: state.answers.content || [],
+        advisor_start: (state.answers.start || [])[0],
+        advisor_commerce_need: state.answers.commerceNeeds || null,
+        recommended_plan_key: planKey,
+        recommended_plan_name: plan.name,
+        recommended_price: plan.price,
+        marketing_email_consent: marketingEmailConsent,
+        marketing_consent_at: marketingEmailConsent ? new Date().toISOString() : null
+    };
+}
+
+async function submitLeadToSupabase(payload) {
+    const response = await fetch(SUPABASE_URL + "/rest/v1/leads", {
+        method: "POST",
+        headers: {
+            apikey: SUPABASE_PUBLISHABLE_KEY,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal"
+        },
+        body: JSON.stringify(payload)
+    });
+
+    if (response.ok) return;
+
+    let errorBody = {};
+    try {
+        errorBody = await response.json();
+    } catch {
+        // El detalle puede no estar disponible en respuestas no JSON.
+    }
+
+    const error = new Error("LEAD_INSERT_FAILED");
+    error.status = response.status;
+    error.code = errorBody.code || "";
+    error.details = errorBody.message || errorBody.details || "";
+    throw error;
+}
+
+function buildLeadConfirmationEmailPayload(planKey, plan) {
+    const contact = state.contact;
+    return {
+        name: contact.name.trim(),
+        email: contact.email.trim().toLowerCase(),
+        businessName: contact.noBusinessName ? null : contact.business.trim(),
+        planName: plan.name,
+        planPrice: plan.price,
+        planKey
+    };
+}
+
+async function sendLeadConfirmationEmail(payload) {
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 9000);
+
+    try {
+        const response = await fetch(SUPABASE_URL + "/functions/v1/send-lead-confirmation", {
+            method: "POST",
+            headers: {
+                apikey: SUPABASE_PUBLISHABLE_KEY,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload),
+            signal: controller.signal
+        });
+
+        if (!response.ok) throw new Error("EMAIL_CONFIRMATION_FAILED");
+
+        let body;
+        try {
+            body = await response.json();
+        } catch {
+            throw new Error("EMAIL_CONFIRMATION_INVALID_RESPONSE");
+        }
+
+        if (body?.ok !== true) throw new Error("EMAIL_CONFIRMATION_FAILED");
+    } finally {
+        window.clearTimeout(timeoutId);
+    }
+}
+
+async function submitContactLead(planKey, plan, honeypotValue) {
+    if (state.isSubmitting || honeypotValue.trim()) return;
+
+    if (!validateContact()) {
+        state.submitError = false;
+        renderAdvisor();
+        return;
+    }
+
+    state.isSubmitting = true;
+    state.submitError = false;
+    state.contactMessage = "";
+    state.emailConfirmationSent = null;
+    renderAdvisor();
+
+    try {
+        await submitLeadToSupabase(buildLeadPayload(planKey, plan));
+    } catch {
+        state.isSubmitting = false;
+        state.submitError = true;
+        state.contactMessage = "No pudimos enviar tu consulta en este momento.";
+        renderAdvisor();
+        return;
+    }
+
+    try {
+        await sendLeadConfirmationEmail(buildLeadConfirmationEmailPayload(planKey, plan));
+        state.emailConfirmationSent = true;
+    } catch {
+        state.emailConfirmationSent = false;
+    }
+
+    state.isSubmitting = false;
+    state.submitError = false;
+    state.contactMessage = "";
+    state.screen = "success";
+    renderAdvisor();
+    resetAdvisorScroll();
 }
 
 function renderStart() {
@@ -679,8 +844,11 @@ function renderResult() {
         state.currentStep = 0;
         state.answers = {};
         state.message = "";
-        state.contact = { name: "", whatsapp: "", business: "", noBusinessName: false, comment: "" };
+        state.contact = { name: "", email: "", whatsapp: "", business: "", noBusinessName: false, comment: "", marketingEmailConsent: false };
         state.contactMessage = "";
+        state.isSubmitting = false;
+        state.submitError = false;
+        state.emailConfirmationSent = null;
         renderAdvisor();
         resetAdvisorScroll();
         scrollToAdvisor();
@@ -708,7 +876,10 @@ function renderContact() {
 
     const form = createElement("form", "contact-form");
     form.noValidate = true;
+    form.setAttribute("aria-busy", String(state.isSubmitting));
+    form.append(createContactHoneypot());
     form.append(createContactField("Nombre *", "name", contact.name, { required: true, autocomplete: "name" }));
+    form.append(createContactField("Email *", "email", contact.email, { required: true, type: "email", autocomplete: "email" }));
     form.append(createContactField("WhatsApp *", "whatsapp", contact.whatsapp, { required: true, type: "tel", autocomplete: "tel" }));
     form.append(createContactField(contact.noBusinessName ? "Nombre de tu negocio, marca o idea" : "Nombre de tu negocio, marca o idea *", "business", contact.business, { required: !contact.noBusinessName, disabled: contact.noBusinessName }));
 
@@ -719,6 +890,7 @@ function renderContact() {
     noBusiness.addEventListener("change", () => {
         state.contact.noBusinessName = noBusiness.checked;
         state.contactMessage = "";
+        state.submitError = false;
         renderAdvisor();
     });
     noBusinessLabel.append(noBusiness, createElement("span", "", "Todavía no tiene nombre"));
@@ -729,40 +901,118 @@ function renderContact() {
         placeholder: "Por ejemplo: qué hacés, qué te gustaría mostrar o alguna idea que ya tengas."
     }));
 
+    const marketingConsentLabel = createElement("label", "contact-checkbox contact-marketing-consent");
+    const marketingConsent = document.createElement("input");
+    marketingConsent.type = "checkbox";
+    marketingConsent.checked = contact.marketingEmailConsent;
+    marketingConsent.addEventListener("change", () => {
+        state.contact.marketingEmailConsent = marketingConsent.checked;
+    });
+    marketingConsentLabel.append(marketingConsent, createElement("span", "", "Quiero recibir novedades, recursos y propuestas de NODO por email."));
+    form.append(marketingConsentLabel);
+
     const validation = createElement("p", "contact-validation", state.contactMessage);
     validation.setAttribute("role", "status");
+    validation.setAttribute("aria-live", "polite");
     form.append(validation);
 
     const actions = createElement("div", "contact-actions");
-    const submit = createButton("Enviar consulta", "button button-primary", () => {});
+    const submitLabel = state.isSubmitting ? "Enviando…" : state.submitError ? "Reintentar" : "Enviar consulta";
+    const submit = createButton(submitLabel, "button button-primary", () => {});
     submit.type = "submit";
+    submit.disabled = state.isSubmitting;
+    submit.setAttribute("aria-disabled", String(state.isSubmitting));
     const back = createButton("Volver a mi recomendación", "button button-text", () => {
+        if (state.isSubmitting) return;
         state.screen = "result";
         state.contactMessage = "";
+        state.submitError = false;
         renderAdvisor();
         resetAdvisorScroll();
     });
-    actions.append(submit, back);
+    if (state.submitError) {
+        const fallback = document.createElement("a");
+        fallback.className = "button button-secondary";
+        fallback.href = projectMessage(plan);
+        fallback.target = "_blank";
+        fallback.rel = "noopener noreferrer";
+        fallback.textContent = "Escribirnos por WhatsApp ↗";
+        actions.append(submit, fallback, back);
+    } else {
+        actions.append(submit, back);
+    }
     form.append(actions);
     form.addEventListener("submit", event => {
         event.preventDefault();
-        if (!validateContact()) {
-            renderAdvisor();
-            return;
-        }
-        window.open(projectMessage(plan), "_blank", "noopener,noreferrer");
+        submitContactLead(key, plan, form.elements.website?.value || "");
     });
     view.append(form);
+    return view;
+}
+
+function renderSuccess() {
+    const plan = plans[getRecommendation(state.answers)];
+    const view = createElement("div", "advisor-view advisor-success");
+    view.setAttribute("role", "status");
+    view.setAttribute("aria-live", "polite");
+    view.append(createElement("p", "result-eyebrow", "CONSULTA RECIBIDA"));
+    view.append(createElement("h3", "contact-title", "Listo, recibimos tu consulta."));
+    view.append(createElement("p", "success-copy", "Perfecto. Ya tenemos la información inicial de tu proyecto. Vamos a revisarla y nos vamos a contactar con vos usando los datos que nos dejaste."));
+    if (state.emailConfirmationSent === true) {
+        view.append(createElement("p", "success-email", "Te enviamos una confirmación a " + state.contact.email.trim().toLowerCase() + "."));
+        view.append(createElement("p", "success-copy", "Si no la encontrás, revisá también Spam o Promociones."));
+    } else if (state.emailConfirmationSent === false) {
+        view.append(createElement("p", "success-email", "Tu consulta quedó registrada correctamente. No pudimos enviar el correo de confirmación en este momento, pero no necesitás completar nada de nuevo. Vamos a contactarte con los datos que nos dejaste."));
+    }
+
+    const process = createElement("ol", "success-process");
+    [
+        ["✓", "Información recibida", "is-complete"],
+        ["●", "Revisión de NODO", "is-current"],
+        ["○", "Propuesta", ""],
+        ["○", "Inicio", ""]
+    ].forEach(([mark, label, stateClass]) => {
+        const item = createElement("li", "success-step " + stateClass);
+        const icon = createElement("span", "success-step-mark", mark);
+        icon.setAttribute("aria-hidden", "true");
+        item.append(icon, createElement("span", "", label));
+        process.append(item);
+    });
+    view.append(process);
+
+    const actions = createElement("div", "success-actions");
+    const talk = document.createElement("a");
+    talk.className = "button button-secondary";
+    talk.href = projectMessage(plan);
+    talk.target = "_blank";
+    talk.rel = "noopener noreferrer";
+    talk.textContent = "También quiero escribirles por WhatsApp ↗";
+    const reset = createButton("Empezar de nuevo", "button button-text", () => {
+        state.screen = "start";
+        state.currentStep = 0;
+        state.answers = {};
+        state.message = "";
+        state.contact = { name: "", email: "", whatsapp: "", business: "", noBusinessName: false, comment: "", marketingEmailConsent: false };
+        state.contactMessage = "";
+        state.isSubmitting = false;
+        state.submitError = false;
+        state.emailConfirmationSent = null;
+        renderAdvisor();
+        resetAdvisorScroll();
+    });
+    actions.append(talk, reset);
+    view.append(actions);
     return view;
 }
 
 function renderAdvisor() {
     advisor.replaceChildren();
     const card = advisor.closest(".advisor-card");
-    card?.classList.toggle("advisor-card-expanded", state.screen === "result" || state.screen === "contact");
+    card?.classList.toggle("advisor-card-expanded", state.screen === "result" || state.screen === "contact" || state.screen === "success");
     if (state.screen === "start") advisor.append(renderStart());
     else if (state.screen === "result") advisor.append(renderResult());
     else if (state.screen === "contact") advisor.append(renderContact());
+    else if (state.screen === "success") advisor.append(renderSuccess());
     else advisor.append(renderStep());
 }
 
