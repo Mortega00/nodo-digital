@@ -286,6 +286,18 @@ function scrollToAdvisor() {
     section.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
 }
 
+function scrollSuccessIntoView() {
+    const success = advisor.querySelector(".advisor-success");
+    if (!success) return;
+
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    window.requestAnimationFrame(() => {
+        const headerHeight = document.querySelector(".site-header")?.getBoundingClientRect().height || 0;
+        const successTop = window.scrollY + success.getBoundingClientRect().top - headerHeight - 16;
+        window.scrollTo({ top: Math.max(0, successTop), behavior: reduceMotion ? "auto" : "smooth" });
+    });
+}
+
 function getRecommendation(answers) {
     const goals = new Set(answers.goals || []);
     const today = new Set(answers.today || []);
@@ -665,6 +677,7 @@ async function submitContactLead(planKey, plan, honeypotValue) {
     state.screen = "success";
     renderAdvisor();
     resetAdvisorScroll();
+    scrollSuccessIntoView();
 }
 
 function renderStart() {

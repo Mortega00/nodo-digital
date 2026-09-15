@@ -482,6 +482,61 @@ button:disabled { cursor: wait; opacity: 0.62; }
 .detail-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 14px; }
 .detail-actions .button { min-height: 38px; padding: 8px 10px; font-size: 0.82rem; }
 
+.button-danger {
+    border-color: rgba(176, 79, 100, 0.3);
+    background: rgba(176, 79, 100, 0.07);
+    color: var(--admin-danger);
+}
+
+.button-danger:hover:not(:disabled) { background: rgba(176, 79, 100, 0.13); }
+
+.proposal-section { background: linear-gradient(180deg, rgba(128, 91, 224, 0.035), transparent 160px); }
+.proposal-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 11px; }
+.proposal-status {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 4px 8px;
+    font-size: 0.72rem;
+    font-weight: 780;
+    line-height: 1.2;
+}
+.proposal-status-draft { background: rgba(128, 91, 224, 0.1); color: #6a5490; }
+.proposal-status-sent { background: rgba(194, 136, 68, 0.1); color: #8a5e27; }
+.proposal-status-accepted { background: rgba(54, 122, 101, 0.1); color: #337460; }
+.proposal-status-declined { background: rgba(176, 79, 100, 0.09); color: #8a5360; }
+.proposal-version { color: var(--admin-muted); font-size: 0.75rem; font-weight: 700; }
+.proposal-empty,
+.proposal-meta { margin: 0 0 13px; color: var(--admin-muted); font-size: 0.84rem; }
+.proposal-actions { margin-top: 12px; }
+
+.proposal-form { display: grid; gap: 15px; }
+.proposal-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+.proposal-field-wide { grid-column: 1 / -1; }
+.proposal-field textarea { min-height: 92px; }
+.proposal-field .proposal-list-control { min-height: 108px; }
+.proposal-editor-actions { margin-top: 0; }
+.proposal-message { min-height: 1.35em; margin: 11px 0 0; color: var(--admin-success); font-size: 0.82rem; font-weight: 650; }
+.proposal-message.is-error { color: var(--admin-danger); }
+
+.proposal-preview {
+    display: grid;
+    gap: 14px;
+    border: 1px solid rgba(128, 91, 224, 0.22);
+    border-radius: 13px;
+    padding: 17px;
+    background: rgba(250, 248, 252, 0.92);
+}
+.proposal-preview-eyebrow { margin: 0; color: #765592; font-size: 0.66rem; font-weight: 840; letter-spacing: 0.11em; }
+.proposal-preview h4 { margin: 0; font-size: 1.05rem; letter-spacing: -0.025em; line-height: 1.25; }
+.proposal-preview-client { margin: -7px 0 0; color: var(--admin-muted); font-size: 0.84rem; }
+.proposal-preview-block { display: grid; gap: 4px; }
+.proposal-preview-block h5 { margin: 0; color: #765592; font-size: 0.69rem; font-weight: 820; letter-spacing: 0.08em; text-transform: uppercase; }
+.proposal-preview-block p { margin: 0; color: var(--admin-text); font-size: 0.84rem; white-space: pre-wrap; }
+.proposal-preview-block ul { display: grid; gap: 4px; margin: 0; padding-left: 18px; color: var(--admin-text); font-size: 0.84rem; }
+
+.management-lock-note { margin: 7px 0 0; color: var(--admin-muted); font-size: 0.76rem; line-height: 1.4; }
+
 .management-message { min-height: 1.35em; margin: 10px 0 0; color: var(--admin-success); font-size: 0.82rem; font-weight: 650; }
 .management-message.is-error { color: var(--admin-danger); }
 .detail-save { width: 100%; margin-top: 15px; }
@@ -537,6 +592,10 @@ button:disabled { cursor: wait; opacity: 0.62; }
     .lead-cards { display: block; }
 
     .dashboard-grid.has-detail { display: block; }
+
+    .proposal-grid { grid-template-columns: 1fr; }
+    .proposal-field-wide { grid-column: auto; }
+    .proposal-actions .button { flex: 1 1 145px; }
 
     .lead-detail {
         position: fixed;

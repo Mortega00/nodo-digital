@@ -1,5 +1,6 @@
 const SUPABASE_URL = "https://pmrrudtwsgqyncstfdrm.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_XhjenDP8bMVfuEUl02h6XA_ZkJLCnn_";
+const NODO_PROPOSAL_URL = new URL("propuesta.html", window.location.href).href;
 
 const supabaseClient = window.supabase?.createClient?.(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     auth: {
@@ -79,8 +80,13 @@ const state = {
     loadError: false,
     isLoading: false,
     isSaving: false,
+    isProposalSaving: false,
     isTerminatingSession: false,
-    managementMessage: ""
+    managementMessage: "",
+    proposalDraft: null,
+    proposalMessage: "",
+    proposalPreviewOpen: false,
+    proposalPreviewScroll: null
 };
 
 function createElement(tag, className, text) {
@@ -110,7 +116,12 @@ function clearPrivateState() {
     state.loadError = false;
     state.isLoading = false;
     state.isSaving = false;
+    state.isProposalSaving = false;
     state.managementMessage = "";
+    state.proposalDraft = null;
+    state.proposalMessage = "";
+    state.proposalPreviewOpen = false;
+    state.proposalPreviewScroll = null;
 }
 
 function statusDefinition(status) {
@@ -178,6 +189,149 @@ function valuesFromLead(value) {
     }
 
     return [value];
+}
+
+function currentProposal(lead) {
+    return lead?.proposal || null;
+}
+
+function proposalStatusLabel(status) {
+    return {
+        draft: "Borrador",
+        sent: "Propuesta enviada",
+        accepted: "Aceptada",
+        declined: "No avanza"
+    }[status] || "Sin estado";
+}
+
+function proposalListText(value) {
+    return valuesFromLead(value)
+        .map(item => String(item).trim())
+        .filter(Boolean)
+        .join("\n");
+}
+
+function proposalLines(value) {
+    return String(value || "")
+        .split(/\r?\n/)
+        .map(item => item.trim())
+        .filter(Boolean);
+}
+
+function dateForInput(value) {
+    if (!value) return "";
+    if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value)) return value.slice(0, 10);
+
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
+}
+
+function proposalDraftFromRow(lead, proposal) {
+    if (!proposal || proposal.status !== "draft") return null;
+
+    return {
+        leadId: lead.id,
+        proposalId: proposal.id,
+        clientName: proposal.client_name || lead.name || "",
+        businessName: proposal.business_name || lead.business_name || "",
+        title: proposal.title || "",
+        objective: proposal.objective || "",
+        proposedSolution: proposal.proposed_solution || "",
+        scope: proposalListText(proposal.scope),
+        deliverables: proposalListText(proposal.deliverables),
+        included: proposalListText(proposal.included),
+        excluded: proposalListText(proposal.excluded),
+        priceAmount: proposal.price_amount ?? "",
+        currency: proposal.currency === "USD" ? "USD" : "ARS",
+        paymentTerms: proposal.payment_terms || "",
+        depositAmount: proposal.deposit_amount ?? "",
+        balanceAmount: proposal.balance_amount ?? "",
+        estimatedTimeline: proposal.estimated_timeline || "",
+        revisionCount: proposal.revision_count ?? "",
+        validUntil: dateForInput(proposal.valid_until),
+        conditions: proposal.conditions || "",
+        nextStep: proposal.next_step || "",
+        dirty: false
+    };
+}
+
+function proposalPublicUrl(proposal) {
+    if (!proposal?.public_token) return "";
+    const url = new URL(NODO_PROPOSAL_URL);
+    url.searchParams.set("t", proposal.public_token);
+    return url.href;
+}
+
+function formatProposalPrice(proposal) {
+    if (proposal?.price_amount === null || proposal?.price_amount === undefined || proposal.price_amount === "") return "A definir";
+    const amount = Number(proposal?.price_amount);
+    if (!Number.isFinite(amount)) return "A definir";
+
+    try {
+        return new Intl.NumberFormat("es-AR", {
+            style: "currency",
+            currency: proposal.currency === "USD" ? "USD" : "ARS",
+            maximumFractionDigits: 2
+        }).format(amount);
+    } catch {
+        return String(amount) + " " + (proposal?.currency || "ARS");
+    }
+}
+
+function prefersReducedMotion() {
+    return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+}
+
+function detailScrollContainer() {
+    return document.querySelector(".lead-detail");
+}
+
+function captureProposalScroll() {
+    const detail = detailScrollContainer();
+    const detailCanScroll = detail && detail.scrollHeight > detail.clientHeight + 1;
+    return {
+        detailScrollTop: detailCanScroll ? detail.scrollTop : null,
+        windowScrollY: window.scrollY
+    };
+}
+
+function restoreProposalScroll(position) {
+    if (!position) return;
+
+    requestAnimationFrame(() => {
+        const detail = detailScrollContainer();
+        const detailCanScroll = detail && detail.scrollHeight > detail.clientHeight + 1;
+        if (detailCanScroll && position.detailScrollTop !== null) {
+            detail.scrollTop = position.detailScrollTop;
+            return;
+        }
+
+        window.scrollTo({ top: position.windowScrollY, behavior: "auto" });
+    });
+}
+
+function scrollToProposalSection() {
+    requestAnimationFrame(() => {
+        const detail = detailScrollContainer();
+        const proposal = document.getElementById("proposal-section");
+        if (!proposal) return;
+
+        const behavior = prefersReducedMotion() ? "auto" : "smooth";
+        const detailCanScroll = detail && detail.scrollHeight > detail.clientHeight + 1;
+        if (detailCanScroll) {
+            const header = detail.querySelector(".detail-header");
+            const offset = (header?.getBoundingClientRect().height || 0) + 12;
+            const target = detail.scrollTop
+                + proposal.getBoundingClientRect().top
+                - detail.getBoundingClientRect().top
+                - offset;
+            detail.scrollTo({ top: Math.max(0, target), behavior });
+            return;
+        }
+
+        const target = window.scrollY + proposal.getBoundingClientRect().top - 16;
+        window.scrollTo({ top: Math.max(0, target), behavior });
+    });
 }
 
 function humanLabels(group, value) {
@@ -340,7 +494,7 @@ async function authorizeSession(session) {
 }
 
 async function loadLeads({ refresh = false } = {}) {
-    if (state.isLoading || state.isSaving) return;
+    if (state.isLoading || state.isSaving || state.isProposalSaving) return;
 
     state.isLoading = true;
     state.loadError = false;
@@ -358,6 +512,7 @@ async function loadLeads({ refresh = false } = {}) {
 
         const leadIds = (leads || []).map(lead => lead.id);
         let managementRows = [];
+        let proposalRows = [];
 
         if (leadIds.length) {
             const { data, error } = await supabaseClient
@@ -367,13 +522,35 @@ async function loadLeads({ refresh = false } = {}) {
 
             if (error) throw error;
             managementRows = data || [];
+
+            const { data: proposals, error: proposalsError } = await supabaseClient
+                .from("proposals")
+                .select("id, lead_id, version, is_current, status, client_name, business_name, title, objective, proposed_solution, scope, deliverables, included, excluded, price_amount, currency, payment_terms, deposit_amount, balance_amount, estimated_timeline, revision_count, valid_until, conditions, next_step, public_token, created_at, updated_at, sent_at, accepted_at, declined_at")
+                .in("lead_id", leadIds)
+                .eq("is_current", true);
+
+            if (proposalsError) throw proposalsError;
+            proposalRows = proposals || [];
         }
 
         const managementByLeadId = new Map(managementRows.map(row => [row.lead_id, row]));
+        const proposalByLeadId = new Map(proposalRows.map(row => [row.lead_id, row]));
         state.leads = (leads || []).map(lead => ({
             ...lead,
-            management: managementByLeadId.get(lead.id) || null
+            management: managementByLeadId.get(lead.id) || null,
+            proposal: proposalByLeadId.get(lead.id) || null
         }));
+
+        const refreshedLead = selectedLead();
+        if (refreshedLead && !state.draft?.dirty && !state.proposalDraft?.dirty) {
+            state.draft = {
+                leadId: refreshedLead.id,
+                leadStatus: operationalStatus(refreshedLead),
+                internalNotes: internalNotes(refreshedLead),
+                dirty: false
+            };
+            state.proposalDraft = proposalDraftFromRow(refreshedLead, currentProposal(refreshedLead));
+        }
         state.loadError = false;
         state.screen = "dashboard";
     } catch (error) {
@@ -406,7 +583,7 @@ function renderDashboard() {
     titleGroup.append(createElement("p", "workspace-eyebrow", "PANEL NODO"));
     titleGroup.append(createElement("h1", "", "Consultas"));
     const refresh = createButton(state.isLoading ? "Actualizando…" : "Actualizar", "button button-secondary", () => loadLeads({ refresh: true }));
-    refresh.disabled = state.isLoading || state.isSaving;
+    refresh.disabled = state.isLoading || state.isSaving || state.isProposalSaving;
     header.append(titleGroup, refresh);
     workspace.append(header);
 
@@ -439,7 +616,7 @@ function renderSidebar() {
     const footer = createElement("div", "sidebar-footer");
     footer.append(createElement("span", "sidebar-user", displayValue(state.user?.email, "Sesión activa")));
     const logout = createButton("Cerrar sesión", "button button-quiet", handleLogout);
-    logout.disabled = state.isLoading || state.isSaving || state.isTerminatingSession;
+    logout.disabled = state.isLoading || state.isSaving || state.isProposalSaving || state.isTerminatingSession;
     footer.append(logout);
     sidebar.append(footer);
     return sidebar;
@@ -601,7 +778,7 @@ function createStatusBadge(status) {
 }
 
 function openLead(leadId) {
-    if (state.selectedLeadId && state.selectedLeadId !== leadId && state.draft?.dirty) {
+    if (state.selectedLeadId && state.selectedLeadId !== leadId && (state.draft?.dirty || state.proposalDraft?.dirty)) {
         const discard = window.confirm("Tenés cambios sin guardar. ¿Querés descartarlos y abrir otra consulta?");
         if (!discard) return;
     }
@@ -617,15 +794,19 @@ function openLead(leadId) {
         dirty: false
     };
     state.managementMessage = "";
+    state.proposalDraft = proposalDraftFromRow(lead, currentProposal(lead));
+    state.proposalMessage = "";
+    state.proposalPreviewOpen = false;
+    state.proposalPreviewScroll = null;
     renderApp();
     document.querySelector(".detail-close")?.focus();
 }
 
 function requestCloseDetail() {
     if (!state.selectedLeadId) return;
-    if (state.isSaving) return;
+    if (state.isSaving || state.isProposalSaving) return;
 
-    if (state.draft?.dirty) {
+    if (state.draft?.dirty || state.proposalDraft?.dirty) {
         const discard = window.confirm("Tenés cambios sin guardar. ¿Querés descartarlos?");
         if (!discard) return;
     }
@@ -633,6 +814,10 @@ function requestCloseDetail() {
     state.selectedLeadId = null;
     state.draft = null;
     state.managementMessage = "";
+    state.proposalDraft = null;
+    state.proposalMessage = "";
+    state.proposalPreviewOpen = false;
+    state.proposalPreviewScroll = null;
     renderApp();
 }
 
@@ -646,6 +831,13 @@ function renderLeadDetail(lead) {
         };
     }
 
+    if (!state.proposalDraft || state.proposalDraft.leadId !== lead.id
+        || state.proposalDraft.proposalId !== currentProposal(lead)?.id) {
+        state.proposalDraft = proposalDraftFromRow(lead, currentProposal(lead));
+        state.proposalPreviewOpen = false;
+        state.proposalPreviewScroll = null;
+    }
+
     const detail = createElement("aside", "lead-detail");
     detail.setAttribute("aria-label", "Detalle de consulta");
     detail.tabIndex = -1;
@@ -656,7 +848,7 @@ function renderLeadDetail(lead) {
     title.append(createElement("p", "", formatDate(lead.created_at)));
     const close = createButton("×", "detail-close", requestCloseDetail);
     close.setAttribute("aria-label", "Cerrar detalle de consulta");
-    close.disabled = state.isSaving;
+    close.disabled = state.isSaving || state.isProposalSaving;
     header.append(title, close);
     detail.append(header);
 
@@ -705,6 +897,8 @@ function renderLeadDetail(lead) {
     recommendation.append(recommendationData);
     detail.append(recommendation);
 
+    detail.append(renderProposalSection(lead));
+
     const comment = createDetailSection("Comentario");
     const commentData = createElement("div", "detail-data");
     appendDetailRow(commentData, "Comentario del cliente", displayValue(lead.comment, "Sin comentario"), true);
@@ -720,6 +914,513 @@ function renderLeadDetail(lead) {
 
     detail.append(renderManagementSection(lead));
     return detail;
+}
+
+function renderProposalSection(lead) {
+    const section = createDetailSection("Propuesta");
+    section.classList.add("proposal-section");
+    section.id = "proposal-section";
+    const proposal = currentProposal(lead);
+
+    if (!proposal) {
+        const message = operationalStatus(lead) === "reviewing"
+            ? "Este lead está en revisión y puede pasar a propuesta."
+            : "Podrás preparar una propuesta cuando el lead esté en revisión.";
+        section.append(createElement("p", "proposal-empty", message));
+
+        if (operationalStatus(lead) === "reviewing") {
+            const prepare = createButton(state.isProposalSaving ? "Preparando…" : "Preparar propuesta", "button button-primary", prepareProposalDraft);
+            prepare.disabled = state.isProposalSaving || state.isSaving || state.draft?.dirty;
+            section.append(prepare);
+        }
+
+        section.append(renderProposalMessage());
+        return section;
+    }
+
+    const heading = createElement("div", "proposal-heading");
+    const status = createElement("span", "proposal-status proposal-status-" + proposal.status, proposalStatusLabel(proposal.status));
+    heading.append(status, createElement("span", "proposal-version", "Versión " + displayValue(proposal.version, "1")));
+    section.append(heading);
+
+    if (proposal.status === "draft") {
+        section.append(createElement("p", "proposal-empty", "Completá los datos y revisalos antes de enviar esta versión."));
+        section.append(renderProposalEditor(lead, proposal));
+    } else if (proposal.status === "sent") {
+        section.append(createElement("p", "proposal-meta", "Enviada: " + formatDateTime(proposal.sent_at)));
+        section.append(renderPublicProposalActions(proposal));
+        section.append(renderSentProposalActions(proposal));
+    } else if (proposal.status === "accepted") {
+        section.append(createElement("p", "proposal-meta", "Aceptada: " + formatDateTime(proposal.accepted_at)));
+        section.append(renderPublicProposalActions(proposal));
+    } else if (proposal.status === "declined") {
+        section.append(createElement("p", "proposal-meta", "Marcada como no avanza: " + formatDateTime(proposal.declined_at)));
+        section.append(renderPublicProposalActions(proposal));
+    }
+
+    section.append(renderProposalMessage());
+    return section;
+}
+
+function renderProposalMessage() {
+    const isError = /^(No pudimos|Tu sesión|Acceso|Los datos)/.test(state.proposalMessage);
+    const message = createElement("p", "proposal-message" + (isError ? " is-error" : ""), state.proposalMessage);
+    message.id = "proposal-message";
+    message.setAttribute("role", "status");
+    return message;
+}
+
+function renderPublicProposalActions(proposal) {
+    const actions = createElement("div", "detail-actions proposal-actions");
+    const link = proposalPublicUrl(proposal);
+
+    if (!link) {
+        actions.append(createElement("span", "detail-data-value is-muted", "El enlace todavía no está disponible."));
+        return actions;
+    }
+
+    const open = document.createElement("a");
+    open.className = "button button-secondary";
+    open.href = link;
+    open.target = "_blank";
+    open.rel = "noopener noreferrer";
+    open.textContent = "Abrir propuesta ↗";
+    actions.append(open);
+
+    const copy = createButton("Copiar enlace", "button button-secondary", () => copyProposalLink(proposal));
+    copy.disabled = state.isProposalSaving;
+    actions.append(copy);
+    return actions;
+}
+
+function renderSentProposalActions(proposal) {
+    const actions = createElement("div", "detail-actions proposal-actions");
+    const revision = createButton(state.isProposalSaving ? "Creando…" : "Crear nueva versión", "button button-secondary", () => createProposalRevision(proposal));
+    const decline = createButton("Marcar como no avanza", "button button-danger", () => declineProposal(proposal));
+    revision.disabled = state.isProposalSaving || state.isSaving || state.draft?.dirty;
+    decline.disabled = state.isProposalSaving || state.isSaving || state.draft?.dirty;
+    actions.append(revision, decline);
+    return actions;
+}
+
+function renderProposalEditor(lead, proposal) {
+    const draft = state.proposalDraft || proposalDraftFromRow(lead, proposal);
+    if (!draft) return createElement("p", "proposal-empty", "No pudimos preparar el formulario de propuesta.");
+
+    const form = createElement("form", "proposal-form");
+    form.noValidate = true;
+    const mainGrid = createElement("div", "proposal-grid");
+    mainGrid.append(
+        createProposalField("Cliente *", "clientName", draft),
+        createProposalField("Negocio *", "businessName", draft),
+        createProposalField("Título", "title", draft, { wide: true }),
+        createProposalField("Objetivo", "objective", draft, { multiline: true, wide: true }),
+        createProposalField("Solución propuesta", "proposedSolution", draft, { multiline: true, wide: true }),
+        createProposalField("Alcance", "scope", draft, { multiline: true, list: true, wide: true }),
+        createProposalField("Entregables", "deliverables", draft, { multiline: true, list: true, wide: true }),
+        createProposalField("Incluye", "included", draft, { multiline: true, list: true, wide: true }),
+        createProposalField("No incluye", "excluded", draft, { multiline: true, list: true, wide: true }),
+        createProposalField("Precio", "priceAmount", draft, { type: "number", min: "0", step: "any" }),
+        createProposalCurrencyField(draft),
+        createProposalField("Forma de pago", "paymentTerms", draft, { multiline: true, wide: true }),
+        createProposalField("Seña", "depositAmount", draft, { type: "number", min: "0", step: "any" }),
+        createProposalField("Saldo", "balanceAmount", draft, { type: "number", min: "0", step: "any" }),
+        createProposalField("Tiempo estimado", "estimatedTimeline", draft),
+        createProposalField("Cantidad de revisiones", "revisionCount", draft, { type: "number", min: "0", step: "1" }),
+        createProposalField("Vigencia", "validUntil", draft, { type: "date" }),
+        createProposalField("Condiciones / aclaraciones", "conditions", draft, { multiline: true, wide: true }),
+        createProposalField("Próximo paso", "nextStep", draft, { multiline: true, wide: true })
+    );
+    form.append(mainGrid);
+
+    const actions = createElement("div", "detail-actions proposal-actions proposal-editor-actions");
+    const preview = createButton(state.proposalPreviewOpen ? "Ocultar vista previa" : "Vista previa", "button button-secondary", () => {
+        const scrollPosition = state.proposalPreviewOpen
+            ? state.proposalPreviewScroll || captureProposalScroll()
+            : captureProposalScroll();
+        state.proposalPreviewOpen = !state.proposalPreviewOpen;
+        state.proposalPreviewScroll = state.proposalPreviewOpen ? scrollPosition : null;
+        renderApp();
+        restoreProposalScroll(scrollPosition);
+    });
+    preview.setAttribute("aria-expanded", String(state.proposalPreviewOpen));
+    preview.disabled = state.isProposalSaving;
+
+    const save = createButton(state.isProposalSaving ? "Guardando…" : "Guardar borrador", "button button-primary", saveProposalDraft);
+    save.id = "save-proposal-draft";
+    save.disabled = state.isProposalSaving || state.isSaving || !draft.dirty;
+
+    const send = createButton("Enviar propuesta", "button button-secondary", () => sendProposal(proposal));
+    send.disabled = state.isProposalSaving || state.isSaving || draft.dirty || state.draft?.dirty;
+    actions.append(preview, save, send);
+    form.append(actions);
+    form.addEventListener("submit", event => {
+        event.preventDefault();
+        saveProposalDraft();
+    });
+
+    if (state.proposalPreviewOpen) form.append(renderProposalPreview(draft));
+    return form;
+}
+
+function createProposalField(labelText, key, draft, options = {}) {
+    const field = createElement("label", "field proposal-field" + (options.wide ? " proposal-field-wide" : ""));
+    field.append(createElement("span", "", labelText));
+    const control = document.createElement(options.multiline ? "textarea" : "input");
+    control.name = key;
+    control.value = draft[key] ?? "";
+    control.disabled = state.isProposalSaving;
+
+    if (options.multiline) {
+        control.rows = options.list ? 4 : 4;
+        if (options.list) {
+            control.placeholder = "Un ítem por línea";
+            control.classList.add("proposal-list-control");
+        }
+    } else {
+        control.type = options.type || "text";
+        if (options.min) control.min = options.min;
+        if (options.step) control.step = options.step;
+    }
+
+    control.addEventListener("input", () => updateProposalDraftField(key, control.value));
+    control.addEventListener("change", () => updateProposalDraftField(key, control.value));
+    field.append(control);
+    return field;
+}
+
+function createProposalCurrencyField(draft) {
+    const field = createElement("label", "field proposal-field");
+    field.append(createElement("span", "", "Moneda"));
+    const select = document.createElement("select");
+    ["ARS", "USD"].forEach(currency => {
+        const option = document.createElement("option");
+        option.value = currency;
+        option.textContent = currency;
+        select.append(option);
+    });
+    select.value = draft.currency === "USD" ? "USD" : "ARS";
+    select.disabled = state.isProposalSaving;
+    select.addEventListener("change", () => updateProposalDraftField("currency", select.value));
+    field.append(select);
+    return field;
+}
+
+function updateProposalDraftField(key, value) {
+    if (!state.proposalDraft) return;
+    state.proposalDraft[key] = value;
+    state.proposalDraft.dirty = true;
+    state.proposalMessage = "";
+    syncProposalControls();
+}
+
+function syncProposalControls() {
+    const save = document.getElementById("save-proposal-draft");
+    if (save) save.disabled = state.isProposalSaving || state.isSaving || !state.proposalDraft?.dirty;
+    const message = document.getElementById("proposal-message");
+    if (message) {
+        message.textContent = state.proposalMessage;
+        message.classList.toggle("is-error", /^(No pudimos|Tu sesión|Acceso|Los datos)/.test(state.proposalMessage));
+    }
+}
+
+function renderProposalPreview(draft) {
+    const preview = createElement("section", "proposal-preview");
+    preview.append(createElement("p", "proposal-preview-eyebrow", "VISTA PREVIA LOCAL"));
+    preview.append(createElement("h4", "", "NODO · Propuesta para " + displayValue(draft.businessName, "tu negocio")));
+    preview.append(createElement("p", "proposal-preview-client", "Preparada para " + displayValue(draft.clientName, "cliente")));
+    appendPreviewText(preview, "Objetivo", draft.objective);
+    appendPreviewText(preview, "Solución propuesta", draft.proposedSolution);
+    appendPreviewList(preview, "Alcance", proposalLines(draft.scope));
+    appendPreviewList(preview, "Entregables", proposalLines(draft.deliverables));
+    appendPreviewList(preview, "Incluye", proposalLines(draft.included));
+    appendPreviewList(preview, "No incluye", proposalLines(draft.excluded));
+    appendPreviewText(preview, "Tiempo estimado", draft.estimatedTimeline);
+    appendPreviewText(preview, "Cantidad de revisiones", draft.revisionCount);
+    appendPreviewText(preview, "Inversión", formatProposalPrice({ price_amount: draft.priceAmount, currency: draft.currency }));
+    appendPreviewText(preview, "Seña", draft.depositAmount);
+    appendPreviewText(preview, "Saldo", draft.balanceAmount);
+    appendPreviewText(preview, "Forma de pago", draft.paymentTerms);
+    appendPreviewText(preview, "Vigencia", draft.validUntil ? formatDate(draft.validUntil) : "Sin definir");
+    appendPreviewText(preview, "Condiciones", draft.conditions);
+    appendPreviewText(preview, "Próximo paso", draft.nextStep);
+    return preview;
+}
+
+function appendPreviewText(container, label, value) {
+    const block = createElement("section", "proposal-preview-block");
+    block.append(createElement("h5", "", label));
+    block.append(createElement("p", "", displayValue(value, "Sin definir")));
+    container.append(block);
+}
+
+function appendPreviewList(container, label, items) {
+    const block = createElement("section", "proposal-preview-block");
+    block.append(createElement("h5", "", label));
+    if (!items.length) {
+        block.append(createElement("p", "", "Sin definir"));
+    } else {
+        const list = document.createElement("ul");
+        items.forEach(item => list.append(createElement("li", "", item)));
+        block.append(list);
+    }
+    container.append(block);
+}
+
+function optionalNonNegative(value, label, { integer = false } = {}) {
+    const normalized = String(value ?? "").trim();
+    if (!normalized) return { value: null };
+
+    const number = Number(normalized);
+    if (!Number.isFinite(number) || number < 0 || (integer && !Number.isSafeInteger(number))) {
+        return { error: label + " debe ser un número " + (integer ? "entero " : "") + "igual o mayor a cero." };
+    }
+
+    return { value: number };
+}
+
+function proposalUpdatePayload() {
+    const draft = state.proposalDraft;
+    if (!draft) return { error: "No pudimos preparar los datos de la propuesta." };
+
+    const clientName = String(draft.clientName || "").trim();
+    const businessName = String(draft.businessName || "").trim();
+    if (!clientName || !businessName) {
+        return { error: "Los datos inválidos: cliente y negocio son obligatorios." };
+    }
+
+    const priceAmount = optionalNonNegative(draft.priceAmount, "El precio");
+    const depositAmount = optionalNonNegative(draft.depositAmount, "La seña");
+    const balanceAmount = optionalNonNegative(draft.balanceAmount, "El saldo");
+    const revisionCount = optionalNonNegative(draft.revisionCount, "La cantidad de revisiones", { integer: true });
+    const currency = draft.currency === "USD" ? "USD" : draft.currency === "ARS" ? "ARS" : "";
+
+    if (priceAmount.error || depositAmount.error || balanceAmount.error || revisionCount.error || !currency) {
+        return { error: priceAmount.error || depositAmount.error || balanceAmount.error || revisionCount.error || "Los datos inválidos: elegí ARS o USD." };
+    }
+
+    return {
+        proposal: {
+            clientName,
+            businessName,
+            title: String(draft.title || "").trim(),
+            objective: String(draft.objective || "").trim(),
+            proposedSolution: String(draft.proposedSolution || "").trim(),
+            scope: proposalLines(draft.scope),
+            deliverables: proposalLines(draft.deliverables),
+            included: proposalLines(draft.included),
+            excluded: proposalLines(draft.excluded),
+            priceAmount: priceAmount.value,
+            currency,
+            paymentTerms: String(draft.paymentTerms || "").trim(),
+            depositAmount: depositAmount.value,
+            balanceAmount: balanceAmount.value,
+            estimatedTimeline: String(draft.estimatedTimeline || "").trim(),
+            revisionCount: revisionCount.value,
+            validUntil: draft.validUntil || null,
+            conditions: String(draft.conditions || "").trim(),
+            nextStep: String(draft.nextStep || "").trim()
+        }
+    };
+}
+
+async function proposalAdminRequest(payload) {
+    const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+    if (sessionError || !accessToken) throw { status: 401 };
+
+    state.session = sessionData.session;
+    const response = await fetch(SUPABASE_URL + "/functions/v1/proposal-admin", {
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer " + accessToken,
+            "apikey": SUPABASE_PUBLISHABLE_KEY,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+    });
+
+    let responseBody = null;
+    try {
+        responseBody = await response.json();
+    } catch {
+        // La respuesta se normaliza abajo sin mostrar información interna.
+    }
+
+    if (!response.ok || responseBody?.ok !== true) {
+        throw { status: response.status, code: responseBody?.error };
+    }
+
+    return responseBody.data;
+}
+
+async function refreshSelectedLeadProposal() {
+    const lead = selectedLead();
+    if (!lead) return;
+
+    const [managementResult, proposalResult] = await Promise.all([
+        supabaseClient
+            .from("lead_management")
+            .select("lead_id, lead_status, internal_notes, created_at, updated_at")
+            .eq("lead_id", lead.id)
+            .maybeSingle(),
+        supabaseClient
+            .from("proposals")
+            .select("id, lead_id, version, is_current, status, client_name, business_name, title, objective, proposed_solution, scope, deliverables, included, excluded, price_amount, currency, payment_terms, deposit_amount, balance_amount, estimated_timeline, revision_count, valid_until, conditions, next_step, public_token, created_at, updated_at, sent_at, accepted_at, declined_at")
+            .eq("lead_id", lead.id)
+            .eq("is_current", true)
+            .maybeSingle()
+    ]);
+
+    if (managementResult.error) throw managementResult.error;
+    if (proposalResult.error) throw proposalResult.error;
+
+    lead.management = managementResult.data || null;
+    lead.proposal = proposalResult.data || null;
+    state.draft = {
+        leadId: lead.id,
+        leadStatus: operationalStatus(lead),
+        internalNotes: internalNotes(lead),
+        dirty: false
+    };
+    state.proposalDraft = proposalDraftFromRow(lead, currentProposal(lead));
+    state.proposalPreviewOpen = false;
+    state.proposalPreviewScroll = null;
+}
+
+async function handleProposalFailure(error, action) {
+    const status = error?.status;
+    if (status === 401 || isSessionError(error)) {
+        await terminateSession("Tu sesión venció. Ingresá nuevamente.");
+        return;
+    }
+
+    if (status === 403) state.proposalMessage = "Acceso no autorizado para gestionar esta propuesta.";
+    else if (status === 400) state.proposalMessage = "Los datos de la propuesta son inválidos. Revisalos e intentá nuevamente.";
+    else if (action === "send") state.proposalMessage = "La propuesta no se pudo enviar todavía. Revisá título, precio, vigencia futura y que el lead siga en revisión.";
+    else state.proposalMessage = "No pudimos procesar la propuesta. Intentá nuevamente.";
+}
+
+async function runProposalAction(payload, successMessage, { preserveScroll = false } = {}) {
+    if (state.isProposalSaving || state.isSaving) return false;
+
+    const scrollPosition = captureProposalScroll();
+    let succeeded = false;
+    state.isProposalSaving = true;
+    state.proposalMessage = "Procesando…";
+    renderApp();
+    restoreProposalScroll(scrollPosition);
+
+    try {
+        await proposalAdminRequest(payload);
+        await refreshSelectedLeadProposal();
+        state.proposalMessage = successMessage;
+        succeeded = true;
+        return true;
+    } catch (error) {
+        console.error("No se pudo procesar una acción de propuesta.", error);
+        await handleProposalFailure(error, payload.action);
+        return false;
+    } finally {
+        state.isProposalSaving = false;
+        if (state.screen === "dashboard") {
+            renderApp();
+            if (succeeded && !preserveScroll) scrollToProposalSection();
+            else restoreProposalScroll(scrollPosition);
+        }
+    }
+}
+
+async function prepareProposalDraft() {
+    const lead = selectedLead();
+    if (!lead || currentProposal(lead) || operationalStatus(lead) !== "reviewing") return;
+    if (state.draft?.dirty) {
+        state.proposalMessage = "Guardá primero los cambios pendientes de gestión.";
+        syncProposalControls();
+        return;
+    }
+
+    await runProposalAction({ action: "create_draft", leadId: lead.id }, "Borrador creado. Ya podés completar la propuesta.");
+}
+
+async function saveProposalDraft() {
+    const proposal = currentProposal(selectedLead());
+    if (!proposal || proposal.status !== "draft" || state.isProposalSaving) return;
+
+    const payload = proposalUpdatePayload();
+    if (payload.error) {
+        state.proposalMessage = payload.error;
+        syncProposalControls();
+        return;
+    }
+
+    await runProposalAction({
+        action: "update_draft",
+        proposalId: proposal.id,
+        proposal: payload.proposal
+    }, "Borrador guardado correctamente.", { preserveScroll: true });
+}
+
+async function sendProposal(proposal) {
+    if (!proposal || proposal.status !== "draft" || state.isProposalSaving) return;
+    if (state.proposalDraft?.dirty) {
+        state.proposalMessage = "Guardá el borrador antes de enviar la propuesta.";
+        syncProposalControls();
+        return;
+    }
+    if (state.draft?.dirty) {
+        state.proposalMessage = "Guardá primero los cambios pendientes de gestión.";
+        syncProposalControls();
+        return;
+    }
+
+    const confirmed = window.confirm("Una vez enviada, esta versión no podrá editarse. Si el cliente pide cambios, deberás crear una nueva versión. ¿Enviar propuesta?");
+    if (!confirmed) return;
+    await runProposalAction({ action: "send", proposalId: proposal.id }, "Propuesta enviada. El estado del lead se actualizó.");
+}
+
+async function createProposalRevision(proposal) {
+    if (!proposal || proposal.status !== "sent" || state.isProposalSaving) return;
+    const confirmed = window.confirm("Se creará una nueva versión editable. El enlace anterior dejará de estar vigente. ¿Continuar?");
+    if (!confirmed) return;
+    await runProposalAction({ action: "create_revision", proposalId: proposal.id }, "Nueva versión creada. Ya podés editar el borrador.");
+}
+
+async function declineProposal(proposal) {
+    if (!proposal || proposal.status !== "sent" || state.isProposalSaving) return;
+    const confirmed = window.confirm("La propuesta se marcará como no avanza. Esta acción no elimina información. ¿Continuar?");
+    if (!confirmed) return;
+    await runProposalAction({ action: "decline", proposalId: proposal.id }, "Propuesta marcada como no avanza.");
+}
+
+async function copyProposalLink(proposal) {
+    const link = proposalPublicUrl(proposal);
+    if (!link) return;
+
+    try {
+        if (navigator.clipboard?.writeText && window.isSecureContext) {
+            await navigator.clipboard.writeText(link);
+        } else if (!copyTextFallback(link)) {
+            throw new Error("clipboard_unavailable");
+        }
+        state.proposalMessage = "Enlace copiado.";
+    } catch {
+        state.proposalMessage = "No pudimos copiar el enlace. Podés abrirlo y copiarlo desde la nueva pestaña.";
+    }
+    syncProposalControls();
+}
+
+function copyTextFallback(text) {
+    const control = document.createElement("textarea");
+    control.value = text;
+    control.setAttribute("readonly", "");
+    control.style.position = "fixed";
+    control.style.opacity = "0";
+    document.body.append(control);
+    control.select();
+    const copied = document.execCommand("copy");
+    control.remove();
+    return copied;
 }
 
 function createDetailSection(title) {
@@ -753,8 +1454,21 @@ function createDiagnosticGroup(label, group, value) {
     return section;
 }
 
+function allowedManualStatuses(lead) {
+    const proposal = currentProposal(lead);
+    if (!proposal) return null;
+    if (proposal.status === "draft") return ["reviewing"];
+    if (proposal.status === "sent") return ["proposal_sent"];
+    if (proposal.status === "declined") return ["declined"];
+    if (proposal.status === "accepted") {
+        return operationalStatus(lead) === "in_project" ? ["in_project"] : ["accepted", "in_project"];
+    }
+    return null;
+}
+
 function renderManagementSection(lead) {
     const section = createDetailSection("Gestión NODO");
+    const permittedStatuses = allowedManualStatuses(lead);
 
     const statusField = createElement("label", "field");
     statusField.append(createElement("span", "", "Estado"));
@@ -764,10 +1478,11 @@ function renderManagementSection(lead) {
         const choice = document.createElement("option");
         choice.value = option.id;
         choice.textContent = option.label;
+        choice.disabled = Boolean(permittedStatuses && !permittedStatuses.includes(option.id));
         select.append(choice);
     });
     select.value = state.draft.leadStatus;
-    select.disabled = state.isSaving;
+    select.disabled = state.isSaving || state.isProposalSaving || permittedStatuses?.length === 1;
     select.addEventListener("change", () => {
         state.draft.leadStatus = select.value;
         state.draft.dirty = true;
@@ -776,6 +1491,14 @@ function renderManagementSection(lead) {
     });
     statusField.append(select);
 
+    if (permittedStatuses) {
+        const explanation = createElement("p", "management-lock-note", "Este estado se gestiona desde la propuesta.");
+        if (currentProposal(lead)?.status === "accepted" && permittedStatuses.length > 1) {
+            explanation.textContent = "La propuesta gestiona la aceptación. Cuando comience el trabajo, podés pasar el lead a En proyecto.";
+        }
+        statusField.append(explanation);
+    }
+
     const noteField = createElement("label", "field");
     noteField.style.marginTop = "15px";
     noteField.append(createElement("span", "", "Nota interna"));
@@ -783,7 +1506,7 @@ function renderManagementSection(lead) {
     notes.name = "internal_notes";
     notes.placeholder = "Ej.: pidió que lo contactemos después de las 18…";
     notes.value = state.draft.internalNotes;
-    notes.disabled = state.isSaving;
+    notes.disabled = state.isSaving || state.isProposalSaving;
     notes.addEventListener("input", () => {
         state.draft.internalNotes = notes.value;
         state.draft.dirty = true;
@@ -801,7 +1524,7 @@ function renderManagementSection(lead) {
 
     const save = createButton(state.isSaving ? "Guardando…" : "Guardar cambios", "button button-primary detail-save", saveManagement);
     save.id = "save-management";
-    save.disabled = state.isSaving || !state.draft.dirty;
+    save.disabled = state.isSaving || state.isProposalSaving || !state.draft.dirty;
 
     section.append(statusField, noteField, updated, message, save);
     return section;
@@ -809,7 +1532,7 @@ function renderManagementSection(lead) {
 
 function syncManagementControls() {
     const save = document.getElementById("save-management");
-    if (save) save.disabled = state.isSaving || !state.draft?.dirty;
+    if (save) save.disabled = state.isSaving || state.isProposalSaving || !state.draft?.dirty;
     const message = document.getElementById("management-message");
     if (message) {
         message.textContent = state.managementMessage;
@@ -819,7 +1542,7 @@ function syncManagementControls() {
 
 async function saveManagement() {
     const lead = selectedLead();
-    if (!lead || !state.draft || state.isSaving) return;
+    if (!lead || !state.draft || state.isSaving || state.isProposalSaving) return;
 
     state.isSaving = true;
     state.managementMessage = "";
