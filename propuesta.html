@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Propuesta comercial de NODO.">
+    <meta name="robots" content="noindex,nofollow,noarchive">
+    <meta name="referrer" content="no-referrer">
+    <title>Propuesta comercial · NODO</title>
+    <link rel="stylesheet" href="propuesta/propuesta.css">
+</head>
+<body>
+    <div id="proposal-page">
+        <header class="proposal-header">
+            <a class="proposal-brand" href="index.html" aria-label="NODO, volver al inicio">
+                <img src="assets/logo.png" alt="NODO">
+                <span>NODO</span>
+            </a>
+            <p>Propuesta comercial</p>
+        </header>
+
+        <main id="proposal-app" class="proposal-app" tabindex="-1" aria-live="polite"></main>
+
+        <footer class="proposal-footer">
+            <p>NODO · Soluciones digitales claras para proyectos reales.</p>
+        </footer>
+    </div>
+
+    <div class="accept-modal" id="accept-modal" hidden>
+        <div class="accept-modal-backdrop" data-accept-close></div>
+        <section class="accept-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="accept-modal-title" aria-describedby="accept-modal-description" tabindex="-1">
+            <button class="accept-modal-close" type="button" data-accept-close aria-label="Cerrar confirmación">×</button>
+            <p class="modal-eyebrow">CONFIRMACIÓN</p>
+            <h2 id="accept-modal-title">¿Querés avanzar con esta propuesta?</h2>
+            <p id="accept-modal-description">Al confirmar, NODO recibirá tu aceptación y podremos continuar con los próximos pasos.</p>
+            <label class="accept-check"><input id="accept-check" type="checkbox"><span>Leí la propuesta y quiero avanzar con estas condiciones.</span></label>
+            <p class="accept-modal-message" id="accept-modal-message" role="status"></p>
+            <div class="accept-modal-actions">
+                <button class="proposal-button proposal-button-secondary" id="accept-cancel" type="button">Cancelar</button>
+                <button class="proposal-button proposal-button-primary" id="accept-confirm" type="button" disabled>Confirmar aceptación</button>
+            </div>
+        </section>
+    </div>
+
+    <script src="propuesta/propuesta.js"></script>
+</body>
+</html>
