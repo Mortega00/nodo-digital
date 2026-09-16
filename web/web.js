@@ -156,6 +156,43 @@ const commerceNeedOptions = [
     { id: "commerce-unsure", label: "Todavía no estoy seguro", text: "Prefiero que me orienten." }
 ];
 
+const showcaseProjects = [
+    {
+        id: "nativa",
+        eyebrow: "PROYECTO REAL",
+        type: "Landing / presencia digital",
+        name: "NATIVA Estética",
+        subtitle: "Remedios de Escalada, Buenos Aires",
+        description: "Creamos una presencia digital clara para NATIVA Estética, organizando servicios, información del espacio y contacto en una experiencia simple, rápida y adaptable a celular.",
+        tags: ["Responsive", "Servicios claros", "Contacto directo"],
+        image: "assets/nativa-case-cover.png",
+        imageAlt: "Portada publicada de Nativa Estética: salud, belleza y bienestar para tu piel",
+        imageWidth: 1440,
+        imageHeight: 760,
+        url: "https://nativaestetica.netlify.app/",
+        linkLabel: "Ver proyecto"
+    },
+    {
+        id: "bloc",
+        eyebrow: "PRODUCTO NODO",
+        type: "Sistema / procesos",
+        name: "BLOC",
+        description: "Sistema para organizar información y procesos de trabajo.",
+        tags: ["Sistema", "Organización", "Procesos"],
+        status: "En desarrollo"
+    },
+    {
+        id: "cava366",
+        name: "Cava366",
+        pending: true
+    },
+    {
+        id: "grospack",
+        name: "GROSPACK",
+        pending: true
+    }
+];
+
 const state = {
     screen: "start",
     currentStep: 0,
@@ -1051,6 +1088,202 @@ function setupPageChrome() {
     document.querySelectorAll(".brand-mark").forEach(mark => mark.addEventListener("animationend", () => mark.classList.remove("is-spinning")));
     updateHeader();
     window.addEventListener("scroll", updateHeader, { passive: true });
+    setupMobileNavigation();
+}
+
+function setupMobileNavigation() {
+    const menu = document.getElementById("mobile-navigation");
+    const toggle = document.getElementById("mobile-menu-toggle");
+    const panel = menu?.querySelector(".mobile-navigation-panel");
+    if (!menu || !toggle || !panel) return;
+
+    const focusable = () => [...panel.querySelectorAll("a[href], button:not([disabled]), [tabindex]:not([tabindex='-1'])")]
+        .filter(element => !element.hidden && element.getClientRects().length > 0);
+    const closeMenu = (restoreFocus = true) => {
+        if (menu.hidden) return;
+        menu.hidden = true;
+        menu.setAttribute("aria-hidden", "true");
+        toggle.setAttribute("aria-expanded", "false");
+        document.body.classList.remove("mobile-navigation-open");
+        if (restoreFocus) toggle.focus({ preventScroll: true });
+    };
+    const openMenu = () => {
+        menu.hidden = false;
+        menu.setAttribute("aria-hidden", "false");
+        toggle.setAttribute("aria-expanded", "true");
+        document.body.classList.add("mobile-navigation-open");
+        window.requestAnimationFrame(() => focusable()[0]?.focus({ preventScroll: true }));
+    };
+
+    toggle.addEventListener("click", () => menu.hidden ? openMenu() : closeMenu());
+    menu.querySelectorAll("[data-mobile-menu-close]").forEach(control => control.addEventListener("click", () => closeMenu()));
+    menu.querySelectorAll(".mobile-navigation-links a").forEach(link => link.addEventListener("click", event => {
+        const target = document.querySelector(link.getAttribute("href"));
+        if (!target) return;
+        event.preventDefault();
+        closeMenu(false);
+        window.history.pushState(null, "", link.hash);
+        target.scrollIntoView({ behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+    }));
+    menu.querySelector(".mobile-navigation-help")?.addEventListener("click", () => closeMenu(false));
+    document.addEventListener("keydown", event => {
+        if (menu.hidden) return;
+        if (event.key === "Escape") {
+            event.preventDefault();
+            closeMenu();
+            return;
+        }
+        if (event.key !== "Tab") return;
+        const items = focusable();
+        if (!items.length) return;
+        const first = items[0];
+        const last = items.at(-1);
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        }
+    });
+
+    const desktopMedia = window.matchMedia("(min-width: 768px)");
+    const closeOnDesktop = event => {
+        if (event.matches) closeMenu(false);
+    };
+    desktopMedia.addEventListener?.("change", closeOnDesktop);
+}
+
+function setupProjectShowcase() {
+    const showcase = document.getElementById("project-showcase");
+    const viewport = showcase?.querySelector("[data-showcase-viewport]");
+    const track = showcase?.querySelector("[data-showcase-track]");
+    const dots = showcase?.querySelector("[data-showcase-dots]");
+    const tabs = showcase?.querySelector("[data-showcase-tabs]");
+    const previous = showcase?.querySelector("[data-showcase-prev]");
+    const next = showcase?.querySelector("[data-showcase-next]");
+    const status = showcase?.querySelector("[data-showcase-status]");
+    if (!showcase || !viewport || !track || !dots || !tabs || !previous || !next || !status || !showcaseProjects.length) return;
+
+    const reducedMotion = () => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const makeProjectCard = project => {
+        const card = createElement("article", "showcase-card" + (project.pending ? " showcase-card-pending" : ""));
+        const titleId = "showcase-title-" + project.id;
+        card.id = "showcase-project-" + project.id;
+        card.setAttribute("aria-labelledby", titleId);
+
+        const preview = createElement("figure", "showcase-preview" + (project.image ? "" : " showcase-preview-placeholder"));
+        if (project.image) {
+            const image = document.createElement("img");
+            image.src = project.image;
+            image.alt = project.imageAlt;
+            image.width = project.imageWidth || 1440;
+            image.height = project.imageHeight || 900;
+            image.loading = "lazy";
+            image.decoding = "async";
+            preview.append(image);
+        } else {
+            preview.setAttribute("role", "img");
+            preview.setAttribute("aria-label", "Captura pública no disponible para " + project.name);
+            preview.append(createElement("span", "showcase-placeholder-name", project.name));
+            preview.append(createElement("span", "showcase-placeholder-note", "Captura pendiente"));
+        }
+
+        const content = createElement("div", "showcase-content");
+        if (project.eyebrow) content.append(createElement("p", "eyebrow", project.eyebrow));
+        if (project.type) content.append(createElement("p", "showcase-type", project.type));
+        const title = createElement("h3", "", project.name);
+        title.id = titleId;
+        content.append(title);
+        if (project.subtitle) content.append(createElement("p", "showcase-subtitle", project.subtitle));
+        if (project.status) content.append(createElement("p", "showcase-status-badge", project.status));
+        if (project.pending) content.append(createElement("p", "showcase-pending-copy", "Información pública pendiente de incorporar."));
+        if (project.description) content.append(createElement("p", "showcase-description", project.description));
+        if (project.tags?.length) {
+            const tags = createElement("ul", "showcase-tags");
+            tags.setAttribute("aria-label", "Características de " + project.name);
+            project.tags.forEach(tag => tags.append(createElement("li", "", tag)));
+            content.append(tags);
+        }
+        if (project.url) {
+            const link = createElement("a", "text-link showcase-link", project.linkLabel || "Ver proyecto");
+            link.href = project.url;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            const arrow = createElement("span", "", "→");
+            arrow.setAttribute("aria-hidden", "true");
+            link.append(" ", arrow);
+            content.append(link);
+        }
+        card.append(preview, content);
+        return card;
+    };
+
+    const cards = showcaseProjects.map(makeProjectCard);
+    track.replaceChildren(...cards);
+
+    let activeIndex = 0;
+    const selectorButtons = [];
+    const makeSelector = (project, index, className, label) => {
+        const button = createButton(className === "showcase-dot" ? "" : project.name, className, () => moveTo(index));
+        button.setAttribute("aria-label", label + project.name);
+        button.dataset.showcaseIndex = String(index);
+        selectorButtons.push(button);
+        return button;
+    };
+    showcaseProjects.forEach((project, index) => {
+        dots.append(makeSelector(project, index, "showcase-dot", "Ver proyecto: "));
+        tabs.append(makeSelector(project, index, "showcase-tab", "Ver proyecto: "));
+    });
+
+    const updateActive = index => {
+        activeIndex = index;
+        cards.forEach((card, cardIndex) => card.classList.toggle("is-active", cardIndex === index));
+        selectorButtons.forEach(button => {
+            const selected = Number(button.dataset.showcaseIndex) === index;
+            button.classList.toggle("is-active", selected);
+            button.setAttribute("aria-current", selected ? "true" : "false");
+        });
+        status.textContent = "Mostrando " + showcaseProjects[index].name + ". Proyecto " + (index + 1) + " de " + showcaseProjects.length + ".";
+    };
+    const moveTo = index => {
+        const targetIndex = (index + cards.length) % cards.length;
+        viewport.scrollTo({ left: cards[targetIndex].offsetLeft, behavior: reducedMotion() ? "auto" : "smooth" });
+        updateActive(targetIndex);
+    };
+    previous.addEventListener("click", () => moveTo(activeIndex - 1));
+    next.addEventListener("click", () => moveTo(activeIndex + 1));
+    viewport.addEventListener("keydown", event => {
+        if (event.key === "ArrowLeft") {
+            event.preventDefault();
+            moveTo(activeIndex - 1);
+        }
+        if (event.key === "ArrowRight") {
+            event.preventDefault();
+            moveTo(activeIndex + 1);
+        }
+    });
+
+    let scrollFrame = 0;
+    viewport.addEventListener("scroll", () => {
+        if (scrollFrame) return;
+        scrollFrame = window.requestAnimationFrame(() => {
+            scrollFrame = 0;
+            const center = viewport.scrollLeft + viewport.clientWidth / 2;
+            let closestIndex = 0;
+            let closestDistance = Number.POSITIVE_INFINITY;
+            cards.forEach((card, index) => {
+                const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+                const distance = Math.abs(cardCenter - center);
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestIndex = index;
+                }
+            });
+            updateActive(closestIndex);
+        });
+    }, { passive: true });
+    updateActive(0);
 }
 
 function setupFaqAccordion() {
@@ -1295,4 +1528,5 @@ setupPageChrome();
 setupFaqAccordion();
 setupStaticWhatsAppLinks();
 setupAdvisorScrollLinks();
+setupProjectShowcase();
 setupTeamModals();
