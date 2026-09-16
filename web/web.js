@@ -170,26 +170,21 @@ const showcaseProjects = [
         imageWidth: 1440,
         imageHeight: 760,
         url: "https://nativaestetica.netlify.app/",
-        linkLabel: "Ver proyecto"
+        linkLabel: "Ver proyecto",
+        status: "Publicado"
     },
     {
         id: "bloc",
-        eyebrow: "PRODUCTO NODO",
-        type: "Sistema / procesos",
+        eyebrow: "SISTEMA / GESTIÓN",
         name: "BLOC",
-        description: "Sistema para organizar información y procesos de trabajo.",
-        tags: ["Sistema", "Organización", "Procesos"],
+        subtitle: "Control y seguimiento para equipos y operaciones.",
+        description: "Sistema modular para registrar actividad, organizar el trabajo diario y separar experiencias según el rol de cada usuario.",
+        tags: ["Gestión", "Roles", "Seguimiento"],
+        image: "assets/bloc-case-cover.png",
+        imageAlt: "Panel de Supervisión de BLOC, sistema de control y seguimiento.",
+        url: "https://bloc-ar.netlify.app/",
+        linkLabel: "Ver proyecto",
         status: "En desarrollo"
-    },
-    {
-        id: "cava366",
-        name: "Cava366",
-        pending: true
-    },
-    {
-        id: "grospack",
-        name: "GROSPACK",
-        pending: true
     }
 ];
 
@@ -1172,7 +1167,16 @@ function setupProjectShowcase() {
         card.id = "showcase-project-" + project.id;
         card.setAttribute("aria-labelledby", titleId);
 
-        const preview = createElement("figure", "showcase-preview" + (project.image ? "" : " showcase-preview-placeholder"));
+        const preview = createElement("figure", "showcase-preview");
+        const showImageFallback = () => {
+            preview.classList.add("showcase-preview-placeholder");
+            preview.setAttribute("role", "img");
+            preview.setAttribute("aria-label", "Captura pública no disponible para " + project.name);
+            preview.replaceChildren(
+                createElement("span", "showcase-placeholder-name", project.name),
+                createElement("span", "showcase-placeholder-note", "Captura pendiente")
+            );
+        };
         if (project.image) {
             const image = document.createElement("img");
             image.src = project.image;
@@ -1181,12 +1185,10 @@ function setupProjectShowcase() {
             image.height = project.imageHeight || 900;
             image.loading = "lazy";
             image.decoding = "async";
+            image.addEventListener("error", showImageFallback, { once: true });
             preview.append(image);
         } else {
-            preview.setAttribute("role", "img");
-            preview.setAttribute("aria-label", "Captura pública no disponible para " + project.name);
-            preview.append(createElement("span", "showcase-placeholder-name", project.name));
-            preview.append(createElement("span", "showcase-placeholder-note", "Captura pendiente"));
+            showImageFallback();
         }
 
         const content = createElement("div", "showcase-content");
