@@ -605,6 +605,14 @@ async function submitLeadToSupabase(payload) {
         // El detalle puede no estar disponible en respuestas no JSON.
     }
 
+    console.error("NODO lead submission failed", {
+        status: response.status,
+        code: errorBody.code || "",
+        message: errorBody.message || "",
+        details: errorBody.details || "",
+        hint: errorBody.hint || ""
+    });
+
     const error = new Error("LEAD_INSERT_FAILED");
     error.status = response.status;
     error.code = errorBody.code || "";
