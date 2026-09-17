@@ -1,83 +1,66 @@
 const plans = {
-    launch: {
-        name: "NODO Lanzamiento",
-        price: "Desde $65.000 ARS",
+    presence: {
+        name: "Presencia",
+        price: "$180.000 ARS",
         delivery: "Entrega estimada: 2 a 5 días hábiles.",
-        description: "Una página simple y clara para presentar tu negocio, mostrar lo importante y facilitar que te contacten.",
+        description: "Una presencia digital profesional, clara y lista para mostrar lo que hacés y recibir consultas.",
         benefits: [
-            "Se ve bien en celular y computadora.",
-            "La información importante queda ordenada.",
-            "Botones para que puedan escribirte directo.",
-            "Preparamos la página para que Google pueda entenderla mejor.",
-            "Incluye una instancia para revisar detalles."
+            "Una landing profesional que se ve bien en celular y computadora.",
+            "La información de tu negocio y tus servicios queda clara y ordenada.",
+            "WhatsApp y formulario para facilitar las consultas.",
+            "Google Maps cuando corresponde a tu proyecto.",
+            "Una estructura SEO inicial para que los buscadores puedan entender la página."
         ],
         includes: [
-            "Una página con lo esencial de tu negocio.",
-            "Secciones para contar qué hacés, mostrar servicios y dejar tus datos.",
-            "Botones que abren una conversación directa con vos.",
-            "Una estructura clara para que Google pueda interpretar mejor tu página.",
-            "Una instancia para revisar detalles antes de publicar."
+            "Una landing profesional y responsive.",
+            "Información de tu negocio, servicios principales y datos de contacto.",
+            "Botones de WhatsApp y formulario de contacto.",
+            "Google Maps cuando aplique.",
+            "Una estructura SEO inicial y preparación para publicar.",
+            "Acompañamiento para elegir, registrar y conectar un dominio a tu nombre."
         ]
     },
-    positioning: {
-        name: "NODO Posicionamiento",
-        price: "Desde $95.000 ARS",
+    local: {
+        name: "Local",
+        price: "$280.000 ARS",
         delivery: "Entrega estimada: 5 a 10 días hábiles.",
-        description: "Una web más completa para presentar mejor tu negocio, organizar la información y tener una presencia preparada para crecer.",
+        description: "Para negocios que necesitan una buena web y mayor foco en búsquedas y presencia local.",
         benefits: [
-            "Se ve bien en celular y computadora.",
-            "Información y servicios organizados con claridad.",
-            "Botones para que puedan escribirte directo.",
-            "Preparamos la web para que Google pueda entenderla mejor.",
-            "Incluye instancias para revisar detalles."
+            "Todo lo esencial para presentar tu negocio con claridad.",
+            "Más profundidad para los servicios o productos importantes.",
+            "Una estructura orientada a búsquedas y contexto local.",
+            "Preparación para Search Console y Analytics cuando se configuren.",
+            "Acompañamiento sobre el Perfil de Empresa de Google cuando aplique."
         ],
         includes: [
-            "Una estructura más completa para contar sobre tu negocio.",
-            "Espacio para servicios, trabajos, ubicación, precios o promociones.",
-            "Formas claras para que una persona pueda escribirte o dejarte un mensaje.",
-            "Una organización preparada para sumar información con el tiempo.",
-            "Instancias para revisar la propuesta juntos."
-        ]
-    },
-    conversion: {
-        name: "NODO Conversión",
-        price: "Desde $150.000 ARS",
-        delivery: "Entrega estimada: 7 a 15 días hábiles.",
-        description: "Una web pensada para mostrar productos o servicios y hacer más fácil que una persona avance hacia una compra, pedido o consulta.",
-        note: "Tiendas con pagos, stock, envíos o funciones especiales pueden requerir una propuesta personalizada.",
-        benefits: [
-            "Productos o servicios fáciles de recorrer.",
-            "Más de una forma clara de avanzar a un pedido o consulta.",
-            "Se ve bien en celular y computadora.",
-            "La información queda ordenada para facilitar decisiones.",
-            "Preparamos la web para que Google pueda entenderla mejor."
-        ],
-        includes: [
-            "Una propuesta pensada para mostrar productos, servicios o un catálogo.",
-            "Recorridos claros para que una persona pueda pedir, consultar o comprar.",
-            "Botones de contacto ubicados donde hacen falta.",
-            "Espacio para preguntas frecuentes y la información que ayuda a decidir.",
-            "Una base ordenada para seguir mejorando."
+            "Una web profesional y responsive con información relevante de tu negocio.",
+            "Mayor profundidad para servicios, productos, trabajos, ubicación o promociones.",
+            "WhatsApp y formulario para facilitar las consultas.",
+            "Estructura SEO orientada a búsquedas locales, sin prometer posiciones específicas.",
+            "Preparación para conectar Search Console y Analytics cuando corresponda.",
+            "Acompañamiento para optimizar el Perfil de Empresa de Google cuando aplique.",
+            "Acompañamiento para elegir, registrar y conectar un dominio a tu nombre."
         ]
     },
     custom: {
-        name: "NODO Personalizado",
-        price: "Presupuesto a medida",
+        name: "Personalizado",
+        price: "Desde $400.000 ARS",
         delivery: "Lo definimos según el proyecto.",
-        description: "Tu idea necesita algo más específico. Primero entendemos el alcance y después te presentamos una propuesta.",
+        description: "Para proyectos que necesitan más que una web estándar y requieren definir funciones a medida.",
         benefits: [
-            "Partimos de lo que necesitás resolver.",
-            "Definimos juntos qué hace falta para empezar.",
-            "Priorizamos lo importante antes de construir.",
-            "La propuesta acompaña el alcance real de tu idea.",
+            "Partimos de la necesidad real de tu proyecto.",
+            "Podemos contemplar catálogos, reservas, pagos, stock o usuarios según haga falta.",
+            "También podemos trabajar integraciones, automatizaciones, paneles o lógica a medida.",
+            "Definimos alcance y prioridades antes de construir.",
             "Te explicamos cada decisión de forma clara."
         ],
         includes: [
             "Una conversación para entender el alcance de tu idea.",
-            "Una propuesta clara antes de avanzar.",
-            "Un recorrido pensado según las necesidades particulares del proyecto.",
+            "Una propuesta con alcance, funciones y prioridades definidas para tu proyecto.",
+            "Funciones como catálogo avanzado, reservas, pagos, stock, usuarios o integraciones cuando hagan falta.",
+            "Automatizaciones, paneles, sistemas o bases de datos cuando el proyecto lo requiera.",
             "Acompañamiento para ordenar prioridades.",
-            "Una base que contemple lo que tu proyecto realmente necesita."
+            "Una base que contemple lo que tu proyecto realmente necesita, desde $400.000 ARS."
         ]
     }
 };
@@ -94,6 +77,7 @@ const advisorSteps = [
             { id: "professional", label: "Que mi negocio se vea más profesional", text: "Quiero tener un lugar claro donde mostrar quién soy y qué hago." },
             { id: "messages", label: "Que más personas me escriban", text: "Quiero recibir consultas por WhatsApp o formulario." },
             { id: "services", label: "Mostrar mis servicios", text: "Quiero que puedan ver fácilmente qué ofrezco." },
+            { id: "local-search", label: "Que me encuentren más fácil en Google", text: "Quiero mejorar mi presencia en búsquedas locales." },
             { id: "bookings", label: "Recibir reservas o turnos", text: "Quiero que puedan elegir un día u horario." },
             { id: "products", label: "Mostrar productos", text: "Quiero enseñar lo que vendo, aunque la compra no sea online." },
             { id: "sell", label: "Vender por internet", text: "Quiero recibir pedidos o pagos desde la web." },
@@ -338,16 +322,17 @@ function getRecommendation(answers) {
     const commerceNeed = answers.commerceNeeds || "";
 
     const customSignals = ["payments", "stock", "users", "special"];
-    const commercialNeeds = ["commerce-basic", "commerce-unsure"];
     const relevantContent = ["business-info", "services", "photos", "prices", "location", "products", "promotions"];
     const relevantContentCount = relevantContent.filter(item => content.has(item)).length;
-    const hasCommercialIntent = goals.has("sell") || (start === "commerce" && commercialNeeds.includes(commerceNeed));
-    const hasCatalog = goals.has("products") && content.has("products");
+    const hasServiceDepth = goals.has("services") && content.has("services")
+        && (content.has("location") || content.has("promotions") || relevantContentCount >= 4);
+    const hasContentDepth = (start === "complete" || today.has("current-page") || today.has("old-page"))
+        && content.has("services")
+        && (content.has("location") || content.has("promotions") || relevantContentCount >= 4);
 
     if (customSignals.includes(commerceNeed)) return "custom";
-    if (hasCommercialIntent) return "conversion";
-    if (goals.has("bookings") || hasCatalog || start === "complete" || today.has("current-page") || today.has("old-page") || content.has("location") || content.has("promotions") || relevantContentCount >= 4) return "positioning";
-    return "launch";
+    if (goals.has("local-search") || hasServiceDepth || hasContentDepth) return "local";
+    return "presence";
 }
 
 function getReasons(planKey) {
@@ -358,7 +343,6 @@ function getReasons(planKey) {
     const commerceNeed = state.answers.commerceNeeds || "";
     const relevantContent = ["business-info", "services", "photos", "prices", "location", "products", "promotions"];
     const relevantContentCount = relevantContent.filter(item => content.has(item)).length;
-    const hasCommercialIntent = goals.has("sell") || (start === "commerce" && ["commerce-basic", "commerce-unsure"].includes(commerceNeed));
     const customReasons = {
         payments: "Necesitás que las personas puedan pagar desde la página.",
         stock: "También necesitás controlar la disponibilidad de productos.",
@@ -367,30 +351,31 @@ function getReasons(planKey) {
     };
 
     if (planKey === "custom") {
-        return [customReasons[commerceNeed] || "Tu idea necesita funciones más específicas antes de definir una propuesta.", "Por eso primero necesitamos definir el alcance antes de presupuestar."];
+        return [customReasons[commerceNeed] || "Tu idea necesita funciones que van más allá de una web estándar.", "Por eso tiene sentido plantearla como un proyecto personalizado."];
     }
 
     const reasons = [];
 
-    if (goals.has("bookings")) reasons.push("Querés que las personas puedan reservar o elegir un turno.");
-    if (goals.has("messages") || today.has("whatsapp")) reasons.push("Nos dijiste que querés facilitar que las personas te contacten.");
-    if (goals.has("services") || content.has("services")) reasons.push("También querés mostrar tus servicios de una forma clara.");
+    if (planKey === "local") {
+        if (goals.has("local-search")) reasons.push("Te interesa que puedan encontrarte con más facilidad en búsquedas locales.");
+        if (goals.has("services") || content.has("services")) reasons.push("Querés mostrar tus servicios importantes con más profundidad.");
+        if (content.has("location") && (goals.has("services") || content.has("services"))) reasons.push("También necesitás ordenar mejor la información local de tu negocio.");
+        if (relevantContentCount >= 4 || start === "complete") reasons.push("Necesitás una estructura más profunda para ordenar información importante.");
+        if (today.has("current-page") || today.has("old-page")) reasons.push("Ya tenés una web y querés mejorar la forma en que presenta tu negocio.");
+        if (!reasons.length) reasons.push("Por lo que nos contaste, necesitás una presencia con mayor foco en búsquedas y contexto local.");
+        return [...reasons.slice(0, 2), "Por eso tiene sentido trabajar una web con mayor foco en búsquedas y presencia local."];
+    }
+
+    if (goals.has("bookings")) reasons.push("Querés facilitar reservas o turnos sin sumar funciones que hoy no necesitás.");
+    if (goals.has("messages") || today.has("whatsapp")) reasons.push("Querés que las personas puedan contactarte con facilidad.");
+    if (goals.has("services") || content.has("services")) reasons.push("Querés mostrar tus servicios de una forma clara.");
     if (goals.has("products") || content.has("products")) reasons.push("Querés mostrar tus productos de una forma clara y ordenada.");
-    if (commerceNeed === "commerce-basic") reasons.push("Querés mostrar lo que vendés y facilitar que una persona haga un pedido o consulta.");
-    else if (hasCommercialIntent) reasons.push("Buscás una página que acompañe pedidos, compras o consultas.");
-    if (today.has("current-page") || today.has("old-page")) reasons.push("Nos contaste que ya tenés una página y querés mejorar lo que mostrás.");
-    if (relevantContentCount >= 4 || content.has("location") || content.has("promotions") || start === "complete") reasons.push("Necesitás más espacio para ordenar información importante de tu negocio.");
+    if (commerceNeed === "commerce-basic") reasons.push("Querés mostrar lo que vendés y facilitar pedidos o consultas, sin requerir pagos ni stock.");
     if (start === "simple" || today.has("starting")) reasons.push("Querés empezar con una presencia clara y sin sumar cosas que hoy no necesitás.");
     if (!reasons.length && goals.has("professional")) reasons.push("Querés que tu negocio se vea más profesional y sea fácil de entender.");
     if (!reasons.length && start === "recommend") reasons.push("Preferís recibir una guía clara para elegir por dónde empezar.");
 
-    const closing = {
-        launch: "Por eso una presencia simple y clara tiene sentido para empezar.",
-        positioning: "Por eso una web más completa tiene más sentido que una página básica.",
-        conversion: "Por eso conviene priorizar un recorrido claro hacia consultas, pedidos o compras.",
-        custom: "Por eso primero necesitamos definir el alcance antes de presupuestar."
-    };
-    return [...reasons.slice(0, 2), closing[planKey]];
+    return [...reasons.slice(0, 2), "Por eso una web Presencia puede ser un buen punto de partida."];
 }
 
 function joinNeeds(needs) {
@@ -408,21 +393,19 @@ function getRecommendationSummary(planKey) {
     const relevantContent = ["business-info", "services", "photos", "prices", "location", "products", "promotions"];
     const relevantContentCount = relevantContent.filter(item => content.has(item)).length;
 
-    if (planKey === "custom") return "Tu necesidad requiere algo más específico. Primero entendemos bien el alcance y después te presentamos una propuesta.";
-    if (planKey === "conversion" && commerceNeed === "commerce-basic") return "Querés mostrar lo que vendés y facilitar que una persona haga un pedido o consulta.";
-    if (planKey === "conversion" && goals.has("sell")) return "Querés hacer más fácil que una persona avance hacia una compra o pedido.";
-    if (planKey === "conversion") return "Querés explorar una forma clara de recibir pedidos o consultas desde tu página.";
+    if (planKey === "custom") return "Tu idea necesita algunas funciones que van más allá de una web estándar. Lo mejor es plantearla como un proyecto personalizado.";
 
-    if (planKey === "positioning") {
+    if (planKey === "local") {
         const needs = [];
-        if (goals.has("bookings")) needs.push("recibir reservas o turnos");
+        if (goals.has("local-search")) needs.push("que puedan encontrarte mejor en búsquedas locales");
         if (goals.has("services") || content.has("services")) needs.push("mostrar mejor tus servicios");
-        if (goals.has("messages") || today.has("whatsapp")) needs.push("facilitar que te contacten");
-        if (goals.has("products") && content.has("products")) needs.push("mostrar tus productos de forma clara y darles más espacio dentro de tu web");
-        if (today.has("current-page") || today.has("old-page") || start === "complete") needs.push("ordenar la información de tu negocio");
-        if (relevantContentCount >= 4 || content.has("location") || content.has("promotions")) needs.push("dar lugar a información importante");
-        return "Querés " + joinNeeds(needs) + ". Esta opción cubre eso sin sumar cosas que hoy no necesitás.";
+        if (content.has("location")) needs.push("ordenar la información local de tu negocio");
+        if (today.has("current-page") || today.has("old-page") || start === "complete") needs.push("darle más profundidad a tu presencia digital");
+        if (relevantContentCount >= 4 || content.has("promotions")) needs.push("organizar información importante para quienes te buscan");
+        return "Querés " + joinNeeds(needs) + ". Por eso tiene sentido trabajar una web con mayor foco en búsquedas y presencia local.";
     }
+
+    if (commerceNeed === "commerce-basic") return "Querés mostrar lo que vendés y facilitar pedidos o consultas, sin necesitar pagos ni control de stock.";
 
     if (today.has("starting")) {
         return goals.has("messages") || today.has("whatsapp")
@@ -477,7 +460,7 @@ const staticWhatsAppMessages = {
 function consultationMessage(plan) {
     if (plan === plans.custom) {
         return whatsappUrl([
-            "Hola NODO! Completé el asesor y mi proyecto quedó como NODO Personalizado.",
+            "Hola NODO! Completé el asesor y mi proyecto quedó como Personalizado.",
             "",
             "Me gustaría contarles mejor la idea para que podamos definir qué necesito y recibir una propuesta.",
             "",
@@ -857,8 +840,8 @@ function renderResult() {
     card.append(createElement("h3", "", plan.name));
     card.append(createElement("p", "plan-summary", getRecommendationSummary(key)));
     card.append(createElement("p", "plan-price", plan.price));
-    card.append(createElement("p", "plan-price-context", isCustomPlan ? "Valor definido según el alcance" : "Valor estimado inicial"));
-    card.append(createElement("p", "plan-price-note", isCustomPlan ? "Primero definimos juntos el contenido y las funciones necesarias." : "El valor final se confirma cuando definimos juntos el contenido y las funciones necesarias."));
+    card.append(createElement("p", "plan-price-context", isCustomPlan ? "Valor inicial según el alcance" : "Valor estimado inicial"));
+    card.append(createElement("p", "plan-price-note", isCustomPlan ? "El valor final depende de las funciones y el alcance que definamos juntos." : "El valor final se confirma cuando definimos juntos el contenido y las funciones necesarias."));
     card.append(createElement("p", "plan-time", plan.delivery));
     if (plan.note) card.append(createElement("p", "plan-note", plan.note));
     const benefits = createElement("ul", "plan-facts");

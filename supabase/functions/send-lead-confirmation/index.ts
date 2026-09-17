@@ -1,4 +1,4 @@
-type PlanKey = "launch" | "positioning" | "conversion" | "custom";
+type PlanKey = "launch" | "positioning" | "conversion" | "presence" | "local" | "custom";
 
 type ConfirmationInput = {
     name: string;
@@ -9,12 +9,23 @@ type ConfirmationInput = {
     planKey: PlanKey;
 };
 
-const PLAN_NAMES: Record<PlanKey, string> = {
+const PLAN_NAMES: Record<Exclude<PlanKey, "custom">, string> = {
     launch: "NODO Lanzamiento",
     positioning: "NODO Posicionamiento",
     conversion: "NODO Conversión",
-    custom: "NODO Personalizado"
+    presence: "Presencia",
+    local: "Local"
 };
+
+const CURRENT_PLAN_PRICES = {
+    presence: "$180.000 ARS",
+    local: "$280.000 ARS"
+} as const;
+
+const CUSTOM_PLAN_DETAILS = {
+    "NODO Personalizado": "Presupuesto a medida",
+    Personalizado: "Desde $400.000 ARS"
+} as const;
 
 const NODO_LOGO_URL = "https://mortega00.github.io/nodo-digital/assets/logo.png";
 
@@ -88,18 +99,34 @@ function parseInput(value: unknown): ConfirmationInput | null {
     const input = value as Record<string, unknown>;
 
     if (!isText(input.name, 120) || !isText(input.email, 254) || !EMAIL_PATTERN.test(input.email.trim())) return null;
-    if (!isText(input.planKey, 32) || !(input.planKey in PLAN_NAMES)) return null;
+    if (!isText(input.planKey, 32)) return null;
     if (!isText(input.planName, 80) || !isText(input.planPrice, 120)) return null;
-    if (input.planName.trim() !== PLAN_NAMES[input.planKey as PlanKey]) return null;
     if (input.businessName !== null && input.businessName !== undefined && !isText(input.businessName, 160)) return null;
 
     const planKey = input.planKey as PlanKey;
+    const planName = input.planName.trim();
+    const planPrice = input.planPrice.trim();
+    let normalizedPlanName: string;
+    let normalizedPlanPrice: string;
+
+    if (planKey === "custom") {
+        if (!(planName in CUSTOM_PLAN_DETAILS)) return null;
+        normalizedPlanName = planName;
+        normalizedPlanPrice = CUSTOM_PLAN_DETAILS[planName as keyof typeof CUSTOM_PLAN_DETAILS];
+    } else {
+        if (!(planKey in PLAN_NAMES) || planName !== PLAN_NAMES[planKey]) return null;
+        normalizedPlanName = PLAN_NAMES[planKey];
+        normalizedPlanPrice = planKey === "presence" || planKey === "local"
+            ? CURRENT_PLAN_PRICES[planKey]
+            : planPrice;
+    }
+
     return {
         name: input.name.trim(),
         email: input.email.trim().toLowerCase(),
         businessName: typeof input.businessName === "string" ? input.businessName.trim() : null,
-        planName: PLAN_NAMES[planKey],
-        planPrice: planKey === "custom" ? "Presupuesto a medida" : input.planPrice.trim(),
+        planName: normalizedPlanName,
+        planPrice: normalizedPlanPrice,
         planKey
     };
 }
