@@ -245,6 +245,9 @@ h2 {
 .mobile-navigation-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 28px; color: var(--web-lilac); font-size: 0.74rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
 .mobile-navigation-close,
 .showcase-arrow { display: inline-grid; width: 42px; height: 42px; place-items: center; padding: 0; border: 1px solid var(--web-border); border-radius: 12px; background: var(--web-card); color: var(--web-text); cursor: pointer; }
+.showcase-arrow-icon { display: block; width: 8px; height: 8px; border: solid currentColor; border-width: 0 2px 2px 0; }
+.showcase-arrow-icon-prev { transform: rotate(135deg); }
+.showcase-arrow-icon-next { transform: rotate(-45deg); }
 .mobile-navigation-close { flex: 0 0 auto; font-size: 1.4rem; line-height: 1; }
 .mobile-navigation-links { display: grid; gap: 4px; }
 .mobile-navigation-links a { display: flex; min-height: 48px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--web-border); color: var(--web-text); font-size: 1rem; font-weight: 750; text-decoration: none; }
