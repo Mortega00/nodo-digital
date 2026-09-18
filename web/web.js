@@ -44,7 +44,7 @@ const plans = {
     },
     custom: {
         name: "Personalizado",
-        price: "Desde $400.000 ARS",
+        price: "Presupuesto a medida",
         delivery: "Lo definimos según el proyecto.",
         description: "Para proyectos que necesitan más que una web estándar y requieren definir funciones a medida.",
         benefits: [
@@ -60,7 +60,7 @@ const plans = {
             "Funciones como catálogo avanzado, reservas, pagos, stock, usuarios o integraciones cuando hagan falta.",
             "Automatizaciones, paneles, sistemas o bases de datos cuando el proyecto lo requiera.",
             "Acompañamiento para ordenar prioridades.",
-            "Una base que contemple lo que tu proyecto realmente necesita, desde $400.000 ARS."
+            "Una base que contemple lo que tu proyecto realmente necesita."
         ]
     }
 };

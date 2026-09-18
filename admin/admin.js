@@ -1,6 +1,12 @@
 const SUPABASE_URL = "https://pmrrudtwsgqyncstfdrm.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_XhjenDP8bMVfuEUl02h6XA_ZkJLCnn_";
 const NODO_PROPOSAL_URL = new URL("propuesta.html", window.location.href).href;
+const DEFAULT_DRAFT_PAYMENT_TERMS = "50% para comenzar el proyecto.\n50% restante una vez aprobado el resultado final y antes de publicarlo.";
+const PROPOSAL_PLAN_DEFAULTS = {
+    presence: { priceAmount: 180000 },
+    local: { priceAmount: 280000 },
+    custom: { priceAmount: "" }
+};
 
 const supabaseClient = window.supabase?.createClient?.(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     auth: {
@@ -173,6 +179,18 @@ function normalizeSearch(value) {
         .toLocaleLowerCase("es-AR");
 }
 
+function recommendedProposalPlanKey(lead) {
+    const key = String(lead?.recommended_plan_key || "").trim().toLowerCase();
+    if (Object.hasOwn(PROPOSAL_PLAN_DEFAULTS, key)) return key;
+
+    const name = normalizeSearch(lead?.recommended_plan_name);
+    return {
+        presencia: "presence",
+        local: "local",
+        personalizado: "custom"
+    }[name] || "";
+}
+
 function selectedLead() {
     return state.leads.find(lead => lead.id === state.selectedLeadId) || null;
 }
@@ -251,8 +269,45 @@ function proposalDraftFromRow(lead, proposal) {
         validUntil: dateForInput(proposal.valid_until),
         conditions: proposal.conditions || "",
         nextStep: proposal.next_step || "",
+        paymentAmountsAuto: false,
         dirty: false
     };
+}
+
+function defaultPaymentSplit(priceValue) {
+    if (priceValue === null || priceValue === undefined || String(priceValue).trim() === "") return "";
+
+    const price = Number(priceValue);
+    if (!Number.isFinite(price) || price < 0) return "";
+
+    const decimalPart = String(priceValue).trim().match(/\.(\d+)/)?.[1] || "";
+    const factor = 10 ** Math.min(decimalPart.length, 6);
+    const totalUnits = Math.round(price * factor);
+    const initialUnits = Math.floor(totalUnits / 2);
+    return {
+        depositAmount: initialUnits / factor,
+        balanceAmount: (totalUnits - initialUnits) / factor
+    };
+}
+
+function applyAutomaticPaymentSplit(draft) {
+    if (!draft) return;
+
+    const split = defaultPaymentSplit(draft.priceAmount);
+    draft.depositAmount = split ? split.depositAmount : "";
+    draft.balanceAmount = split ? split.balanceAmount : "";
+}
+
+function applyNewDraftCommercialDefaults(draft, lead) {
+    if (!draft) return;
+
+    const planKey = recommendedProposalPlanKey(lead);
+    if (planKey) draft.priceAmount = PROPOSAL_PLAN_DEFAULTS[planKey].priceAmount;
+    draft.paymentTerms = DEFAULT_DRAFT_PAYMENT_TERMS;
+    draft.validUntil = "";
+    draft.paymentAmountsAuto = true;
+    applyAutomaticPaymentSplit(draft);
+    draft.dirty = true;
 }
 
 function proposalPublicUrl(proposal) {
@@ -504,7 +559,7 @@ async function loadLeads({ refresh = false } = {}) {
     try {
         const { data: leads, error: leadsError } = await supabaseClient
             .from("leads")
-            .select("id, created_at, name, email, whatsapp, business_name, no_business_name, comment, advisor_goals, advisor_today, advisor_content, advisor_start, advisor_commerce_need, recommended_plan_name, recommended_price, marketing_email_consent")
+            .select("id, created_at, name, email, whatsapp, business_name, no_business_name, comment, advisor_goals, advisor_today, advisor_content, advisor_start, advisor_commerce_need, recommended_plan_key, recommended_plan_name, recommended_price, marketing_email_consent")
             .order("created_at", { ascending: false })
             .limit(100);
 
@@ -949,7 +1004,7 @@ function renderProposalSection(lead) {
     } else if (proposal.status === "sent") {
         section.append(createElement("p", "proposal-meta", "Enviada: " + formatDateTime(proposal.sent_at)));
         section.append(renderPublicProposalActions(proposal));
-        section.append(renderSentProposalActions(proposal));
+        section.append(renderSentProposalActions(lead, proposal));
     } else if (proposal.status === "accepted") {
         section.append(createElement("p", "proposal-meta", "Aceptada: " + formatDateTime(proposal.accepted_at)));
         section.append(renderPublicProposalActions(proposal));
@@ -993,8 +1048,18 @@ function renderPublicProposalActions(proposal) {
     return actions;
 }
 
-function renderSentProposalActions(proposal) {
+function renderSentProposalActions(lead, proposal) {
     const actions = createElement("div", "detail-actions proposal-actions");
+    const whatsappUrl = createProposalWhatsAppUrl(lead, proposal);
+    if (whatsappUrl) {
+        const whatsapp = document.createElement("a");
+        whatsapp.className = "button button-secondary";
+        whatsapp.href = whatsappUrl;
+        whatsapp.target = "_blank";
+        whatsapp.rel = "noopener noreferrer";
+        whatsapp.textContent = "Compartir por WhatsApp ↗";
+        actions.append(whatsapp);
+    }
     const revision = createButton(state.isProposalSaving ? "Creando…" : "Crear nueva versión", "button button-secondary", () => createProposalRevision(proposal));
     const decline = createButton("Marcar como no avanza", "button button-danger", () => declineProposal(proposal));
     revision.disabled = state.isProposalSaving || state.isSaving || state.draft?.dirty;
@@ -1010,6 +1075,8 @@ function renderProposalEditor(lead, proposal) {
     const form = createElement("form", "proposal-form");
     form.noValidate = true;
     const mainGrid = createElement("div", "proposal-grid");
+    const validity = createProposalField("Vigencia", "validUntil", draft, { type: "date" });
+    validity.append(createElement("small", "proposal-field-note", "Si no elegís una fecha, la propuesta será válida durante 7 días desde el envío."));
     mainGrid.append(
         createProposalField("Cliente *", "clientName", draft),
         createProposalField("Negocio *", "businessName", draft),
@@ -1023,11 +1090,11 @@ function renderProposalEditor(lead, proposal) {
         createProposalField("Precio", "priceAmount", draft, { type: "number", min: "0", step: "any" }),
         createProposalCurrencyField(draft),
         createProposalField("Forma de pago", "paymentTerms", draft, { multiline: true, wide: true }),
-        createProposalField("Seña", "depositAmount", draft, { type: "number", min: "0", step: "any" }),
-        createProposalField("Saldo", "balanceAmount", draft, { type: "number", min: "0", step: "any" }),
+        createProposalField("Pago inicial", "depositAmount", draft, { type: "number", min: "0", step: "any" }),
+        createProposalField("Saldo antes de publicar", "balanceAmount", draft, { type: "number", min: "0", step: "any" }),
         createProposalField("Tiempo estimado", "estimatedTimeline", draft),
         createProposalField("Cantidad de revisiones", "revisionCount", draft, { type: "number", min: "0", step: "1" }),
-        createProposalField("Vigencia", "validUntil", draft, { type: "date" }),
+        validity,
         createProposalField("Condiciones / aclaraciones", "conditions", draft, { multiline: true, wide: true }),
         createProposalField("Próximo paso", "nextStep", draft, { multiline: true, wide: true })
     );
@@ -1046,13 +1113,17 @@ function renderProposalEditor(lead, proposal) {
     preview.setAttribute("aria-expanded", String(state.proposalPreviewOpen));
     preview.disabled = state.isProposalSaving;
 
+    const resetPayment = createButton("Restablecer 50/50", "button button-secondary", resetProposalPaymentSplit);
+    resetPayment.id = "reset-proposal-payment-split";
+    resetPayment.disabled = state.isProposalSaving || state.isSaving || !defaultPaymentSplit(draft.priceAmount);
+
     const save = createButton(state.isProposalSaving ? "Guardando…" : "Guardar borrador", "button button-primary", saveProposalDraft);
     save.id = "save-proposal-draft";
     save.disabled = state.isProposalSaving || state.isSaving || !draft.dirty;
 
     const send = createButton("Enviar propuesta", "button button-secondary", () => sendProposal(proposal));
     send.disabled = state.isProposalSaving || state.isSaving || draft.dirty || state.draft?.dirty;
-    actions.append(preview, save, send);
+    actions.append(preview, resetPayment, save, send);
     form.append(actions);
     form.addEventListener("submit", event => {
         event.preventDefault();
@@ -1109,14 +1180,46 @@ function createProposalCurrencyField(draft) {
 function updateProposalDraftField(key, value) {
     if (!state.proposalDraft) return;
     state.proposalDraft[key] = value;
+    if (key === "priceAmount" && state.proposalDraft.paymentAmountsAuto) {
+        applyAutomaticPaymentSplit(state.proposalDraft);
+        syncProposalPaymentAmountFields();
+    } else if (["depositAmount", "balanceAmount"].includes(key)) {
+        state.proposalDraft.paymentAmountsAuto = false;
+    }
     state.proposalDraft.dirty = true;
     state.proposalMessage = "";
+    syncProposalControls();
+}
+
+function syncProposalPaymentAmountFields() {
+    if (!state.proposalDraft) return;
+    ["depositAmount", "balanceAmount"].forEach(key => {
+        const control = document.querySelector(".proposal-form [name=\"" + key + "\"]");
+        if (control) control.value = state.proposalDraft[key] ?? "";
+    });
+}
+
+function resetProposalPaymentSplit() {
+    const draft = state.proposalDraft;
+    if (!draft || !defaultPaymentSplit(draft.priceAmount)) {
+        state.proposalMessage = "Ingresá un precio válido para restablecer el pago 50/50.";
+        syncProposalControls();
+        return;
+    }
+
+    draft.paymentAmountsAuto = true;
+    applyAutomaticPaymentSplit(draft);
+    draft.dirty = true;
+    state.proposalMessage = "Pago inicial y saldo restablecidos al 50/50.";
+    syncProposalPaymentAmountFields();
     syncProposalControls();
 }
 
 function syncProposalControls() {
     const save = document.getElementById("save-proposal-draft");
     if (save) save.disabled = state.isProposalSaving || state.isSaving || !state.proposalDraft?.dirty;
+    const resetPayment = document.getElementById("reset-proposal-payment-split");
+    if (resetPayment) resetPayment.disabled = state.isProposalSaving || state.isSaving || !defaultPaymentSplit(state.proposalDraft?.priceAmount);
     const message = document.getElementById("proposal-message");
     if (message) {
         message.textContent = state.proposalMessage;
@@ -1138,10 +1241,10 @@ function renderProposalPreview(draft) {
     appendPreviewText(preview, "Tiempo estimado", draft.estimatedTimeline);
     appendPreviewText(preview, "Cantidad de revisiones", draft.revisionCount);
     appendPreviewText(preview, "Inversión", formatProposalPrice({ price_amount: draft.priceAmount, currency: draft.currency }));
-    appendPreviewText(preview, "Seña", draft.depositAmount);
-    appendPreviewText(preview, "Saldo", draft.balanceAmount);
+    appendPreviewText(preview, "Pago inicial", draft.depositAmount);
+    appendPreviewText(preview, "Saldo antes de publicar", draft.balanceAmount);
     appendPreviewText(preview, "Forma de pago", draft.paymentTerms);
-    appendPreviewText(preview, "Vigencia", draft.validUntil ? formatDate(draft.validUntil) : "Sin definir");
+    appendPreviewText(preview, "Vigencia", draft.validUntil ? formatDate(draft.validUntil) : "7 días desde el envío");
     appendPreviewText(preview, "Condiciones", draft.conditions);
     appendPreviewText(preview, "Próximo paso", draft.nextStep);
     return preview;
@@ -1190,8 +1293,8 @@ function proposalUpdatePayload() {
     }
 
     const priceAmount = optionalNonNegative(draft.priceAmount, "El precio");
-    const depositAmount = optionalNonNegative(draft.depositAmount, "La seña");
-    const balanceAmount = optionalNonNegative(draft.balanceAmount, "El saldo");
+    const depositAmount = optionalNonNegative(draft.depositAmount, "El pago inicial");
+    const balanceAmount = optionalNonNegative(draft.balanceAmount, "El saldo antes de publicar");
     const revisionCount = optionalNonNegative(draft.revisionCount, "La cantidad de revisiones", { integer: true });
     const currency = draft.currency === "USD" ? "USD" : draft.currency === "ARS" ? "ARS" : "";
 
@@ -1251,7 +1354,10 @@ async function proposalAdminRequest(payload) {
         throw { status: response.status, code: responseBody?.error };
     }
 
-    return responseBody.data;
+    return {
+        data: responseBody.data,
+        notification: responseBody.notification || null
+    };
 }
 
 async function refreshSelectedLeadProposal() {
@@ -1301,20 +1407,36 @@ async function handleProposalFailure(error, action) {
     else state.proposalMessage = "No pudimos procesar la propuesta. Intentá nuevamente.";
 }
 
-async function runProposalAction(payload, successMessage, { preserveScroll = false } = {}) {
+function proposalSendSuccessMessage(result, lead) {
+    const notification = result?.notification;
+    if (notification?.sent === true) {
+        const email = typeof lead?.email === "string" ? lead.email.trim() : "";
+        return email
+            ? "Propuesta enviada correctamente. También enviamos el enlace por email a " + email + "."
+            : "Propuesta enviada correctamente. También enviamos el enlace por email.";
+    }
+
+    if (notification?.reason === "recipient_unavailable") {
+        return "Propuesta enviada correctamente. No enviamos el email porque no hay una dirección válida; podés compartir el enlace.";
+    }
+
+    return "Propuesta enviada correctamente, pero no pudimos entregar el email. Podés compartir el enlace.";
+}
+
+async function runProposalAction(payload, successMessage, { preserveScroll = false, pendingMessage = "Procesando…" } = {}) {
     if (state.isProposalSaving || state.isSaving) return false;
 
     const scrollPosition = captureProposalScroll();
     let succeeded = false;
     state.isProposalSaving = true;
-    state.proposalMessage = "Procesando…";
+    state.proposalMessage = pendingMessage;
     renderApp();
     restoreProposalScroll(scrollPosition);
 
     try {
-        await proposalAdminRequest(payload);
+        const actionResult = await proposalAdminRequest(payload);
         await refreshSelectedLeadProposal();
-        state.proposalMessage = successMessage;
+        state.proposalMessage = typeof successMessage === "function" ? successMessage(actionResult) : successMessage;
         succeeded = true;
         return true;
     } catch (error) {
@@ -1340,7 +1462,18 @@ async function prepareProposalDraft() {
         return;
     }
 
-    await runProposalAction({ action: "create_draft", leadId: lead.id }, "Borrador creado. Ya podés completar la propuesta.");
+    const created = await runProposalAction({ action: "create_draft", leadId: lead.id }, "Borrador creado. Ya podés completar la propuesta.");
+    if (!created || !state.proposalDraft) return;
+
+    applyNewDraftCommercialDefaults(state.proposalDraft, lead);
+    const planKey = recommendedProposalPlanKey(lead);
+    const defaultPrice = planKey ? PROPOSAL_PLAN_DEFAULTS[planKey].priceAmount : "";
+    state.proposalMessage = defaultPrice === ""
+        ? "Borrador creado. Ingresá el total acordado y se calculará el pago inicial y el saldo."
+        : "Borrador creado con el precio sugerido. Podés editarlo; el pago inicial y el saldo se calculan al 50/50.";
+    const scrollPosition = captureProposalScroll();
+    renderApp();
+    restoreProposalScroll(scrollPosition);
 }
 
 async function saveProposalDraft() {
@@ -1354,11 +1487,13 @@ async function saveProposalDraft() {
         return;
     }
 
-    await runProposalAction({
+    const paymentAmountsAuto = state.proposalDraft?.paymentAmountsAuto === true;
+    const saved = await runProposalAction({
         action: "update_draft",
         proposalId: proposal.id,
         proposal: payload.proposal
     }, "Borrador guardado correctamente.", { preserveScroll: true });
+    if (saved && state.proposalDraft) state.proposalDraft.paymentAmountsAuto = paymentAmountsAuto;
 }
 
 async function sendProposal(proposal) {
@@ -1376,7 +1511,12 @@ async function sendProposal(proposal) {
 
     const confirmed = window.confirm("Una vez enviada, esta versión no podrá editarse. Si el cliente pide cambios, deberás crear una nueva versión. ¿Enviar propuesta?");
     if (!confirmed) return;
-    await runProposalAction({ action: "send", proposalId: proposal.id }, "Propuesta enviada. El estado del lead se actualizó.");
+    const lead = selectedLead();
+    await runProposalAction(
+        { action: "send", proposalId: proposal.id },
+        result => proposalSendSuccessMessage(result, lead),
+        { pendingMessage: "Enviando propuesta…" }
+    );
 }
 
 async function createProposalRevision(proposal) {
@@ -1584,7 +1724,7 @@ async function saveManagement() {
     }
 }
 
-function createWhatsAppUrl(whatsapp, name) {
+function whatsappDestination(whatsapp) {
     const digits = String(whatsapp || "").replace(/\D/g, "");
     if (!digits) return "";
 
@@ -1600,8 +1740,35 @@ function createWhatsAppUrl(whatsapp, name) {
         return "";
     }
 
+    return destination;
+}
+
+function createWhatsAppUrl(whatsapp, name) {
+    const destination = whatsappDestination(whatsapp);
+    if (!destination) return "";
+
     const greeting = "Hola " + displayValue(name, "" , "") + ", soy Maxi de NODO. Estuve revisando la consulta que nos enviaste…";
     return "https://wa.me/" + destination + "?text=" + encodeURIComponent(greeting);
+}
+
+function createProposalWhatsAppUrl(lead, proposal) {
+    const destination = whatsappDestination(lead?.whatsapp);
+    const proposalUrl = proposalPublicUrl(proposal);
+    if (!destination || !proposalUrl) return "";
+
+    const name = typeof lead?.name === "string" && lead.name.trim() ? lead.name.trim() : "";
+    const greeting = name ? "Hola " + name + " 👋" : "Hola 👋";
+    const message = [
+        greeting,
+        "",
+        "Ya preparamos la propuesta para tu proyecto en NODO.",
+        "",
+        "Podés revisarla acá:",
+        proposalUrl,
+        "",
+        "Si querés conversar algún detalle, escribinos."
+    ].join("\n");
+    return "https://wa.me/" + destination + "?text=" + encodeURIComponent(message);
 }
 
 async function handleLogout() {

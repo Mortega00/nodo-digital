@@ -2,6 +2,19 @@ const SUPABASE_URL = "https://pmrrudtwsgqyncstfdrm.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_XhjenDP8bMVfuEUl02h6XA_ZkJLCnn_";
 const NODO_WHATSAPP = "5491130700900";
 const TOKEN_PATTERN = /^[0-9a-f]{64}$/i;
+const PUBLIC_NAME_PLACEHOLDERS = new Set([
+    "todavia sin nombre",
+    "sin nombre",
+    "s/n",
+    "sn",
+    "undefined",
+    "null",
+    "n/a",
+    "na",
+    "no informado",
+    "sin definir",
+    "-"
+]);
 
 const app = document.getElementById("proposal-app");
 const page = document.getElementById("proposal-page");
@@ -39,6 +52,17 @@ function isRecord(value) {
 
 function text(value) {
     return typeof value === "string" ? value.trim() : "";
+}
+
+function publicName(value) {
+    const candidate = text(value);
+    if (!candidate) return "";
+
+    const normalized = candidate
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLocaleLowerCase("es-AR");
+    return PUBLIC_NAME_PLACEHOLDERS.has(normalized) ? "" : candidate;
 }
 
 function list(value) {
@@ -141,20 +165,22 @@ function renderProposal() {
     const proposal = dto.proposal;
     const status = dto.status;
     const expired = dto.is_expired === true;
-    const businessName = text(proposal.business_name) || "tu negocio";
-    const clientName = text(proposal.client_name) || "";
+    const businessName = publicName(proposal.business_name);
+    const clientName = publicName(proposal.client_name);
+    const recipient = businessName || clientName || "tu proyecto";
 
     const shell = createElement("div", "proposal-shell");
     const card = createElement("article", "proposal-card");
 
     const hero = createElement("section", "proposal-hero");
     const headingRow = createElement("div", "proposal-heading-row");
+    const statusClass = status === "accepted" ? "accepted" : expired ? "expired" : status;
+    const statusLabel = status === "accepted" ? "Aceptada" : expired ? "Propuesta vencida" : "Propuesta vigente";
     headingRow.append(createElement("p", "proposal-eyebrow", "PROPUESTA NODO"));
-    headingRow.append(createElement("span", "proposal-status proposal-status-" + status, status === "accepted" ? "Aceptada" : "Propuesta comercial"));
+    headingRow.append(createElement("span", "proposal-status proposal-status-" + statusClass, statusLabel));
     hero.append(headingRow);
-    hero.append(createElement("h1", "", "Propuesta para " + businessName));
-    if (clientName) hero.append(createElement("p", "proposal-client", "Preparada para " + clientName));
-    if (text(proposal.title)) hero.append(createElement("h2", "proposal-title", proposal.title));
+    hero.append(createElement("h1", "", "Propuesta para " + recipient));
+    if (businessName && clientName) hero.append(createElement("p", "proposal-client", "Preparada para " + clientName));
 
     const dates = createElement("div", "proposal-dates");
     const sentAt = formatDate(proposal.sent_at);
@@ -171,19 +197,19 @@ function renderProposal() {
     card.append(hero);
 
     const body = createElement("div", "proposal-body");
-    appendTextSection(body, "OBJETIVO", "Objetivo", proposal.objective);
-    appendTextSection(body, "SOLUCIÓN PROPUESTA", "Solución propuesta", proposal.proposed_solution);
-    appendListSection(body, "ALCANCE", "Alcance", proposal.scope);
-    appendListSection(body, "ENTREGABLES", "Entregables", proposal.deliverables);
-    appendIncludedSections(body, proposal.included, proposal.excluded);
+    appendTextSection(body, "LO QUE ENTENDIMOS", "Lo que entendimos", proposal.objective);
+    appendSolutionSection(body, proposal);
+    appendWorkSection(body, proposal);
     appendTimeSection(body, proposal);
     appendInvestmentSection(body, proposal);
-    appendPaymentSection(body, proposal);
-    appendTextSection(body, "CONDICIONES", "Condiciones", proposal.conditions);
-    appendTextSection(body, "PRÓXIMO PASO", "Próximo paso", proposal.next_step);
+    appendDomainAndHostingSection(body);
+    appendListSection(body, "QUÉ NO INCLUYE", "Qué no incluye", proposal.excluded);
+    appendTextSection(body, "ACLARACIONES", "Aclaraciones", proposal.conditions);
+    appendAccompanimentSection(body);
+    appendNextStepsSection(body, proposal.next_step);
     card.append(body);
 
-    card.append(renderFinalCta({ status, expired, proposal, businessName, clientName, acceptedAt: proposal.accepted_at }));
+    card.append(renderFinalCta({ status, expired, proposal, businessName: recipient, clientName, acceptedAt: proposal.accepted_at }));
     shell.append(card);
     return shell;
 }
@@ -205,6 +231,39 @@ function appendTextSection(parent, eyebrow, title, value) {
     parent.append(section);
 }
 
+function appendSolutionSection(parent, proposal) {
+    const title = text(proposal.title);
+    const description = text(proposal.proposed_solution);
+    const price = formatMoney(proposal.price_amount, proposal.currency);
+    if (!title && !description && !price) return;
+
+    const section = createElement("section", "proposal-section proposal-solution");
+    section.append(createElement("p", "section-eyebrow", "LA SOLUCIÓN QUE PROPONEMOS"));
+    section.append(createElement("h2", "", "La solución que proponemos"));
+    if (title) section.append(createElement("p", "proposal-solution-name", title));
+    if (price) section.append(createElement("p", "proposal-solution-price", price));
+    if (description) section.append(createElement("p", "", description));
+    parent.append(section);
+}
+
+function appendWorkSection(parent, proposal) {
+    const groups = [
+        ["Lo que vamos a trabajar", list(proposal.scope)],
+        ["Lo que vas a recibir", list(proposal.deliverables)],
+        ["Incluye", list(proposal.included)]
+    ].filter(([, items]) => items.length);
+    if (!groups.length) return;
+
+    const section = createElement("section", "proposal-section");
+    section.append(createElement("p", "section-eyebrow", "QUÉ VAMOS A HACER"));
+    section.append(createElement("h2", "", "Qué vamos a hacer"));
+    groups.forEach(([label, items]) => {
+        if (groups.length > 1) section.append(createElement("h3", "proposal-subsection-title", label));
+        section.append(createTextList(items));
+    });
+    parent.append(section);
+}
+
 function appendListSection(parent, eyebrow, title, value) {
     const items = list(value);
     if (!items.length) return;
@@ -213,26 +272,6 @@ function appendListSection(parent, eyebrow, title, value) {
     section.append(createElement("h2", "", title));
     section.append(createTextList(items));
     parent.append(section);
-}
-
-function appendIncludedSections(parent, includedValue, excludedValue) {
-    const included = list(includedValue);
-    const excluded = list(excludedValue);
-    if (!included.length && !excluded.length) return;
-
-    const wrapper = createElement("div", "proposal-duo");
-    if (!included.length || !excluded.length) wrapper.classList.add("proposal-duo-single");
-    if (included.length) wrapper.append(createListSection("INCLUYE", "Incluye", included));
-    if (excluded.length) wrapper.append(createListSection("NO INCLUYE", "No incluye", excluded));
-    parent.append(wrapper);
-}
-
-function createListSection(eyebrow, title, items) {
-    const section = createElement("section", "proposal-section");
-    section.append(createElement("p", "section-eyebrow", eyebrow));
-    section.append(createElement("h2", "", title));
-    section.append(createTextList(items));
-    return section;
 }
 
 function createTextList(items) {
@@ -249,39 +288,74 @@ function appendTimeSection(parent, proposal) {
 
     const section = createElement("section", "proposal-section");
     section.append(createElement("p", "section-eyebrow", "TIEMPOS Y REVISIONES"));
-    section.append(createElement("h2", "", "Una hoja de ruta clara"));
+    section.append(createElement("h2", "", "Tiempo estimado"));
     const facts = createElement("div", "proposal-facts");
     if (timeline) facts.append(createFact("Tiempo estimado", timeline));
     if (hasRevisionCount) facts.append(createFact("Revisiones incluidas", String(revisionCount)));
     section.append(facts);
+    section.append(createElement("p", "proposal-section-note", "El plazo comienza cuando confirmamos el proyecto y contamos con la información necesaria para avanzar."));
     parent.append(section);
 }
 
 function appendInvestmentSection(parent, proposal) {
     const price = formatMoney(proposal.price_amount, proposal.currency);
-    if (!price) return;
+    const terms = text(proposal.payment_terms);
+    const deposit = formatMoney(proposal.deposit_amount, proposal.currency);
+    const balance = formatMoney(proposal.balance_amount, proposal.currency);
+    if (!price && !terms && !deposit && !balance) return;
+
     const section = createElement("section", "proposal-section");
     section.append(createElement("p", "section-eyebrow", "INVERSIÓN"));
     section.append(createElement("h2", "", "La inversión para avanzar"));
     const investment = createElement("div", "investment-card");
-    investment.append(createElement("p", "investment-price", price));
+    if (price) investment.append(createElement("p", "investment-price", price));
+    if (terms || deposit || balance) {
+        investment.append(createElement("p", "investment-payment-title", "Forma de pago"));
+        if (terms) investment.append(createElement("p", "payment-copy", terms));
+        const facts = createElement("div", "proposal-facts");
+        if (deposit) facts.append(createFact("Para comenzar", deposit));
+        if (balance) facts.append(createFact("Antes de publicar", balance));
+        if (facts.childElementCount) investment.append(facts);
+    }
     section.append(investment);
     parent.append(section);
 }
 
-function appendPaymentSection(parent, proposal) {
-    const terms = text(proposal.payment_terms);
-    const deposit = formatMoney(proposal.deposit_amount, proposal.currency);
-    const balance = formatMoney(proposal.balance_amount, proposal.currency);
-    if (!terms && !deposit && !balance) return;
+function appendDomainAndHostingSection(parent) {
     const section = createElement("section", "proposal-section");
-    section.append(createElement("p", "section-eyebrow", "FORMA DE PAGO"));
-    section.append(createElement("h2", "", "Cómo lo organizamos"));
-    if (terms) section.append(createElement("p", "payment-copy", terms));
-    const facts = createElement("div", "proposal-facts");
-    if (deposit) facts.append(createFact("Seña", deposit));
-    if (balance) facts.append(createFact("Saldo", balance));
-    if (facts.childElementCount) section.append(facts);
+    section.append(createElement("p", "section-eyebrow", "DOMINIO Y HOSTING"));
+    section.append(createElement("h2", "", "Para dejar tu proyecto listo online"));
+    section.append(createElement("p", "", "El dominio se registra a tu nombre y queda bajo tu control. Te acompañamos para elegirlo, registrarlo y conectarlo. El costo del dominio y sus renovaciones corre por cuenta del cliente, salvo que esta propuesta indique otra cosa. El hosting es el servicio que permite que la web esté disponible online: se define según la solución y te lo explicamos antes de publicar. Puede contratarlo el cliente o podemos configurarlo como parte de un acompañamiento posterior."));
+    parent.append(section);
+}
+
+function appendAccompanimentSection(parent) {
+    const section = createElement("section", "proposal-section");
+    section.append(createElement("p", "section-eyebrow", "ACOMPAÑAMIENTO Y CRECIMIENTO"));
+    section.append(createElement("h2", "", "Después de publicar"));
+    section.append(createElement("p", "", "Si después de publicar querés seguir mejorando el proyecto, podemos definir un acompañamiento adaptado a lo que realmente necesites."));
+    parent.append(section);
+}
+
+function appendNextStepsSection(parent, snapshotNextStep) {
+    const section = createElement("section", "proposal-section proposal-next-steps");
+    section.append(createElement("p", "section-eyebrow", "CÓMO SEGUIMOS"));
+    section.append(createElement("h2", "", "Los próximos pasos"));
+    const steps = [
+        "Aceptás la propuesta.",
+        "Coordinamos el pago inicial.",
+        "Te pedimos la información y los materiales necesarios.",
+        "Empezamos el proyecto.",
+        "Revisamos juntos el resultado.",
+        "Con la aprobación final, se abona el saldo restante.",
+        "Publicamos."
+    ];
+    const listElement = createElement("ol", "proposal-process");
+    steps.forEach(step => listElement.append(createElement("li", "", step)));
+    section.append(listElement);
+
+    const nextStep = text(snapshotNextStep);
+    if (nextStep) section.append(createElement("p", "proposal-section-note", nextStep));
     parent.append(section);
 }
 
@@ -299,7 +373,7 @@ function renderFinalCta({ status, expired, proposal, businessName, clientName, a
         section.append(createElement("h2", "", "✓ Propuesta aceptada"));
         const accepted = createElement("div", "proposal-accepted");
         accepted.append(createElement("strong", "", "Gracias" + (clientName ? ", " + clientName : "") + "."));
-        accepted.append(createElement("p", "", "Recibimos tu confirmación. Nos vamos a poner en contacto para continuar con los próximos pasos."));
+        accepted.append(createElement("p", "", "Ya registramos tu aceptación. Ahora vamos a contactarte para coordinar el inicio y el pago inicial."));
         const date = formatDate(acceptedAt);
         if (date) accepted.append(createElement("p", "", "Aceptada el " + date + "."));
         section.append(accepted);

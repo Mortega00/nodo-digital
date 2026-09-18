@@ -80,6 +80,7 @@ a { color: inherit; }
 .proposal-status { display: inline-flex; align-items: center; border-radius: 999px; padding: 5px 9px; font-size: 0.74rem; font-weight: 780; line-height: 1.2; }
 .proposal-status-sent { background: rgba(194, 136, 68, 0.12); color: var(--proposal-warning); }
 .proposal-status-accepted { background: rgba(49, 115, 94, 0.1); color: var(--proposal-success); }
+.proposal-status-expired { background: rgba(149, 100, 70, 0.11); color: #875733; }
 .proposal-hero h1 { max-width: 720px; margin: 0; font-size: clamp(2rem, 6vw, 3.9rem); letter-spacing: -0.06em; line-height: 1.02; }
 .proposal-client { margin: 16px 0 0; color: var(--proposal-muted); font-size: clamp(1rem, 2.5vw, 1.18rem); }
 .proposal-title { margin: 26px 0 0; font-size: clamp(1.22rem, 3vw, 1.72rem); letter-spacing: -0.035em; line-height: 1.25; }
@@ -93,6 +94,10 @@ a { color: inherit; }
 .proposal-section { padding: clamp(25px, 5vw, 42px) clamp(28px, 6vw, 54px); border-top: 1px solid var(--proposal-border); }
 .proposal-section h2 { margin: 8px 0 0; font-size: clamp(1.32rem, 3.2vw, 1.78rem); letter-spacing: -0.04em; line-height: 1.15; }
 .proposal-section > p:last-child { margin: 16px 0 0; color: var(--proposal-text); white-space: pre-wrap; }
+.proposal-solution-name { margin: 20px 0 0; color: var(--proposal-text); font-size: clamp(1.08rem, 2.8vw, 1.34rem); font-weight: 820; }
+.proposal-solution-price { margin: 7px 0 0; color: #553889; font-size: clamp(1.38rem, 4vw, 1.95rem); font-weight: 850; letter-spacing: -0.045em; line-height: 1.1; }
+.proposal-subsection-title { margin: 23px 0 -5px; color: var(--proposal-muted); font-size: 0.8rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.proposal-section-note { max-width: 630px; margin: 19px 0 0; color: var(--proposal-muted) !important; font-size: 0.94rem; }
 .proposal-list { display: grid; gap: 10px; margin: 20px 0 0; padding: 0; list-style: none; }
 .proposal-list li { position: relative; padding-left: 23px; color: var(--proposal-text); }
 .proposal-list li::before { position: absolute; top: 0.62em; left: 0; width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(135deg, var(--proposal-purple), var(--proposal-blue)); content: ""; }
@@ -108,7 +113,11 @@ a { color: inherit; }
 
 .investment-card { display: grid; gap: 17px; margin-top: 20px; border: 1px solid rgba(127, 90, 221, 0.25); border-radius: 15px; padding: clamp(19px, 4vw, 27px); background: linear-gradient(135deg, rgba(127, 90, 221, 0.08), rgba(91, 140, 255, 0.06)); }
 .investment-price { margin: 0; color: #553889; font-size: clamp(1.75rem, 5vw, 2.55rem); font-weight: 850; letter-spacing: -0.05em; line-height: 1; }
+.investment-payment-title { margin: 3px 0 -5px; color: var(--proposal-dim); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
 .payment-copy { margin: 0; white-space: pre-wrap; }
+.proposal-process { display: grid; gap: 10px; margin: 21px 0 0; padding: 0; list-style: none; counter-reset: proposal-steps; }
+.proposal-process li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 11px; align-items: start; counter-increment: proposal-steps; color: var(--proposal-text); }
+.proposal-process li::before { display: grid; width: 24px; height: 24px; place-items: center; border-radius: 50%; background: linear-gradient(135deg, rgba(127, 90, 221, 0.15), rgba(91, 140, 255, 0.15)); color: #624491; content: counter(proposal-steps); font-size: 0.72rem; font-weight: 850; line-height: 1; }
 
 .proposal-cta { padding: clamp(30px, 6vw, 52px) clamp(28px, 6vw, 54px); border-top: 1px solid var(--proposal-border); background: #2a2533; color: #fff; }
 .proposal-cta .section-eyebrow { color: #d4c8ec; }
@@ -171,4 +180,33 @@ a { color: inherit; }
 
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+}
+
+@media print {
+    @page { margin: 16mm; }
+
+    html,
+    body { background: #fff; }
+
+    body { min-width: 0; color: #1f1b25; font-size: 10.5pt; }
+
+    .proposal-header,
+    .proposal-footer,
+    .proposal-shell { width: 100%; }
+
+    .proposal-header { min-height: auto; padding: 0 0 10mm; }
+    .proposal-app { min-height: 0; padding: 0; }
+    .proposal-card,
+    .proposal-state { border-color: #c8c2d0; border-radius: 0; box-shadow: none; }
+    .proposal-hero,
+    .investment-card { background: #fff; }
+    .proposal-hero,
+    .proposal-section,
+    .proposal-cta { break-inside: avoid; }
+    .proposal-cta { background: #fff; color: var(--proposal-text); }
+    .proposal-cta .section-eyebrow,
+    .proposal-cta > p { color: var(--proposal-muted); }
+    .proposal-actions,
+    .accept-modal { display: none !important; }
+    .proposal-footer { padding: 8mm 0 0; }
 }

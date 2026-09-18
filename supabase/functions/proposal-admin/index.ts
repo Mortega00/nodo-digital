@@ -25,7 +25,21 @@ type UpdateDraftInput = {
     nextStep: string;
 };
 
+type ProposalEmailNotification = {
+    attempted: boolean;
+    sent: boolean;
+    reason?: "configuration_unavailable" | "recipient_unavailable" | "proposal_unavailable" | "delivery_failed";
+};
+
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const HTML_ESCAPE_MAP: Record<string, string> = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "'": "&#39;",
+    "\"": "&quot;"
+};
 const ALLOWED_ACTIONS = new Set<AdminAction>([
     "create_draft",
     "update_draft",
@@ -51,6 +65,82 @@ function nonEmptyText(value: unknown, maxLength: number): string | null {
 function text(value: unknown, maxLength: number): string | null {
     if (typeof value !== "string") return null;
     return value.length <= maxLength ? value.trim() : null;
+}
+
+function escapeHtml(value: string): string {
+    return value.replace(/[&<>'"]/g, character => HTML_ESCAPE_MAP[character]);
+}
+
+function emailGreetingName(value: unknown): string {
+    return typeof value === "string" && value.trim().length > 0 && value.trim().length <= 160
+        ? value.trim()
+        : "";
+}
+
+function proposalEmailHtml(name: string, proposalUrl: URL): string {
+    const greeting = name ? `Hola, ${escapeHtml(name)}.` : "Hola.";
+    const link = escapeHtml(proposalUrl.toString());
+
+    return `<!doctype html>
+<html lang="es">
+  <body style="margin:0;padding:0;background:#f4f1f7;color:#25222a;font-family:Arial,Helvetica,sans-serif;">
+    <div style="display:none;max-height:0;overflow:hidden;color:#f4f1f7;font-size:1px;line-height:1px;opacity:0;mso-hide:all;">Preparamos tu propuesta de NODO. Ya podés revisarla.</div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;background:#f4f1f7;">
+      <tr>
+        <td align="center" style="padding:32px 16px 40px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:600px;background:#ffffff;border:1px solid #e2ddea;border-radius:16px;overflow:hidden;">
+            <tr><td style="height:4px;background:#805be0;font-size:0;line-height:0;">&nbsp;</td></tr>
+            <tr>
+              <td style="padding:24px 32px;background:#fbfaff;border-bottom:1px solid #e8e2f0;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <td width="42" valign="middle" style="width:42px;padding:0 12px 0 0;"><img src="cid:nodo-logo" width="34" alt="NODO" border="0" style="display:block;width:34px;height:auto;border:0;outline:none;text-decoration:none;"></td>
+                    <td valign="middle" style="padding:0;color:#25222a;font-size:18px;font-weight:800;letter-spacing:0.13em;line-height:1;">NODO</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:34px 32px 30px;">
+                <h1 style="margin:0 0 16px;color:#25222a;font-size:28px;line-height:1.3;font-weight:700;">${greeting}</h1>
+                <p style="margin:0 0 18px;color:#504a58;font-size:16px;line-height:1.65;">Preparamos la propuesta para tu proyecto.</p>
+                <p style="margin:0 0 12px;color:#504a58;font-size:16px;line-height:1.65;">Ahí vas a encontrar:</p>
+                <ul style="margin:0 0 26px;padding:0 0 0 21px;color:#504a58;font-size:16px;line-height:1.7;">
+                  <li>qué proponemos;</li>
+                  <li>qué incluye;</li>
+                  <li>la inversión y la forma de pago;</li>
+                  <li>los próximos pasos.</li>
+                </ul>
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                  <tr><td style="border-radius:8px;background:#805be0;"><a href="${link}" style="display:inline-block;padding:13px 20px;color:#ffffff;font-size:15px;font-weight:700;line-height:1;text-decoration:none;">Ver propuesta</a></td></tr>
+                </table>
+                <p style="margin:28px 0 0;color:#504a58;font-size:15px;line-height:1.65;">Si querés conversar algún detalle antes de avanzar, escribinos.</p>
+              </td>
+            </tr>
+            <tr><td style="padding:22px 32px 26px;background:#fbfaff;border-top:1px solid #eee9f4;"><p style="margin:0;color:#6e6875;font-size:14px;line-height:1.6;">NODO<br>Soluciones digitales de forma clara.</p></td></tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+}
+
+function proposalEmailText(name: string, proposalUrl: URL): string {
+    return [
+        name ? `Hola, ${name}.` : "Hola.",
+        "",
+        "Preparamos la propuesta para tu proyecto.",
+        "",
+        "Ahí vas a encontrar qué proponemos, qué incluye, la inversión, la forma de pago y los próximos pasos.",
+        "",
+        `Ver propuesta: ${proposalUrl.toString()}`,
+        "",
+        "Si querés conversar algún detalle antes de avanzar, escribinos.",
+        "",
+        "NODO",
+        "Soluciones digitales de forma clara."
+    ].join("\n");
 }
 
 function stringArray(value: unknown): string[] | null {
@@ -269,6 +359,92 @@ async function callAction(
     }
 }
 
+async function sendProposalReadyEmail(
+    serverClient: ReturnType<typeof createClient>,
+    proposalId: string,
+    nodoSiteUrl: URL | null
+): Promise<ProposalEmailNotification> {
+    try {
+    const resendApiKey = Deno.env.get("RESEND_API_KEY")?.trim();
+    const emailFrom = Deno.env.get("NODO_EMAIL_FROM")?.trim();
+    if (!resendApiKey || !emailFrom || !nodoSiteUrl) {
+        console.warn("proposal-admin email notification unavailable", { proposalId, reason: "configuration_unavailable" });
+        return { attempted: false, sent: false, reason: "configuration_unavailable" };
+    }
+
+    const { data: proposalData, error: proposalError } = await serverClient
+        .from("proposals")
+        .select("id, lead_id, status, public_token, client_name")
+        .eq("id", proposalId)
+        .maybeSingle();
+
+    if (proposalError || !isRecord(proposalData) || proposalData.status !== "sent"
+        || typeof proposalData.lead_id !== "string" || typeof proposalData.public_token !== "string") {
+        console.warn("proposal-admin email notification unavailable", { proposalId, reason: "proposal_unavailable" });
+        return { attempted: false, sent: false, reason: "proposal_unavailable" };
+    }
+
+    const { data: leadData, error: leadError } = await serverClient
+        .from("leads")
+        .select("email, name")
+        .eq("id", proposalData.lead_id)
+        .maybeSingle();
+
+    const recipient = isRecord(leadData) && typeof leadData.email === "string"
+        ? leadData.email.trim().toLowerCase()
+        : "";
+    if (leadError || !EMAIL_PATTERN.test(recipient)) {
+        console.warn("proposal-admin email notification unavailable", { proposalId, reason: "recipient_unavailable" });
+        return { attempted: false, sent: false, reason: "recipient_unavailable" };
+    }
+
+    const proposalUrl = new URL("propuesta.html", nodoSiteUrl);
+    proposalUrl.searchParams.set("t", proposalData.public_token);
+    const logoUrl = new URL("assets/logo.png", nodoSiteUrl);
+    const recipientName = emailGreetingName(proposalData.client_name) || emailGreetingName(leadData.name);
+
+    try {
+        const resendResponse = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${resendApiKey}`,
+                "Content-Type": "application/json",
+                "User-Agent": "nodo-proposal-notification/1.0"
+            },
+            body: JSON.stringify({
+                from: emailFrom,
+                to: [recipient],
+                subject: recipientName ? `${recipientName}, tu propuesta de NODO está lista` : "Preparamos tu propuesta | NODO",
+                html: proposalEmailHtml(recipientName, proposalUrl),
+                text: proposalEmailText(recipientName, proposalUrl),
+                attachments: [
+                    {
+                        path: logoUrl.toString(),
+                        filename: "nodo-logo.png",
+                        contentId: "nodo-logo"
+                    }
+                ]
+            })
+        });
+
+        if (!resendResponse.ok) {
+            console.warn("proposal-admin email delivery failed", { proposalId, status: resendResponse.status });
+            return { attempted: true, sent: false, reason: "delivery_failed" };
+        }
+    } catch {
+        console.warn("proposal-admin email delivery failed", { proposalId, reason: "delivery_failed" });
+        return { attempted: true, sent: false, reason: "delivery_failed" };
+    }
+
+    console.info("proposal-admin email delivered", { proposalId });
+    return { attempted: true, sent: true };
+    } catch {
+        // La propuesta ya fue enviada: una falla secundaria de notificación nunca revierte esa transición.
+        console.warn("proposal-admin email notification failed", { proposalId, reason: "delivery_failed" });
+        return { attempted: false, sent: false, reason: "delivery_failed" };
+    }
+}
+
 Deno.serve(async (request: Request) => {
     const siteUrl = configuredSiteUrl();
     const origin = allowedOrigin(request.headers.get("Origin"), siteUrl);
@@ -347,7 +523,10 @@ Deno.serve(async (request: Request) => {
             return json({ ok: false, error: "proposal_action_failed" }, 500, origin);
         }
 
-        return json({ ok: true, data: result.data }, 200, origin);
+        const notification = body.action === "send"
+            ? await sendProposalReadyEmail(serverClient, body.proposalId as string, siteUrl)
+            : undefined;
+        return json({ ok: true, data: result.data, notification }, 200, origin);
     } catch {
         console.error("proposal-admin unexpected failure");
         return json({ ok: false, error: "server_error" }, 500, origin);

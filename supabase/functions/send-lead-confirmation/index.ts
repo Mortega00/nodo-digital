@@ -24,10 +24,10 @@ const CURRENT_PLAN_PRICES = {
 
 const CUSTOM_PLAN_DETAILS = {
     "NODO Personalizado": "Presupuesto a medida",
-    Personalizado: "Desde $400.000 ARS"
+    Personalizado: "Presupuesto a medida"
 } as const;
 
-const NODO_LOGO_URL = "https://mortega00.github.io/nodo-digital/assets/logo.png";
+const NODO_LOGO_URL = "https://nododigital.com.ar/assets/logo.png";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const HTML_ESCAPE_MAP: Record<string, string> = {
