@@ -1,7 +1,7 @@
 const plans = {
     presence: {
         name: "Presencia",
-        price: "$180.000 ARS",
+        price: "A definir según el alcance",
         delivery: "Entrega estimada: 2 a 5 días hábiles.",
         description: "Una presencia digital profesional, clara y lista para mostrar lo que hacés y recibir consultas.",
         benefits: [
@@ -22,7 +22,7 @@ const plans = {
     },
     local: {
         name: "Local",
-        price: "$280.000 ARS",
+        price: "A definir según el alcance",
         delivery: "Entrega estimada: 5 a 10 días hábiles.",
         description: "Para negocios que necesitan una buena web y mayor foco en búsquedas y presencia local.",
         benefits: [
@@ -44,7 +44,7 @@ const plans = {
     },
     custom: {
         name: "Personalizado",
-        price: "Presupuesto a medida",
+        price: "A definir según el alcance",
         delivery: "Lo definimos según el proyecto.",
         description: "Para proyectos que necesitan más que una web estándar y requieren definir funciones a medida.",
         benefits: [
@@ -159,16 +159,29 @@ const showcaseProjects = [
     },
     {
         id: "bloc",
-        eyebrow: "SISTEMA / GESTIÓN",
+        eyebrow: "PRODUCTO PROPIO / SISTEMA",
+        type: "Sistema de gestión",
         name: "BLOC",
-        subtitle: "Control y seguimiento para equipos y operaciones.",
-        description: "Sistema modular para registrar actividad, organizar el trabajo diario y separar experiencias según el rol de cada usuario.",
-        tags: ["Gestión", "Roles", "Seguimiento"],
+        subtitle: "Organización y seguimiento del trabajo diario.",
+        description: "Sistema pensado para organizar tareas, registrar actividad y facilitar el seguimiento del trabajo diario según el rol de cada usuario.",
+        tags: ["Gestión", "Seguimiento", "Roles"],
         image: "assets/bloc-case-cover.png",
         imageAlt: "Panel de Supervisión de BLOC, sistema de control y seguimiento.",
         url: "https://bloc-ar.netlify.app/",
-        linkLabel: "Ver proyecto",
+        linkLabel: "Ver producto",
         status: "En desarrollo"
+    },
+    {
+        id: "movia-ortopedia",
+        eyebrow: "DEMO SECTORIAL",
+        type: "Concepto para ortopedia",
+        name: "MOVIA Ortopedia",
+        subtitle: "Demo para productos, alquiler y consultas.",
+        description: "Concepto desarrollado por NODO para mostrar cómo podría resolverse la presencia digital de una ortopedia orientada a productos, alquiler y consultas. Es una demo, no un cliente real.",
+        tags: ["Demo", "Productos", "Consultas"],
+        url: "demos/ortopedia/",
+        linkLabel: "Ver demo",
+        status: "Demo sectorial"
     }
 ];
 
@@ -458,26 +471,10 @@ const staticWhatsAppMessages = {
 };
 
 function consultationMessage(plan) {
-    if (plan === plans.custom) {
-        return whatsappUrl([
-            "Hola NODO! Completé el asesor y mi proyecto quedó como Personalizado.",
-            "",
-            "Me gustaría contarles mejor la idea para que podamos definir qué necesito y recibir una propuesta.",
-            "",
-            "Origen: Recomendación NODO Web"
-        ]);
-    }
-
     return whatsappUrl([
-        "Hola NODO! Completé el asesor y antes de avanzar me gustaría hablar con ustedes.",
+        "Hola NODO! Completé el asesor y me gustaría hablar con ustedes.",
         "",
-        "Me recomendaron:",
-        plan.name,
-        "",
-        "Valor orientativo:",
-        plan.price,
-        "",
-        "Quisiera consultarles algunas cosas antes de seguir.",
+        "Quisiera contarles sobre mi proyecto y definir qué solución tiene más sentido.",
         "",
         "Origen: Recomendación NODO Web"
     ]);
@@ -495,8 +492,7 @@ function projectMessage(plan) {
         "Negocio / marca: " + business,
         "",
         "RECOMENDACIÓN",
-        "Plan: " + plan.name,
-        "Valor orientativo: " + plan.price
+        "Opción: " + plan.name
     ];
 
     if (contact.comment.trim()) lines.push("", "COMENTARIO", contact.comment.trim());
@@ -703,6 +699,170 @@ async function submitContactLead(planKey, plan, honeypotValue) {
     scrollSuccessIntoView();
 }
 
+function buildCommercialLeadComment(data) {
+    const sections = ["MENSAJE", data.message];
+    if (data.improvements.length) sections.push("QUÉ LE GUSTARÍA MEJORAR", data.improvements.map(item => "• " + item).join("\n"));
+    if (data.currentWebsite) sections.push("WEB ACTUAL", data.currentWebsite);
+    return sections.join("\n\n");
+}
+
+function buildCommercialLeadPayload(data) {
+    const marketingEmailConsent = Boolean(data.marketingEmailConsent);
+    return {
+        name: data.name,
+        email: data.email,
+        whatsapp: data.whatsapp,
+        business_name: data.business || null,
+        no_business_name: !data.business,
+        comment: buildCommercialLeadComment(data),
+        advisor_goals: [],
+        advisor_today: [],
+        advisor_content: [],
+        advisor_start: null,
+        advisor_commerce_need: null,
+        recommended_plan_key: "custom",
+        recommended_plan_name: plans.custom.name,
+        recommended_price: plans.custom.price,
+        marketing_email_consent: marketingEmailConsent,
+        marketing_consent_at: marketingEmailConsent ? new Date().toISOString() : null
+    };
+}
+
+function buildCommercialConfirmationEmailPayload(data) {
+    return {
+        name: data.name,
+        email: data.email,
+        businessName: data.business || null,
+        planName: plans.custom.name,
+        planPrice: plans.custom.price,
+        planKey: "custom"
+    };
+}
+
+function commercialContactWhatsApp(data) {
+    const lines = [
+        "Hola NODO! Quiero que revisemos mi proyecto.",
+        "",
+        "DATOS",
+        "Nombre: " + data.name,
+        "WhatsApp: " + data.whatsapp,
+        "Email: " + data.email,
+        "Negocio / marca: " + (data.business || "No informado"),
+        "",
+        "QUÉ QUIERO MEJORAR",
+        data.improvements.join(", "),
+        "",
+        "MENSAJE",
+        data.message
+    ];
+    if (data.currentWebsite) lines.push("", "WEB ACTUAL", data.currentWebsite);
+    lines.push("", "Origen: Formulario comercial NODO Web");
+    return whatsappUrl(lines);
+}
+
+function setupCommercialContactForm() {
+    const form = document.getElementById("commercial-contact-form");
+    const status = document.getElementById("commercial-contact-status");
+    const submit = form?.querySelector("[data-commercial-contact-submit]");
+    const fallback = form?.querySelector("[data-commercial-contact-fallback]");
+    const currentWebsite = form?.elements.currentWebsite;
+    if (!form || !status || !submit || !fallback || !currentWebsite) return;
+
+    let isSubmitting = false;
+    const setBusy = busy => {
+        form.setAttribute("aria-busy", String(busy));
+        submit.disabled = busy;
+        submit.setAttribute("aria-disabled", String(busy));
+        submit.textContent = busy ? "Enviando…" : "Quiero que revisemos mi proyecto";
+    };
+    const setStatus = (message, isError = false) => {
+        status.textContent = message;
+        status.classList.toggle("is-error", isError);
+    };
+    const formValue = name => String(new FormData(form).get(name) || "").trim();
+    const getData = () => ({
+        name: formValue("name"),
+        business: formValue("business"),
+        whatsapp: formValue("whatsapp"),
+        email: formValue("email").toLowerCase(),
+        improvements: new FormData(form).getAll("improvements").map(value => String(value).trim()).filter(Boolean),
+        currentWebsite: formValue("currentWebsite"),
+        message: formValue("message"),
+        marketingEmailConsent: Boolean(form.querySelector("[name='marketingEmailConsent']")?.checked)
+    });
+
+    form.addEventListener("input", () => {
+        if (isSubmitting) return;
+        setStatus("");
+        fallback.hidden = true;
+        submit.textContent = "Quiero que revisemos mi proyecto";
+    });
+    form.addEventListener("change", () => {
+        if (isSubmitting) return;
+        setStatus("");
+        fallback.hidden = true;
+        submit.textContent = "Quiero que revisemos mi proyecto";
+    });
+    form.addEventListener("submit", async event => {
+        event.preventDefault();
+        if (isSubmitting || form.elements.website?.value?.trim()) return;
+
+        const data = getData();
+        const missing = [];
+        if (!data.name) missing.push("tu nombre");
+        if (!data.whatsapp) missing.push("tu WhatsApp");
+        if (!data.email) missing.push("tu email");
+        if (!data.message) missing.push("una breve descripción de tu proyecto");
+        if (missing.length) {
+            setStatus("Completá " + missing.join(", ") + " para enviar la consulta.", true);
+            return;
+        }
+        if (!isValidEmail(data.email)) {
+            setStatus("Ingresá un email válido para continuar.", true);
+            return;
+        }
+        if (!data.improvements.length) {
+            setStatus("Elegí al menos una opción sobre lo que te gustaría mejorar.", true);
+            return;
+        }
+        if (data.currentWebsite && !currentWebsite.validity.valid) {
+            setStatus("Ingresá una URL válida para tu web actual o dejá ese campo vacío.", true);
+            return;
+        }
+
+        isSubmitting = true;
+        fallback.hidden = true;
+        setStatus("");
+        setBusy(true);
+        try {
+            await submitLeadToSupabase(buildCommercialLeadPayload(data));
+        } catch {
+            isSubmitting = false;
+            setBusy(false);
+            fallback.href = commercialContactWhatsApp(data);
+            fallback.hidden = false;
+            submit.textContent = "Reintentar";
+            setStatus("No pudimos enviar tu consulta en este momento. Podés reintentar o escribirnos por WhatsApp.", true);
+            return;
+        }
+
+        let emailConfirmationSent = false;
+        try {
+            await sendLeadConfirmationEmail(buildCommercialConfirmationEmailPayload(data));
+            emailConfirmationSent = true;
+        } catch {
+            emailConfirmationSent = false;
+        }
+
+        form.reset();
+        isSubmitting = false;
+        setBusy(false);
+        setStatus(emailConfirmationSent
+            ? "Listo, recibimos tu consulta. Te enviamos una confirmación a " + data.email + "."
+            : "Listo, recibimos tu consulta. Vamos a responderte personalmente con los datos que nos dejaste.");
+    });
+}
+
 function renderStart() {
     const view = createElement("div", "advisor-view advisor-start");
     view.append(createElement("p", "eyebrow", "EMPEZAMOS CUANDO QUIERAS"));
@@ -838,7 +998,6 @@ function setupDetailsAccordion(container) {
 function renderResult() {
     const key = getRecommendation(state.answers);
     const plan = plans[key];
-    const isCustomPlan = key === "custom";
     const view = createElement("div", "advisor-view");
     view.setAttribute("aria-live", "polite");
     view.append(createElement("p", "result-eyebrow", "UNA OPCIÓN PARA VOS"));
@@ -847,9 +1006,6 @@ function renderResult() {
     const card = createElement("article", "plan-result");
     card.append(createElement("h3", "", plan.name));
     card.append(createElement("p", "plan-summary", getRecommendationSummary(key)));
-    card.append(createElement("p", "plan-price", plan.price));
-    card.append(createElement("p", "plan-price-context", isCustomPlan ? "Valor inicial según el alcance" : "Valor estimado inicial"));
-    card.append(createElement("p", "plan-price-note", isCustomPlan ? "El valor final depende de las funciones y el alcance que definamos juntos." : "El valor final se confirma cuando definimos juntos el contenido y las funciones necesarias."));
     card.append(createElement("p", "plan-time", plan.delivery));
     if (plan.note) card.append(createElement("p", "plan-note", plan.note));
     const benefits = createElement("ul", "plan-facts");
@@ -865,13 +1021,9 @@ function renderResult() {
     setupDetailsAccordion(details);
 
     const actions = createElement("div", "result-actions");
-    const proceed = createButton(isCustomPlan ? "Contarnos el proyecto" : "Quiero avanzar", "button button-primary", () => {
-        state.screen = "contact";
-        state.contactMessage = "";
-        renderAdvisor();
-        resetAdvisorScroll();
-    });
-    const talk = createElement("a", "button button-secondary", isCustomPlan ? "Hablar con NODO ↗" : "Quiero hablarlo primero ↗");
+    const proceed = createElement("a", "button button-primary", "Contanos tu proyecto");
+    proceed.href = "#contacto";
+    const talk = createElement("a", "button button-secondary", "Hablar con NODO ↗");
     talk.href = consultationMessage(plan);
     talk.target = "_blank";
     talk.rel = "noopener noreferrer";
@@ -1240,7 +1392,7 @@ function setupProjectShowcase() {
         status.textContent = "Mostrando " + showcaseProjects[index].name + ". Proyecto " + (index + 1) + " de " + showcaseProjects.length + ".";
     };
     const moveTo = index => {
-        const targetIndex = (index + cards.length) % cards.length;
+        const targetIndex = ((index % cards.length) + cards.length) % cards.length;
         viewport.scrollTo({ left: cards[targetIndex].offsetLeft, behavior: reducedMotion() ? "auto" : "smooth" });
         updateActive(targetIndex);
     };
@@ -1258,6 +1410,7 @@ function setupProjectShowcase() {
     });
 
     let scrollFrame = 0;
+    let scrollSettleTimer = 0;
     viewport.addEventListener("scroll", () => {
         if (scrollFrame) return;
         scrollFrame = window.requestAnimationFrame(() => {
@@ -1273,7 +1426,8 @@ function setupProjectShowcase() {
                     closestIndex = index;
                 }
             });
-            updateActive(closestIndex);
+            window.clearTimeout(scrollSettleTimer);
+            scrollSettleTimer = window.setTimeout(() => updateActive(closestIndex), 110);
         });
     }, { passive: true });
     updateActive(0);
@@ -1299,6 +1453,19 @@ function setupStaticWhatsAppLinks() {
 function setupAdvisorScrollLinks() {
     document.querySelectorAll("[data-scroll-advisor]").forEach(link => link.addEventListener("click", event => {
         event.preventDefault();
+        scrollToAdvisor();
+    }));
+}
+
+function setupAdvisorEntryLinks() {
+    document.querySelectorAll("[data-start-advisor]").forEach(link => link.addEventListener("click", event => {
+        event.preventDefault();
+        state.screen = "steps";
+        state.currentStep = 0;
+        state.answers = {};
+        state.message = "";
+        renderAdvisor();
+        resetAdvisorScroll();
         scrollToAdvisor();
     }));
 }
@@ -1521,5 +1688,7 @@ setupPageChrome();
 setupFaqAccordion();
 setupStaticWhatsAppLinks();
 setupAdvisorScrollLinks();
+setupAdvisorEntryLinks();
+setupCommercialContactForm();
 setupProjectShowcase();
 setupTeamModals();
