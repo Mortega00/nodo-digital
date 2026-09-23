@@ -1,0 +1,177 @@
+.nativa-case-page .nativa-case-header .header-content {
+    flex-wrap: wrap;
+    gap: 10px 18px;
+}
+
+.nativa-case-page .nativa-case-header .primary-navigation {
+    display: flex;
+    order: 2;
+    width: 100%;
+    gap: 16px;
+    padding-bottom: 4px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+.nativa-case-page .nativa-case-header .primary-navigation a {
+    flex: 0 0 auto;
+    color: var(--web-muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.nativa-case-page .nativa-case-hero {
+    padding-top: 68px;
+    padding-bottom: 66px;
+}
+
+.nativa-case-page .nativa-case-hero-content { max-width: 840px; }
+
+.nativa-case-page .nativa-case-hero h1 {
+    max-width: 800px;
+    margin-bottom: 22px;
+    font-size: clamp(2.4rem, 6.8vw, 4.55rem);
+    letter-spacing: -0.06em;
+    line-height: 1.01;
+}
+
+.nativa-case-page .nativa-case-hero p:not(.eyebrow) {
+    max-width: 720px;
+    margin-bottom: 14px;
+    color: var(--web-muted);
+    font-size: clamp(1rem, 2vw, 1.12rem);
+    line-height: 1.68;
+}
+
+.nativa-case-page .nativa-case-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.nativa-case-page .nativa-case-card-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.nativa-case-page .nativa-case-card {
+    min-width: 0;
+    padding: 22px;
+    border: 1px solid var(--web-border);
+    border-radius: 18px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.045), rgba(185, 167, 216, 0.025));
+}
+
+.nativa-case-page .nativa-case-card h3 {
+    margin-bottom: 9px;
+    font-size: 1.06rem;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+}
+
+.nativa-case-page .nativa-case-card p,
+.nativa-case-page .nativa-case-local-card p {
+    margin-bottom: 0;
+    color: var(--web-muted);
+    line-height: 1.65;
+}
+
+.nativa-case-page .nativa-case-decisions-section,
+.nativa-case-page .nativa-case-learnings-section {
+    background: linear-gradient(145deg, rgba(91, 140, 255, 0.05), transparent 60%);
+}
+
+.nativa-case-page .nativa-case-built-grid {
+    display: grid;
+    gap: 24px;
+    align-items: center;
+}
+
+.nativa-case-page .nativa-case-deliverables {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.nativa-case-page .nativa-case-deliverables li {
+    display: flex;
+    gap: 10px;
+    color: var(--web-text);
+    line-height: 1.48;
+}
+
+.nativa-case-page .nativa-case-deliverables li::before {
+    content: "✓";
+    flex: 0 0 auto;
+    color: var(--web-lilac);
+    font-weight: 800;
+}
+
+.nativa-case-page .nativa-case-note {
+    max-width: 650px;
+    margin: 24px 0 0;
+    color: var(--web-dim);
+    line-height: 1.65;
+}
+
+.nativa-case-page .nativa-case-cover {
+    display: block;
+    overflow: hidden;
+    border: 1px solid var(--web-border);
+    border-radius: 15px;
+    background: var(--web-card-strong);
+}
+
+.nativa-case-page .nativa-case-cover img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.nativa-case-page .nativa-case-local-card {
+    max-width: 860px;
+    padding: 26px 24px;
+    border: 1px solid var(--web-border);
+    border-radius: var(--web-radius);
+    background: linear-gradient(135deg, rgba(155, 108, 255, 0.1), rgba(91, 140, 255, 0.045));
+}
+
+.nativa-case-page .nativa-case-local-card h2 { max-width: 660px; }
+
+.nativa-case-page .nativa-case-local-card p:not(.eyebrow) {
+    max-width: 720px;
+    margin-bottom: 14px;
+}
+
+.nativa-case-page .nativa-case-local-card p:last-child { margin-bottom: 0; }
+
+.nativa-case-page .nativa-case-footer { margin-top: 0; }
+
+@media (min-width: 640px) {
+    .nativa-case-page .nativa-case-card-grid-four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 768px) {
+    .nativa-case-page .nativa-case-hero { padding-top: 96px; padding-bottom: 82px; }
+    .nativa-case-page .nativa-case-card-grid-three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .nativa-case-page .nativa-case-built-grid { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); }
+}
+
+@media (min-width: 1024px) {
+    .nativa-case-page .nativa-case-header .header-content { flex-wrap: nowrap; }
+    .nativa-case-page .nativa-case-header .primary-navigation { order: 0; width: auto; margin-inline: auto 0; padding-bottom: 0; overflow: visible; }
+    .nativa-case-page .nativa-case-card-grid-four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (max-width: 639px) {
+    .nativa-case-page .nativa-case-header .primary-navigation { padding-bottom: 7px; }
+    .nativa-case-page .nativa-case-hero { padding-top: 50px; padding-bottom: 48px; }
+    .nativa-case-page .nativa-case-hero h1 { font-size: clamp(2.2rem, 10vw, 2.75rem); }
+    .nativa-case-page .nativa-case-actions { display: grid; }
+    .nativa-case-page .nativa-case-actions .button { width: 100%; }
+}
