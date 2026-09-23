@@ -202,8 +202,14 @@ const state = {
     contactMessage: "",
     isSubmitting: false,
     submitError: false,
-    emailConfirmationSent: null
+    emailConfirmationSent: null,
+    commercialAdvisorContext: null
 };
+
+function resetAdvisorState() {
+    state.answers = {};
+    state.commercialAdvisorContext = null;
+}
 
 const advisor = document.getElementById("advisor");
 
@@ -263,6 +269,7 @@ function toggleOption(step, option) {
         state.answers[step.id] = next;
     }
 
+    state.commercialAdvisorContext = null;
     state.message = "";
     renderAdvisor();
 }
@@ -271,10 +278,55 @@ function selectedCommerceNeed() {
     return state.answers.commerceNeeds || "";
 }
 
+function advisorContextFromAnswers() {
+    const recommendedPlanKey = getRecommendation(state.answers);
+    const plan = plans[recommendedPlanKey];
+    return {
+        goals: [...(state.answers.goals || [])],
+        today: [...(state.answers.today || [])],
+        content: [...(state.answers.content || [])],
+        start: (state.answers.start || [])[0] || null,
+        commerceNeed: state.answers.commerceNeeds || null,
+        recommendedPlanKey,
+        recommendedPlanName: plan.name,
+        recommendedPrice: plan.price
+    };
+}
+
+function improvementsForAdvisorContext(context) {
+    const improvements = new Set();
+    const goals = new Set(context.goals);
+    const hasExistingPage = context.today.includes("current-page") || context.today.includes("old-page");
+
+    if (!hasExistingPage && ["professional", "messages", "services"].some(goal => goals.has(goal))) improvements.add("Necesito una web desde cero");
+    if (goals.has("bookings")) improvements.add("Necesito turnos o reservas");
+    if (goals.has("products") || goals.has("sell")) improvements.add("Quiero mostrar o vender productos");
+    if (goals.has("unsure")) improvements.add("No estoy seguro");
+    if (hasExistingPage) improvements.add("Quiero mejorar mi web actual");
+
+    return improvements;
+}
+
+function continueWithAdvisorContext() {
+    const context = advisorContextFromAnswers();
+    state.commercialAdvisorContext = context;
+
+    const contactSection = document.getElementById("contacto");
+    const form = document.getElementById("commercial-contact-form");
+    const improvements = improvementsForAdvisorContext(context);
+    form?.querySelectorAll("input[name='improvements']").forEach(input => {
+        if (improvements.has(input.value)) input.checked = true;
+    });
+
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    contactSection?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+}
+
 function toggleCommerceNeed(option) {
     const selected = selectedCommerceNeed();
     if (selected === option.id) delete state.answers.commerceNeeds;
     else state.answers.commerceNeeds = option.id;
+    state.commercialAdvisorContext = null;
     state.message = "";
     renderAdvisor();
 }
@@ -699,47 +751,75 @@ async function submitContactLead(planKey, plan, honeypotValue) {
     scrollSuccessIntoView();
 }
 
-function buildCommercialLeadComment(data) {
-    const sections = ["MENSAJE", data.message];
-    if (data.improvements.length) sections.push("QUÉ LE GUSTARÍA MEJORAR", data.improvements.map(item => "• " + item).join("\n"));
-    if (data.currentWebsite) sections.push("WEB ACTUAL", data.currentWebsite);
+function advisorAnswerLabels(stepId, answers) {
+    return answers.map(answer => labelFor(stepId, answer) || answer).filter(Boolean);
+}
+
+function advisorCommerceNeedLabel(answer) {
+    return commerceNeedOptions.find(option => option.id === answer)?.label || answer || "No corresponde";
+}
+
+function advisorContextComment(context) {
+    const formatAnswers = answers => answers.length ? answers.map(answer => "• " + answer).join("\n") : "No informado";
+    return [
+        "CONTEXTO DEL ASESOR:",
+        "Objetivos:\n" + formatAnswers(advisorAnswerLabels("goals", context.goals)),
+        "Situación actual:\n" + formatAnswers(advisorAnswerLabels("today", context.today)),
+        "Contenido disponible:\n" + formatAnswers(advisorAnswerLabels("content", context.content)),
+        "Tipo de solución que busca:\n" + (labelFor("start", context.start) || "No informado"),
+        "Necesidad de comercio:\n" + advisorCommerceNeedLabel(context.commerceNeed),
+        "Recomendación:\n" + context.recommendedPlanName
+    ].join("\n\n");
+}
+
+function buildCommercialLeadComment(data, advisorContext) {
+    const sections = [
+        "MENSAJE DEL CLIENTE:\n" + data.message,
+        "QUÉ QUIERE MEJORAR:\n" + data.improvements.map(item => "• " + item).join("\n")
+    ];
+    if (data.currentWebsite) sections.push("WEB ACTUAL:\n" + data.currentWebsite);
+    if (advisorContext) sections.push(advisorContextComment(advisorContext));
     return sections.join("\n\n");
 }
 
-function buildCommercialLeadPayload(data) {
+function buildCommercialLeadPayload(data, advisorContext = null) {
     const marketingEmailConsent = Boolean(data.marketingEmailConsent);
+    const recommendedPlanKey = advisorContext?.recommendedPlanKey || "custom";
+    const plan = plans[recommendedPlanKey];
     return {
         name: data.name,
         email: data.email,
         whatsapp: data.whatsapp,
         business_name: data.business || null,
         no_business_name: !data.business,
-        comment: buildCommercialLeadComment(data),
-        advisor_goals: [],
-        advisor_today: [],
-        advisor_content: [],
-        advisor_start: null,
-        advisor_commerce_need: null,
-        recommended_plan_key: "custom",
-        recommended_plan_name: plans.custom.name,
-        recommended_price: plans.custom.price,
+        comment: buildCommercialLeadComment(data, advisorContext),
+        advisor_goals: advisorContext?.goals || [],
+        advisor_today: advisorContext?.today || [],
+        advisor_content: advisorContext?.content || [],
+        advisor_start: advisorContext?.start || null,
+        advisor_commerce_need: advisorContext?.commerceNeed || null,
+        recommended_plan_key: recommendedPlanKey,
+        recommended_plan_name: plan.name,
+        recommended_price: advisorContext?.recommendedPrice || plan.price,
         marketing_email_consent: marketingEmailConsent,
         marketing_consent_at: marketingEmailConsent ? new Date().toISOString() : null
     };
 }
 
-function buildCommercialConfirmationEmailPayload(data) {
+function buildCommercialConfirmationEmailPayload(data, advisorContext = null) {
+    const planKey = advisorContext?.recommendedPlanKey || "custom";
+    const plan = plans[planKey];
     return {
         name: data.name,
         email: data.email,
         businessName: data.business || null,
-        planName: plans.custom.name,
-        planPrice: plans.custom.price,
-        planKey: "custom"
+        planName: plan.name,
+        planPrice: advisorContext?.recommendedPrice || plan.price,
+        planKey
     };
 }
 
-function commercialContactWhatsApp(data) {
+function commercialContactWhatsApp(data, advisorContext = null) {
     const lines = [
         "Hola NODO! Quiero que revisemos mi proyecto.",
         "",
@@ -756,6 +836,17 @@ function commercialContactWhatsApp(data) {
         data.message
     ];
     if (data.currentWebsite) lines.push("", "WEB ACTUAL", data.currentWebsite);
+    if (advisorContext) {
+        lines.push(
+            "", "CONTEXTO DEL ASESOR",
+            "Objetivos: " + advisorAnswerLabels("goals", advisorContext.goals).join(", "),
+            "Situación actual: " + advisorAnswerLabels("today", advisorContext.today).join(", "),
+            "Contenido disponible: " + advisorAnswerLabels("content", advisorContext.content).join(", "),
+            "Tipo de solución que busca: " + (labelFor("start", advisorContext.start) || "No informado"),
+            "Necesidad de comercio: " + advisorCommerceNeedLabel(advisorContext.commerceNeed),
+            "Recomendación: " + advisorContext.recommendedPlanName
+        );
+    }
     lines.push("", "Origen: Formulario comercial NODO Web");
     return whatsappUrl(lines);
 }
@@ -808,6 +899,7 @@ function setupCommercialContactForm() {
         if (isSubmitting || form.elements.website?.value?.trim()) return;
 
         const data = getData();
+        const advisorContext = state.commercialAdvisorContext;
         const missing = [];
         if (!data.name) missing.push("tu nombre");
         if (!data.whatsapp) missing.push("tu WhatsApp");
@@ -835,11 +927,11 @@ function setupCommercialContactForm() {
         setStatus("");
         setBusy(true);
         try {
-            await submitLeadToSupabase(buildCommercialLeadPayload(data));
+            await submitLeadToSupabase(buildCommercialLeadPayload(data, advisorContext));
         } catch {
             isSubmitting = false;
             setBusy(false);
-            fallback.href = commercialContactWhatsApp(data);
+            fallback.href = commercialContactWhatsApp(data, advisorContext);
             fallback.hidden = false;
             submit.textContent = "Reintentar";
             setStatus("No pudimos enviar tu consulta en este momento. Podés reintentar o escribirnos por WhatsApp.", true);
@@ -848,13 +940,14 @@ function setupCommercialContactForm() {
 
         let emailConfirmationSent = false;
         try {
-            await sendLeadConfirmationEmail(buildCommercialConfirmationEmailPayload(data));
+            await sendLeadConfirmationEmail(buildCommercialConfirmationEmailPayload(data, advisorContext));
             emailConfirmationSent = true;
         } catch {
             emailConfirmationSent = false;
         }
 
         form.reset();
+        state.commercialAdvisorContext = null;
         isSubmitting = false;
         setBusy(false);
         setStatus(emailConfirmationSent
@@ -1021,8 +1114,12 @@ function renderResult() {
     setupDetailsAccordion(details);
 
     const actions = createElement("div", "result-actions");
-    const proceed = createElement("a", "button button-primary", "Contanos tu proyecto");
+    const proceed = createElement("a", "button button-primary", "Continuar con esta opción");
     proceed.href = "#contacto";
+    proceed.addEventListener("click", event => {
+        event.preventDefault();
+        continueWithAdvisorContext();
+    });
     const talk = createElement("a", "button button-secondary", "Hablar con NODO ↗");
     talk.href = consultationMessage(plan);
     talk.target = "_blank";
@@ -1030,7 +1127,7 @@ function renderResult() {
     const reset = createButton("Empezar de nuevo", "button button-text", () => {
         state.screen = "start";
         state.currentStep = 0;
-        state.answers = {};
+        resetAdvisorState();
         state.message = "";
         state.contact = { name: "", email: "", whatsapp: "", business: "", noBusinessName: false, comment: "", marketingEmailConsent: false };
         state.contactMessage = "";
@@ -1178,7 +1275,7 @@ function renderSuccess() {
     const reset = createButton("Empezar de nuevo", "button button-text", () => {
         state.screen = "start";
         state.currentStep = 0;
-        state.answers = {};
+        resetAdvisorState();
         state.message = "";
         state.contact = { name: "", email: "", whatsapp: "", business: "", noBusinessName: false, comment: "", marketingEmailConsent: false };
         state.contactMessage = "";
@@ -1462,7 +1559,7 @@ function setupAdvisorEntryLinks() {
         event.preventDefault();
         state.screen = "steps";
         state.currentStep = 0;
-        state.answers = {};
+        resetAdvisorState();
         state.message = "";
         renderAdvisor();
         resetAdvisorScroll();
