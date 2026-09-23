@@ -1,0 +1,284 @@
+.hola-page .hola-header {
+    position: relative;
+}
+
+.hola-page .hola-header-content {
+    min-height: 38px;
+}
+
+.hola-page .hola-header-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 42px;
+    color: var(--web-lilac);
+    font-size: 0.88rem;
+    font-weight: 750;
+    text-decoration: none;
+}
+
+.hola-page .hola-header-link span {
+    margin-left: 6px;
+}
+
+.hola-page .hola-main {
+    padding-bottom: 36px;
+}
+
+.hola-page .hola-shell {
+    width: min(100% - 40px, 720px);
+}
+
+.hola-page .hola-hero {
+    padding: clamp(52px, 10vw, 92px) 0 28px;
+}
+
+.hola-page .hola-card,
+.hola-page .hola-note,
+.hola-page .hola-final-card {
+    border: 1px solid var(--web-border);
+    border-radius: 24px;
+    background: var(--web-card);
+    box-shadow: var(--web-shadow);
+}
+
+.hola-page .hola-card {
+    padding: clamp(28px, 7vw, 48px);
+    background:
+        radial-gradient(circle at 100% 0, rgba(91, 140, 255, 0.14), transparent 16rem),
+        radial-gradient(circle at 0 100%, rgba(155, 108, 255, 0.11), transparent 18rem),
+        var(--web-card);
+}
+
+.hola-page .hola-card .eyebrow {
+    margin-bottom: 16px;
+}
+
+.hola-page .hola-card h1 {
+    max-width: 10ch;
+    margin-bottom: 22px;
+    font-size: clamp(2.35rem, 11vw, 4.25rem);
+    letter-spacing: -0.06em;
+    line-height: 0.98;
+}
+
+.hola-page .hola-introduction {
+    max-width: 570px;
+    color: var(--web-muted);
+    font-size: clamp(1rem, 3.8vw, 1.12rem);
+}
+
+.hola-page .hola-introduction p {
+    margin-bottom: 14px;
+}
+
+.hola-page .hola-introduction p:last-child {
+    margin-bottom: 28px;
+}
+
+.hola-page .hola-whatsapp-button {
+    width: 100%;
+    min-height: 58px;
+    padding-inline: 24px;
+}
+
+.hola-page .hola-alternatives {
+    display: grid;
+    gap: 10px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--web-border);
+}
+
+.hola-page .hola-alternative {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    min-width: 0;
+    min-height: 68px;
+    padding: 14px 0;
+    color: var(--web-text);
+    text-decoration: none;
+}
+
+.hola-page .hola-alternative + .hola-alternative {
+    border-top: 1px solid var(--web-border);
+}
+
+.hola-page .hola-alternative-content {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.hola-page .hola-alternative strong {
+    color: var(--web-lilac);
+    font-size: 0.94rem;
+}
+
+.hola-page .hola-alternative small {
+    color: var(--web-muted);
+    font-size: 0.84rem;
+    line-height: 1.42;
+}
+
+.hola-page .hola-alternative > span:last-child {
+    flex: 0 0 auto;
+    color: var(--web-lilac);
+    font-size: 1.1rem;
+}
+
+.hola-page .hola-section {
+    padding: 28px 0;
+}
+
+.hola-page .hola-note,
+.hola-page .hola-final-card {
+    padding: clamp(24px, 6vw, 36px);
+}
+
+.hola-page .hola-note {
+    border-color: var(--web-border-active);
+    background: linear-gradient(135deg, rgba(155, 108, 255, 0.1), rgba(91, 140, 255, 0.06));
+}
+
+.hola-page .hola-note h2,
+.hola-page .hola-section-heading h2 {
+    margin-bottom: 12px;
+    font-size: clamp(1.6rem, 6vw, 2.1rem);
+}
+
+.hola-page .hola-note p,
+.hola-page .hola-final-card p {
+    max-width: 570px;
+    margin-bottom: 0;
+    color: var(--web-muted);
+}
+
+.hola-page .hola-next-steps {
+    padding-top: 42px;
+}
+
+.hola-page .hola-section-heading {
+    margin-bottom: 18px;
+}
+
+.hola-page .hola-steps {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.hola-page .hola-steps li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 68px;
+    padding: 14px 16px;
+    border: 1px solid var(--web-border);
+    border-radius: 16px;
+    background: var(--web-card);
+}
+
+.hola-page .hola-steps span {
+    display: grid;
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(155, 108, 255, 0.14);
+    color: var(--web-lilac);
+    font-size: 0.8rem;
+    font-weight: 800;
+}
+
+.hola-page .hola-steps p {
+    margin-bottom: 0;
+    color: var(--web-text);
+    font-size: 0.95rem;
+    font-weight: 650;
+}
+
+.hola-page .hola-final {
+    padding-top: 42px;
+}
+
+.hola-page .hola-final-card {
+    display: grid;
+    gap: 20px;
+    background: var(--web-card-strong);
+}
+
+.hola-page .hola-footer {
+    padding: 28px 0 38px;
+    border-top: 1px solid var(--web-border);
+}
+
+.hola-page .hola-footer-content {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 20px;
+}
+
+.hola-page .hola-footer a {
+    color: var(--web-lilac);
+    font-size: 0.84rem;
+    font-weight: 750;
+    text-decoration: none;
+}
+
+.hola-page .hola-footer p {
+    margin-bottom: 0;
+    color: var(--web-dim);
+    font-size: 0.82rem;
+}
+
+.hola-page .hola-header-link:focus-visible,
+.hola-page .hola-alternative:focus-visible,
+.hola-page .hola-footer a:focus-visible {
+    outline: 3px solid var(--web-blue);
+    outline-offset: 4px;
+    border-radius: 6px;
+}
+
+.hola-page .hola-whatsapp-button:focus-visible {
+    outline: 3px solid var(--web-blue);
+    outline-offset: 4px;
+}
+
+@media (hover: hover) {
+    .hola-page .hola-header-link:hover,
+    .hola-page .hola-footer a:hover {
+        color: var(--web-purple);
+    }
+
+    .hola-page .hola-alternative:hover strong,
+    .hola-page .hola-alternative:hover > span:last-child {
+        color: var(--web-purple);
+    }
+
+    .hola-page .hola-whatsapp-button:hover {
+        transform: translateY(-2px);
+    }
+}
+
+@media (min-width: 640px) {
+    .hola-page .hola-whatsapp-button {
+        width: auto;
+    }
+
+    .hola-page .hola-alternatives {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .hola-page .hola-alternative + .hola-alternative {
+        padding-left: 20px;
+        border-top: 0;
+        border-left: 1px solid var(--web-border);
+    }
+}
