@@ -25,6 +25,41 @@ const STATUS_OPTIONS = [
 
 const SUMMARY_STATUS_IDS = ["new", "reviewing", "proposal_sent", "accepted"];
 
+const OPPORTUNITY_STATUS_OPTIONS = [
+    { id: "new", label: "Nuevo", filterLabel: "Nuevos" },
+    { id: "reviewing", label: "En conversación", filterLabel: "En conversación" },
+    { id: "proposal_sent", label: "Propuesta enviada", filterLabel: "Propuesta enviada" },
+    { id: "accepted", label: "Aceptada", filterLabel: "Aceptadas" },
+    { id: "declined", label: "No avanza", filterLabel: "No avanzan" },
+    { id: "in_project", label: "En proyecto", filterLabel: "En proyecto" }
+];
+
+const OPPORTUNITY_ORIGIN_OPTIONS = [
+    { id: "visit", label: "Visita presencial" },
+    { id: "referral", label: "Referido" },
+    { id: "instagram", label: "Instagram" },
+    { id: "whatsapp", label: "WhatsApp" },
+    { id: "call", label: "Llamada" },
+    { id: "event", label: "Evento" },
+    { id: "manual", label: "Manual" },
+    { id: "other", label: "Otro" }
+];
+
+const OPPORTUNITY_INTEREST_OPTIONS = [
+    { id: "web", label: "Web" },
+    { id: "local_presence", label: "Presencia local" },
+    { id: "systems", label: "Sistemas" },
+    { id: "automation", label: "Automatización" },
+    { id: "other", label: "Otro" }
+];
+
+const OPPORTUNITY_DEMO_STATUS_OPTIONS = [
+    { id: "not_needed", label: "No necesaria" },
+    { id: "pending", label: "Pendiente" },
+    { id: "ready", label: "Lista" },
+    { id: "sent", label: "Enviada" }
+];
+
 // Mappings declarativos duplicados desde web/web.js. No se comparte lógica
 // del asesor para mantener la web comercial completamente independiente.
 const ADVISOR_LABELS = {
@@ -77,6 +112,7 @@ const state = {
     screen: "checking-session",
     session: null,
     user: null,
+    activeSection: "leads",
     leads: [],
     activeFilter: "all",
     search: "",
@@ -92,7 +128,17 @@ const state = {
     proposalDraft: null,
     proposalMessage: "",
     proposalPreviewOpen: false,
-    proposalPreviewScroll: null
+    proposalPreviewScroll: null,
+    opportunities: [],
+    opportunitiesLoadState: "idle",
+    opportunitiesLoadError: false,
+    selectedOpportunityId: null,
+    isCreatingOpportunity: false,
+    opportunityDraft: null,
+    opportunitySearch: "",
+    opportunityFilter: "all",
+    opportunityMessage: "",
+    isOpportunitySaving: false
 };
 
 function createElement(tag, className, text) {
@@ -128,6 +174,17 @@ function clearPrivateState() {
     state.proposalMessage = "";
     state.proposalPreviewOpen = false;
     state.proposalPreviewScroll = null;
+    state.activeSection = "leads";
+    state.opportunities = [];
+    state.opportunitiesLoadState = "idle";
+    state.opportunitiesLoadError = false;
+    state.selectedOpportunityId = null;
+    state.isCreatingOpportunity = false;
+    state.opportunityDraft = null;
+    state.opportunitySearch = "";
+    state.opportunityFilter = "all";
+    state.opportunityMessage = "";
+    state.isOpportunitySaving = false;
 }
 
 function statusDefinition(status) {
@@ -193,6 +250,140 @@ function recommendedProposalPlanKey(lead) {
 
 function selectedLead() {
     return state.leads.find(lead => lead.id === state.selectedLeadId) || null;
+}
+
+function selectedOpportunity() {
+    return state.opportunities.find(opportunity => opportunity.id === state.selectedOpportunityId) || null;
+}
+
+function opportunityStatusDefinition(status) {
+    return OPPORTUNITY_STATUS_OPTIONS.find(option => option.id === status) || OPPORTUNITY_STATUS_OPTIONS[0];
+}
+
+function opportunityOptionLabel(options, value, fallback = "No informado") {
+    return options.find(option => option.id === value)?.label || fallback;
+}
+
+function opportunityInterestIds(value) {
+    const ids = Array.isArray(value) ? value : [];
+    return ids.filter(id => OPPORTUNITY_INTEREST_OPTIONS.some(option => option.id === id));
+}
+
+function opportunityInterestLabels(value) {
+    return opportunityInterestIds(value)
+        .map(id => opportunityOptionLabel(OPPORTUNITY_INTEREST_OPTIONS, id, ""))
+        .filter(Boolean);
+}
+
+function displayOpportunityBusiness(opportunity) {
+    return typeof opportunity?.business_name === "string" && opportunity.business_name.trim()
+        ? opportunity.business_name.trim()
+        : "Sin negocio";
+}
+
+function displayOpportunityContact(opportunity) {
+    return typeof opportunity?.contact_name === "string" && opportunity.contact_name.trim()
+        ? opportunity.contact_name.trim()
+        : "Sin contacto";
+}
+
+function dateTimeForInput(value) {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+
+    const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+    return localDate.toISOString().slice(0, 16);
+}
+
+function dateTimeFromInput(value) {
+    if (!value) return null;
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
+function safeHttpUrl(value) {
+    if (typeof value !== "string" || !value.trim()) return "";
+
+    try {
+        const url = new URL(value.trim());
+        return url.protocol === "https:" || url.protocol === "http:" ? url.href : "";
+    } catch {
+        return "";
+    }
+}
+
+function nullableText(value) {
+    const normalized = typeof value === "string" ? value.trim() : "";
+    return normalized || null;
+}
+
+function emptyOpportunityDraft() {
+    return {
+        id: null,
+        businessName: "",
+        contactName: "",
+        phone: "",
+        email: "",
+        origin: "manual",
+        sourceDetail: "",
+        status: "new",
+        interests: [],
+        internalNotes: "",
+        lastContactAt: "",
+        nextFollowupAt: "",
+        demoStatus: "not_needed",
+        demoUrl: "",
+        demoSentAt: "",
+        dirty: false
+    };
+}
+
+function opportunityDraftFromRow(opportunity) {
+    const draft = emptyOpportunityDraft();
+    return {
+        ...draft,
+        id: opportunity.id,
+        businessName: opportunity.business_name || "",
+        contactName: opportunity.contact_name || "",
+        phone: opportunity.phone || "",
+        email: opportunity.email || "",
+        origin: OPPORTUNITY_ORIGIN_OPTIONS.some(option => option.id === opportunity.origin) ? opportunity.origin : "manual",
+        sourceDetail: opportunity.source_detail || "",
+        status: OPPORTUNITY_STATUS_OPTIONS.some(option => option.id === opportunity.status) ? opportunity.status : "new",
+        interests: opportunityInterestIds(opportunity.interests),
+        internalNotes: opportunity.internal_notes || "",
+        lastContactAt: dateTimeForInput(opportunity.last_contact_at),
+        nextFollowupAt: dateTimeForInput(opportunity.next_followup_at),
+        demoStatus: OPPORTUNITY_DEMO_STATUS_OPTIONS.some(option => option.id === opportunity.demo_status) ? opportunity.demo_status : "not_needed",
+        demoUrl: opportunity.demo_url || "",
+        demoSentAt: dateTimeForInput(opportunity.demo_sent_at)
+    };
+}
+
+function opportunityPayloadFromDraft(draft) {
+    const demoUrlText = nullableText(draft.demoUrl);
+    const demoUrl = safeHttpUrl(demoUrlText || "");
+    if (demoUrlText && !demoUrl) return { error: "La URL de demo debe comenzar con http:// o https://." };
+
+    return {
+        data: {
+            business_name: nullableText(draft.businessName),
+            contact_name: nullableText(draft.contactName),
+            phone: nullableText(draft.phone),
+            email: nullableText(draft.email),
+            origin: OPPORTUNITY_ORIGIN_OPTIONS.some(option => option.id === draft.origin) ? draft.origin : "manual",
+            source_detail: nullableText(draft.sourceDetail),
+            status: OPPORTUNITY_STATUS_OPTIONS.some(option => option.id === draft.status) ? draft.status : "new",
+            interests: opportunityInterestIds(draft.interests),
+            internal_notes: nullableText(draft.internalNotes),
+            last_contact_at: dateTimeFromInput(draft.lastContactAt),
+            next_followup_at: dateTimeFromInput(draft.nextFollowupAt),
+            demo_status: OPPORTUNITY_DEMO_STATUS_OPTIONS.some(option => option.id === draft.demoStatus) ? draft.demoStatus : "not_needed",
+            demo_url: demoUrl || null,
+            demo_sent_at: dateTimeFromInput(draft.demoSentAt)
+        }
+    };
 }
 
 function valuesFromLead(value) {
@@ -626,7 +817,48 @@ async function loadLeads({ refresh = false } = {}) {
     }
 }
 
+async function loadOpportunities({ refresh = false } = {}) {
+    if (state.opportunitiesLoadState === "loading" || state.isOpportunitySaving) return;
+
+    state.opportunitiesLoadState = "loading";
+    state.opportunitiesLoadError = false;
+    if (state.activeSection === "opportunities") renderApp();
+
+    try {
+        const { data, error } = await supabaseClient
+            .from("commercial_opportunities")
+            .select("id, created_at, updated_at, business_name, contact_name, phone, email, origin, source_detail, status, interests, internal_notes, last_contact_at, next_followup_at, demo_status, demo_url, demo_sent_at")
+            .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        state.opportunities = data || [];
+        if (state.selectedOpportunityId && !selectedOpportunity()) {
+            state.selectedOpportunityId = null;
+            state.opportunityDraft = null;
+            state.opportunityMessage = "";
+        }
+        state.opportunitiesLoadState = "loaded";
+        state.opportunitiesLoadError = false;
+    } catch (error) {
+        console.error("No se pudieron cargar las oportunidades comerciales.", error);
+        if (isSessionError(error)) {
+            await terminateSession("Tu sesión venció. Ingresá nuevamente.");
+            return;
+        }
+        state.opportunitiesLoadState = "error";
+        state.opportunitiesLoadError = true;
+    } finally {
+        if (state.opportunitiesLoadState === "loading") state.opportunitiesLoadState = "loaded";
+        if (state.activeSection === "opportunities" && state.screen === "dashboard") renderApp();
+    }
+}
+
 function renderDashboard() {
+    return state.activeSection === "opportunities" ? renderOpportunitiesDashboard() : renderLeadsDashboard();
+}
+
+function renderLeadsDashboard() {
     const layout = createElement("div", "admin-layout");
     layout.append(renderSidebar());
 
@@ -665,16 +897,622 @@ function renderSidebar() {
 
     const nav = createElement("nav", "sidebar-nav");
     nav.setAttribute("aria-label", "Navegación del panel");
-    nav.append(createElement("span", "sidebar-link", "Consultas"));
+    nav.append(createSidebarLink("leads", "Consultas"), createSidebarLink("opportunities", "Oportunidades"));
     sidebar.append(nav);
 
     const footer = createElement("div", "sidebar-footer");
     footer.append(createElement("span", "sidebar-user", displayValue(state.user?.email, "Sesión activa")));
     const logout = createButton("Cerrar sesión", "button button-quiet", handleLogout);
-    logout.disabled = state.isLoading || state.isSaving || state.isProposalSaving || state.isTerminatingSession;
+    logout.disabled = state.isLoading || state.isSaving || state.isProposalSaving || state.isOpportunitySaving || state.isTerminatingSession;
     footer.append(logout);
     sidebar.append(footer);
     return sidebar;
+}
+
+function createSidebarLink(section, label) {
+    const link = createButton(label, "sidebar-link", () => setActiveSection(section));
+    const active = state.activeSection === section;
+    link.setAttribute("aria-current", active ? "page" : "false");
+    link.setAttribute("aria-pressed", String(active));
+    return link;
+}
+
+function setActiveSection(section) {
+    if ((section !== "leads" && section !== "opportunities") || state.activeSection === section) return;
+
+    state.activeSection = section;
+    if (section === "opportunities" && state.opportunitiesLoadState === "idle") {
+        loadOpportunities();
+        return;
+    }
+
+    renderApp();
+}
+
+function renderOpportunitiesDashboard() {
+    const layout = createElement("div", "admin-layout");
+    layout.append(renderSidebar());
+
+    const workspace = createElement("main", "workspace");
+    workspace.id = "opportunities";
+
+    const header = createElement("header", "workspace-header");
+    const titleGroup = createElement("div", "");
+    titleGroup.append(createElement("p", "workspace-eyebrow", "PANEL NODO"));
+    titleGroup.append(createElement("h1", "", "Oportunidades"));
+    const actions = createElement("div", "workspace-actions");
+    const refresh = createButton(state.opportunitiesLoadState === "loading" ? "Actualizando…" : "Actualizar", "button button-secondary", () => loadOpportunities({ refresh: true }));
+    refresh.disabled = state.opportunitiesLoadState === "loading" || state.isOpportunitySaving;
+    const create = createButton("+ Nueva oportunidad", "button button-primary", startCreateOpportunity);
+    create.disabled = state.opportunitiesLoadState === "loading" || state.isOpportunitySaving;
+    actions.append(refresh, create);
+    header.append(titleGroup, actions);
+    workspace.append(header);
+
+    if (state.opportunitiesLoadState === "loading") {
+        workspace.append(renderOpportunitiesLoading());
+        layout.append(workspace);
+        return layout;
+    }
+
+    if (state.opportunitiesLoadError) {
+        workspace.append(renderOpportunitiesLoadError());
+        layout.append(workspace);
+        return layout;
+    }
+
+    workspace.append(renderFollowupSection());
+
+    const hasDetail = Boolean(selectedOpportunity() || state.isCreatingOpportunity);
+    const grid = createElement("div", "dashboard-grid" + (hasDetail ? " has-detail" : ""));
+    grid.append(renderOpportunityListShell());
+    if (hasDetail) grid.append(renderOpportunityDetail());
+    workspace.append(grid);
+    layout.append(workspace);
+    return layout;
+}
+
+function renderOpportunitiesLoading() {
+    const section = createElement("section", "opportunity-loading");
+    section.setAttribute("role", "status");
+    section.append(createElement("div", "loading-spinner"));
+    section.append(createElement("p", "", "Cargando oportunidades…"));
+    return section;
+}
+
+function renderOpportunitiesLoadError() {
+    const section = createElement("section", "load-error");
+    section.setAttribute("role", "status");
+    section.append(createElement("p", "", "No pudimos cargar las oportunidades."));
+    const retry = createButton("Reintentar", "button button-secondary", () => loadOpportunities());
+    retry.disabled = state.opportunitiesLoadState === "loading";
+    section.append(retry);
+    return section;
+}
+
+function opportunityFollowups() {
+    return state.opportunities
+        .filter(opportunity => opportunity.next_followup_at && !Number.isNaN(new Date(opportunity.next_followup_at).getTime()))
+        .sort((first, second) => new Date(first.next_followup_at).getTime() - new Date(second.next_followup_at).getTime());
+}
+
+function renderFollowupSection() {
+    const section = createElement("section", "followup-section");
+    section.setAttribute("aria-labelledby", "followup-title");
+    section.append(createElement("h2", "followup-title", "Seguimientos pendientes"));
+
+    const followups = opportunityFollowups();
+    if (!followups.length) {
+        section.append(createElement("p", "followup-empty", "No hay seguimientos pendientes."));
+        return section;
+    }
+
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const startOfTomorrow = new Date(startOfToday);
+    startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
+    const groups = [
+        { label: "Vencidos", items: followups.filter(item => new Date(item.next_followup_at) < startOfToday) },
+        { label: "Hoy", items: followups.filter(item => {
+            const date = new Date(item.next_followup_at);
+            return date >= startOfToday && date < startOfTomorrow;
+        }) },
+        { label: "Próximos", items: followups.filter(item => new Date(item.next_followup_at) >= startOfTomorrow) }
+    ];
+
+    const list = createElement("div", "followup-groups");
+    groups.filter(group => group.items.length).forEach(group => {
+        const groupElement = createElement("section", "followup-group");
+        groupElement.append(createElement("h3", "", group.label));
+        const items = createElement("div", "followup-list");
+        group.items.forEach(opportunity => items.append(renderFollowupItem(opportunity)));
+        groupElement.append(items);
+        list.append(groupElement);
+    });
+    section.append(list);
+    return section;
+}
+
+function renderFollowupItem(opportunity) {
+    const item = createElement("article", "followup-item");
+    const copy = createElement("div", "followup-copy");
+    copy.append(createElement("strong", "", displayOpportunityBusiness(opportunity)));
+    copy.append(createElement("span", "", displayOpportunityContact(opportunity)));
+    copy.append(createElement("time", "", formatDateTime(opportunity.next_followup_at)));
+    item.append(copy, createOpportunityStatusBadge(opportunity.status));
+
+    const whatsappUrl = createOpportunityFollowupWhatsAppUrl(opportunity.phone, opportunity.contact_name);
+    if (whatsappUrl) {
+        const whatsapp = document.createElement("a");
+        whatsapp.className = "button button-secondary followup-whatsapp";
+        whatsapp.href = whatsappUrl;
+        whatsapp.target = "_blank";
+        whatsapp.rel = "noopener noreferrer";
+        whatsapp.textContent = "Abrir WhatsApp ↗";
+        item.append(whatsapp);
+    }
+    return item;
+}
+
+function renderOpportunityListShell() {
+    const shell = createElement("section", "list-shell");
+    shell.setAttribute("aria-label", "Listado de oportunidades");
+
+    const controls = createElement("div", "list-controls");
+    const filters = createElement("div", "filter-row");
+    filters.setAttribute("aria-label", "Filtros por estado");
+    [{ id: "all", label: "Todos" }, ...OPPORTUNITY_STATUS_OPTIONS.map(option => ({ id: option.id, label: option.filterLabel }))]
+        .forEach(filter => {
+            const button = createButton(filter.label, "filter-button", () => {
+                state.opportunityFilter = filter.id;
+                renderApp();
+            });
+            button.setAttribute("aria-pressed", String(state.opportunityFilter === filter.id));
+            filters.append(button);
+        });
+
+    const searchWrap = createElement("label", "search-wrap");
+    searchWrap.append(createElement("span", "sr-only", "Buscar oportunidades"));
+    const search = document.createElement("input");
+    search.type = "search";
+    search.className = "search-input";
+    search.placeholder = "Buscar por negocio o contacto…";
+    search.value = state.opportunitySearch;
+    search.autocomplete = "off";
+    search.addEventListener("input", () => {
+        state.opportunitySearch = search.value;
+        renderOpportunityResults(results);
+    });
+    searchWrap.append(search);
+    controls.append(filters, searchWrap);
+
+    const results = createElement("div", "lead-results");
+    renderOpportunityResults(results);
+    shell.append(controls, results);
+    return shell;
+}
+
+function filteredOpportunities() {
+    const search = normalizeSearch(state.opportunitySearch.trim());
+    return state.opportunities.filter(opportunity => {
+        if (state.opportunityFilter !== "all" && opportunity.status !== state.opportunityFilter) return false;
+        if (!search) return true;
+        return [opportunity.business_name, opportunity.contact_name]
+            .map(normalizeSearch)
+            .join(" ")
+            .includes(search);
+    });
+}
+
+function renderOpportunityResults(container) {
+    container.replaceChildren();
+    const opportunities = filteredOpportunities();
+
+    if (!opportunities.length) {
+        const empty = createElement("div", "empty-state");
+        const hasFilters = state.opportunitySearch || state.opportunityFilter !== "all";
+        empty.append(createElement("p", "", hasFilters ? "No encontramos oportunidades." : "Todavía no hay oportunidades cargadas."));
+        container.append(empty);
+        return;
+    }
+
+    const tableWrap = createElement("div", "lead-table-wrapper");
+    const table = createElement("table", "lead-table opportunity-table");
+    const head = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+    ["Negocio", "Contacto", "Origen", "Intereses", "Estado", "Último contacto", "Próximo seguimiento", "Demo"].forEach(label => headerRow.append(createElement("th", "", label)));
+    head.append(headerRow);
+    const body = document.createElement("tbody");
+
+    opportunities.forEach(opportunity => {
+        const row = document.createElement("tr");
+        row.tabIndex = 0;
+        row.setAttribute("role", "button");
+        row.setAttribute("aria-label", "Abrir oportunidad de " + displayOpportunityBusiness(opportunity));
+        row.addEventListener("click", () => openOpportunity(opportunity.id));
+        row.addEventListener("keydown", event => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                openOpportunity(opportunity.id);
+            }
+        });
+        row.append(createElement("td", "lead-name", displayOpportunityBusiness(opportunity)));
+        row.append(createElement("td", "lead-business", displayOpportunityContact(opportunity)));
+        row.append(createElement("td", "lead-business", opportunityOptionLabel(OPPORTUNITY_ORIGIN_OPTIONS, opportunity.origin)));
+        row.append(createElement("td", "lead-plan", opportunityInterestLabels(opportunity.interests).join(", ") || "Sin definir"));
+        const statusCell = document.createElement("td");
+        statusCell.append(createOpportunityStatusBadge(opportunity.status));
+        row.append(statusCell);
+        row.append(createElement("td", "lead-business", formatDateTime(opportunity.last_contact_at)));
+        row.append(createElement("td", "lead-business", formatDateTime(opportunity.next_followup_at)));
+        row.append(createElement("td", "lead-business", opportunityOptionLabel(OPPORTUNITY_DEMO_STATUS_OPTIONS, opportunity.demo_status)));
+        body.append(row);
+    });
+
+    table.append(head, body);
+    tableWrap.append(table);
+    container.append(tableWrap);
+
+    const cards = createElement("div", "lead-cards");
+    opportunities.forEach(opportunity => cards.append(renderOpportunityCard(opportunity)));
+    container.append(cards);
+}
+
+function renderOpportunityCard(opportunity) {
+    const card = createButton("", "lead-card", () => openOpportunity(opportunity.id));
+    card.setAttribute("aria-label", "Abrir oportunidad de " + displayOpportunityBusiness(opportunity));
+    const top = createElement("div", "lead-card-top");
+    top.append(createElement("span", "lead-card-name", displayOpportunityBusiness(opportunity)), createOpportunityStatusBadge(opportunity.status));
+    const middle = createElement("div", "lead-card-meta", displayOpportunityContact(opportunity));
+    const details = createElement("div", "opportunity-card-meta");
+    details.append(
+        createElement("span", "", opportunityOptionLabel(OPPORTUNITY_ORIGIN_OPTIONS, opportunity.origin)),
+        createElement("span", "", opportunityInterestLabels(opportunity.interests).join(", ") || "Sin intereses"),
+        createElement("span", "", "Seguimiento: " + formatDateTime(opportunity.next_followup_at)),
+        createElement("span", "", "Demo: " + opportunityOptionLabel(OPPORTUNITY_DEMO_STATUS_OPTIONS, opportunity.demo_status))
+    );
+    card.append(top, middle, details);
+    return card;
+}
+
+function createOpportunityStatusBadge(status) {
+    const definition = opportunityStatusDefinition(status);
+    return createElement("span", "status-badge status-" + definition.id, definition.label);
+}
+
+function startCreateOpportunity() {
+    if (state.isOpportunitySaving) return;
+    if (state.opportunityDraft?.dirty) {
+        const discard = window.confirm("Tenés cambios sin guardar. ¿Querés descartarlos y crear una nueva oportunidad?");
+        if (!discard) return;
+    }
+
+    state.selectedOpportunityId = null;
+    state.isCreatingOpportunity = true;
+    state.opportunityDraft = emptyOpportunityDraft();
+    state.opportunityMessage = "";
+    renderApp();
+    document.querySelector(".opportunity-detail .detail-close")?.focus();
+}
+
+function openOpportunity(opportunityId) {
+    if ((state.selectedOpportunityId && state.selectedOpportunityId !== opportunityId || state.isCreatingOpportunity) && state.opportunityDraft?.dirty) {
+        const discard = window.confirm("Tenés cambios sin guardar. ¿Querés descartarlos y abrir otra oportunidad?");
+        if (!discard) return;
+    }
+
+    const opportunity = state.opportunities.find(item => item.id === opportunityId);
+    if (!opportunity) return;
+
+    state.selectedOpportunityId = opportunityId;
+    state.isCreatingOpportunity = false;
+    state.opportunityDraft = opportunityDraftFromRow(opportunity);
+    state.opportunityMessage = "";
+    renderApp();
+    document.querySelector(".opportunity-detail .detail-close")?.focus();
+}
+
+function requestCloseOpportunityDetail() {
+    if ((!state.selectedOpportunityId && !state.isCreatingOpportunity) || state.isOpportunitySaving) return;
+    if (state.opportunityDraft?.dirty) {
+        const discard = window.confirm("Tenés cambios sin guardar. ¿Querés descartarlos?");
+        if (!discard) return;
+    }
+
+    state.selectedOpportunityId = null;
+    state.isCreatingOpportunity = false;
+    state.opportunityDraft = null;
+    state.opportunityMessage = "";
+    renderApp();
+}
+
+function updateOpportunityDraft(key, value) {
+    if (!state.opportunityDraft || state.isOpportunitySaving) return;
+    state.opportunityDraft[key] = value;
+    state.opportunityDraft.dirty = true;
+    state.opportunityMessage = "";
+    syncOpportunityControls();
+}
+
+function renderOpportunityDetail() {
+    const opportunity = selectedOpportunity();
+    if (!state.opportunityDraft) {
+        state.opportunityDraft = opportunity ? opportunityDraftFromRow(opportunity) : emptyOpportunityDraft();
+    }
+    const draft = state.opportunityDraft;
+    const isNew = state.isCreatingOpportunity;
+    const detail = createElement("aside", "lead-detail opportunity-detail");
+    detail.setAttribute("aria-label", isNew ? "Nueva oportunidad" : "Detalle de oportunidad");
+    detail.tabIndex = -1;
+
+    const header = createElement("header", "detail-header");
+    const title = createElement("div", "");
+    title.append(createElement("h2", "", isNew ? "Nueva oportunidad" : displayOpportunityBusiness(opportunity)));
+    title.append(createElement("p", "", isNew ? "Completá sólo los datos que ya tengas." : "Creada: " + formatDateTime(opportunity?.created_at)));
+    const close = createButton("×", "detail-close", requestCloseOpportunityDetail);
+    close.setAttribute("aria-label", "Cerrar detalle de oportunidad");
+    close.disabled = state.isOpportunitySaving;
+    header.append(title, close);
+    detail.append(header);
+
+    const form = document.createElement("form");
+    form.className = "opportunity-form";
+    form.noValidate = true;
+    form.addEventListener("submit", event => {
+        event.preventDefault();
+        saveOpportunity();
+    });
+
+    const identity = createDetailSection("Negocio y contacto");
+    const identityGrid = createElement("div", "opportunity-form-grid");
+    identityGrid.append(
+        createOpportunityTextField("Negocio", "businessName", draft, { placeholder: "Ej.: Ortopedia López" }),
+        createOpportunityTextField("Contacto", "contactName", draft),
+        createOpportunityTextField("Teléfono", "phone", draft, { type: "tel", autocomplete: "tel" }),
+        createOpportunityTextField("Email", "email", draft, { type: "email", autocomplete: "email" })
+    );
+    identity.append(identityGrid);
+
+    const context = createDetailSection("Contexto comercial");
+    const contextGrid = createElement("div", "opportunity-form-grid");
+    contextGrid.append(
+        createOpportunitySelectField("Origen", "origin", OPPORTUNITY_ORIGIN_OPTIONS, draft),
+        createOpportunitySelectField("Estado", "status", OPPORTUNITY_STATUS_OPTIONS, draft),
+        createOpportunityTextField("Detalle del origen", "sourceDetail", draft, { wide: true, placeholder: "Ej.: tarjeta entregada durante una visita" }),
+        createOpportunityInterestField(draft),
+        createOpportunityTextField("Notas internas", "internalNotes", draft, { multiline: true, wide: true, placeholder: "Contexto comercial relevante para el seguimiento." })
+    );
+    context.append(contextGrid);
+
+    const followup = createDetailSection("Seguimiento");
+    const followupGrid = createElement("div", "opportunity-form-grid");
+    followupGrid.append(
+        createOpportunityTextField("Último contacto", "lastContactAt", draft, { type: "datetime-local" }),
+        createOpportunityTextField("Próximo seguimiento", "nextFollowupAt", draft, { type: "datetime-local" })
+    );
+    followup.append(followupGrid);
+
+    const demo = createDetailSection("Demo");
+    const demoGrid = createElement("div", "opportunity-form-grid");
+    demoGrid.append(
+        createOpportunitySelectField("Estado de demo", "demoStatus", OPPORTUNITY_DEMO_STATUS_OPTIONS, draft),
+        createOpportunityTextField("Fecha de envío de demo", "demoSentAt", draft, { type: "datetime-local" }),
+        createOpportunityTextField("URL de demo", "demoUrl", draft, { wide: true, placeholder: "https://…" })
+    );
+    demo.append(demoGrid);
+
+    form.append(identity, context, followup, demo, renderOpportunityActions(opportunity, draft, isNew));
+    detail.append(form);
+    return detail;
+}
+
+function createOpportunityTextField(labelText, key, draft, options = {}) {
+    const field = createElement("label", "field opportunity-field" + (options.wide ? " opportunity-field-wide" : ""));
+    field.append(createElement("span", "", labelText));
+    const control = document.createElement(options.multiline ? "textarea" : "input");
+    if (!options.multiline) control.type = options.type || "text";
+    control.name = key;
+    control.value = draft[key] || "";
+    if (options.placeholder) control.placeholder = options.placeholder;
+    if (options.autocomplete) control.autocomplete = options.autocomplete;
+    control.disabled = state.isOpportunitySaving;
+    control.addEventListener("input", () => updateOpportunityDraft(key, control.value));
+    field.append(control);
+    return field;
+}
+
+function createOpportunitySelectField(labelText, key, options, draft) {
+    const field = createElement("label", "field opportunity-field");
+    field.append(createElement("span", "", labelText));
+    const select = document.createElement("select");
+    select.name = key;
+    options.forEach(option => {
+        const choice = document.createElement("option");
+        choice.value = option.id;
+        choice.textContent = option.label;
+        select.append(choice);
+    });
+    select.value = draft[key];
+    select.disabled = state.isOpportunitySaving;
+    select.addEventListener("change", () => updateOpportunityDraft(key, select.value));
+    field.append(select);
+    return field;
+}
+
+function createOpportunityInterestField(draft) {
+    const field = document.createElement("fieldset");
+    field.className = "opportunity-interest-field opportunity-field-wide";
+    field.disabled = state.isOpportunitySaving;
+    field.append(createElement("legend", "field-label", "Intereses"));
+    const choices = createElement("div", "opportunity-interest-choices");
+    OPPORTUNITY_INTEREST_OPTIONS.forEach(option => {
+        const label = createElement("label", "opportunity-interest-choice");
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.value = option.id;
+        input.checked = draft.interests.includes(option.id);
+        input.addEventListener("change", () => {
+            const next = new Set(draft.interests);
+            if (input.checked) next.add(option.id);
+            else next.delete(option.id);
+            updateOpportunityDraft("interests", Array.from(next));
+        });
+        label.append(input, createElement("span", "", option.label));
+        choices.append(label);
+    });
+    field.append(choices);
+    return field;
+}
+
+function renderOpportunityActions(opportunity, draft, isNew) {
+    const section = createDetailSection("Acciones");
+    const actions = createElement("div", "detail-actions opportunity-actions");
+    const whatsappUrl = createOpportunityFollowupWhatsAppUrl(draft.phone, draft.contactName);
+    if (whatsappUrl) {
+        const whatsapp = document.createElement("a");
+        whatsapp.className = "button button-secondary";
+        whatsapp.href = whatsappUrl;
+        whatsapp.target = "_blank";
+        whatsapp.rel = "noopener noreferrer";
+        whatsapp.textContent = "Abrir WhatsApp ↗";
+        actions.append(whatsapp);
+    }
+
+    const demoUrl = safeHttpUrl(opportunity?.demo_url);
+    if (demoUrl) {
+        const demo = document.createElement("a");
+        demo.className = "button button-secondary";
+        demo.href = demoUrl;
+        demo.target = "_blank";
+        demo.rel = "noopener noreferrer";
+        demo.textContent = "Abrir demo ↗";
+        actions.append(demo);
+    }
+
+    if (!isNew) {
+        const complete = createButton(state.isOpportunitySaving ? "Guardando…" : "Marcar seguimiento realizado", "button button-secondary", markOpportunityFollowupComplete);
+        complete.disabled = state.isOpportunitySaving;
+        actions.append(complete);
+    }
+    if (actions.childElementCount) section.append(actions);
+
+    const message = createElement("p", "management-message" + (state.opportunityMessage.startsWith("No pudimos") || state.opportunityMessage.startsWith("La URL") || state.opportunityMessage.startsWith("Guardá") ? " is-error" : ""), state.opportunityMessage);
+    message.id = "opportunity-message";
+    message.setAttribute("role", "status");
+    section.append(message);
+
+    const save = createButton(state.isOpportunitySaving ? "Guardando…" : "Guardar cambios", "button button-primary detail-save", undefined);
+    save.type = "submit";
+    save.id = "save-opportunity";
+    save.disabled = state.isOpportunitySaving || !draft.dirty;
+    section.append(save);
+    return section;
+}
+
+function syncOpportunityControls() {
+    const save = document.getElementById("save-opportunity");
+    if (save) save.disabled = state.isOpportunitySaving || !state.opportunityDraft?.dirty;
+    const message = document.getElementById("opportunity-message");
+    if (message) {
+        message.textContent = state.opportunityMessage;
+        message.classList.toggle("is-error", state.opportunityMessage.startsWith("No pudimos") || state.opportunityMessage.startsWith("La URL") || state.opportunityMessage.startsWith("Guardá"));
+    }
+}
+
+async function saveOpportunity() {
+    const draft = state.opportunityDraft;
+    const isNew = state.isCreatingOpportunity;
+    if (!draft || state.isOpportunitySaving) return;
+
+    const payload = opportunityPayloadFromDraft(draft);
+    if (payload.error) {
+        state.opportunityMessage = payload.error;
+        syncOpportunityControls();
+        return;
+    }
+
+    state.isOpportunitySaving = true;
+    state.opportunityMessage = "";
+    renderApp();
+
+    try {
+        let data;
+        let error;
+        if (isNew) {
+            ({ data, error } = await supabaseClient
+                .from("commercial_opportunities")
+                .insert(payload.data)
+                .select("id, created_at, updated_at, business_name, contact_name, phone, email, origin, source_detail, status, interests, internal_notes, last_contact_at, next_followup_at, demo_status, demo_url, demo_sent_at")
+                .single());
+        } else {
+            ({ data, error } = await supabaseClient
+                .from("commercial_opportunities")
+                .update(payload.data)
+                .eq("id", draft.id)
+                .select("id, created_at, updated_at, business_name, contact_name, phone, email, origin, source_detail, status, interests, internal_notes, last_contact_at, next_followup_at, demo_status, demo_url, demo_sent_at")
+                .single());
+        }
+
+        if (error) throw error;
+
+        state.opportunities = isNew
+            ? [data, ...state.opportunities]
+            : state.opportunities.map(opportunity => opportunity.id === data.id ? data : opportunity);
+        state.selectedOpportunityId = data.id;
+        state.isCreatingOpportunity = false;
+        state.opportunityDraft = opportunityDraftFromRow(data);
+        state.opportunityMessage = "Cambios guardados.";
+    } catch (error) {
+        console.error("No se pudo guardar la oportunidad comercial.", error);
+        if (isSessionError(error)) {
+            await terminateSession("Tu sesión venció. Ingresá nuevamente.");
+            return;
+        }
+        state.opportunityMessage = "No pudimos guardar los cambios. Revisá los datos e intentá nuevamente.";
+    } finally {
+        state.isOpportunitySaving = false;
+        if (state.activeSection === "opportunities" && state.screen === "dashboard") renderApp();
+    }
+}
+
+async function markOpportunityFollowupComplete() {
+    const opportunity = selectedOpportunity();
+    if (!opportunity || !state.opportunityDraft || state.isOpportunitySaving) return;
+    if (state.opportunityDraft.dirty) {
+        state.opportunityMessage = "Guardá los cambios pendientes antes de marcar el seguimiento.";
+        syncOpportunityControls();
+        return;
+    }
+
+    state.isOpportunitySaving = true;
+    state.opportunityMessage = "";
+    renderApp();
+
+    try {
+        const completedAt = new Date().toISOString();
+        const { data, error } = await supabaseClient
+            .from("commercial_opportunities")
+            .update({ last_contact_at: completedAt, next_followup_at: null })
+            .eq("id", opportunity.id)
+            .select("id, created_at, updated_at, business_name, contact_name, phone, email, origin, source_detail, status, interests, internal_notes, last_contact_at, next_followup_at, demo_status, demo_url, demo_sent_at")
+            .single();
+
+        if (error) throw error;
+
+        state.opportunities = state.opportunities.map(item => item.id === data.id ? data : item);
+        state.opportunityDraft = opportunityDraftFromRow(data);
+        state.opportunityMessage = "Seguimiento marcado como realizado.";
+    } catch (error) {
+        console.error("No se pudo marcar el seguimiento como realizado.", error);
+        if (isSessionError(error)) {
+            await terminateSession("Tu sesión venció. Ingresá nuevamente.");
+            return;
+        }
+        state.opportunityMessage = "No pudimos actualizar el seguimiento. Intentá nuevamente.";
+    } finally {
+        state.isOpportunitySaving = false;
+        if (state.activeSection === "opportunities" && state.screen === "dashboard") renderApp();
+    }
 }
 
 function renderLoadError() {
@@ -1748,6 +2586,17 @@ function createWhatsAppUrl(whatsapp, name) {
     if (!destination) return "";
 
     const greeting = "Hola " + displayValue(name, "" , "") + ", soy Maxi de NODO. Estuve revisando la consulta que nos enviaste…";
+    return "https://wa.me/" + destination + "?text=" + encodeURIComponent(greeting);
+}
+
+function createOpportunityFollowupWhatsAppUrl(phone, contactName) {
+    const destination = whatsappDestination(phone);
+    if (!destination) return "";
+
+    const name = typeof contactName === "string" ? contactName.trim() : "";
+    const greeting = name
+        ? "Hola " + name + ", ¿cómo estás? Te escribo desde NODO para retomar lo que habíamos hablado."
+        : "Hola, ¿cómo estás? Te escribo desde NODO para retomar lo que habíamos hablado.";
     return "https://wa.me/" + destination + "?text=" + encodeURIComponent(greeting);
 }
 
