@@ -153,8 +153,8 @@ const showcaseProjects = [
         imageAlt: "Portada publicada de Nativa Estética: salud, belleza y bienestar para tu piel",
         imageWidth: 1440,
         imageHeight: 760,
-        url: "https://nativaestetica.netlify.app/",
-        linkLabel: "Ver proyecto",
+        url: "/casos/nativa-estetica/",
+        linkLabel: "Conocer el caso",
         status: "Publicado"
     },
     {
@@ -165,23 +165,45 @@ const showcaseProjects = [
         subtitle: "Organización y seguimiento del trabajo diario.",
         description: "Sistema pensado para organizar tareas, registrar actividad y facilitar el seguimiento del trabajo diario según el rol de cada usuario.",
         tags: ["Gestión", "Seguimiento", "Roles"],
-        image: "assets/bloc-case-cover.png",
+        image: "assets/projects/bloc-dashboard.png",
         imageAlt: "Panel de Supervisión de BLOC, sistema de control y seguimiento.",
-        url: "https://bloc-ar.netlify.app/",
-        linkLabel: "Ver producto",
+        imageWidth: 1667,
+        imageHeight: 988,
+        url: "/proyectos/bloc/",
+        linkLabel: "Ver proyecto",
         status: "En desarrollo"
     },
     {
-        id: "movia-ortopedia",
-        eyebrow: "DEMO SECTORIAL",
-        type: "Concepto para ortopedia",
-        name: "MOVIA Ortopedia",
-        subtitle: "Demo para productos, alquiler y consultas.",
-        description: "Concepto desarrollado por NODO para mostrar cómo podría resolverse la presencia digital de una ortopedia orientada a productos, alquiler y consultas. Es una demo, no un cliente real.",
-        tags: ["Demo", "Productos", "Consultas"],
-        url: "demos/ortopedia/",
-        linkLabel: "Ver demo",
-        status: "Demo sectorial"
+        id: "planner",
+        eyebrow: "PRODUCTO PROPIO",
+        type: "Organización personal",
+        name: "Planner",
+        subtitle: "Agenda, tareas, notas, finanzas y objetivos en un mismo espacio.",
+        description: "Una herramienta en desarrollo para reunir distintas áreas de organización personal en una experiencia clara.",
+        tags: ["Agenda", "Tareas", "Organización"],
+        image: "assets/projects/planner-home.png",
+        imageAlt: "Inicio de Planner con tareas del día, agenda semanal y accesos a áreas de organización.",
+        imageWidth: 1897,
+        imageHeight: 981,
+        url: "/proyectos/planner/",
+        linkLabel: "Ver proyecto",
+        status: "En desarrollo"
+    },
+    {
+        id: "start",
+        eyebrow: "DEMO",
+        type: "Landing de prueba",
+        name: "START",
+        subtitle: "Una demostración visual de una landing orientada a presentar un programa funcional.",
+        description: "Una exploración de diseño para comunicar una propuesta de entrenamiento de forma directa y visual.",
+        tags: ["Landing", "Propuesta clara", "Diseño visual"],
+        image: "assets/projects/start-hero.png",
+        imageAlt: "Hero de la demo START con presentación de un plan funcional de cuatro semanas.",
+        imageWidth: 1917,
+        imageHeight: 885,
+        url: "/proyectos/start/",
+        linkLabel: "Ver proyecto",
+        status: "Demo"
     }
 ];
 
@@ -205,6 +227,34 @@ const state = {
     emailConfirmationSent: null,
     commercialAdvisorContext: null
 };
+
+const commercialAdvisorContextStorageKey = "nodo_commercial_advisor_context";
+
+function persistCommercialAdvisorContext(context) {
+    try {
+        window.sessionStorage.setItem(commercialAdvisorContextStorageKey, JSON.stringify(context));
+    } catch {
+        // El formulario sigue disponible aunque el navegador bloquee sessionStorage.
+    }
+}
+
+function consumeCommercialAdvisorContext() {
+    try {
+        const serialized = window.sessionStorage.getItem(commercialAdvisorContextStorageKey);
+        window.sessionStorage.removeItem(commercialAdvisorContextStorageKey);
+        if (!serialized) return null;
+        const context = JSON.parse(serialized);
+        const hasExpectedShape = context
+            && Array.isArray(context.goals)
+            && Array.isArray(context.today)
+            && Array.isArray(context.content)
+            && typeof context.recommendedPlanKey === "string"
+            && Boolean(plans[context.recommendedPlanKey]);
+        return hasExpectedShape ? context : null;
+    } catch {
+        return null;
+    }
+}
 
 function resetAdvisorState() {
     state.answers = {};
@@ -311,13 +361,19 @@ function continueWithAdvisorContext() {
     const context = advisorContextFromAnswers();
     state.commercialAdvisorContext = context;
 
-    const contactSection = document.getElementById("contacto");
     const form = document.getElementById("commercial-contact-form");
+    if (!form) {
+        persistCommercialAdvisorContext(context);
+        window.location.assign("/contacto/#formulario");
+        return;
+    }
+
     const improvements = improvementsForAdvisorContext(context);
     form?.querySelectorAll("input[name='improvements']").forEach(input => {
         if (improvements.has(input.value)) input.checked = true;
     });
 
+    const contactSection = document.getElementById("contacto");
     const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     contactSection?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
 }
@@ -859,6 +915,15 @@ function setupCommercialContactForm() {
     const currentWebsite = form?.elements.currentWebsite;
     if (!form || !status || !submit || !fallback || !currentWebsite) return;
 
+    const advisorContext = consumeCommercialAdvisorContext();
+    if (advisorContext) {
+        state.commercialAdvisorContext = advisorContext;
+        const improvements = improvementsForAdvisorContext(advisorContext);
+        form.querySelectorAll("input[name='improvements']").forEach(input => {
+            if (improvements.has(input.value)) input.checked = true;
+        });
+    }
+
     let isSubmitting = false;
     const setBusy = busy => {
         form.setAttribute("aria-busy", String(busy));
@@ -1115,7 +1180,7 @@ function renderResult() {
 
     const actions = createElement("div", "result-actions");
     const proceed = createElement("a", "button button-primary", "Continuar con esta opción");
-    proceed.href = "#contacto";
+    proceed.href = "/contacto/#formulario";
     proceed.addEventListener("click", event => {
         event.preventDefault();
         continueWithAdvisorContext();
@@ -1291,6 +1356,7 @@ function renderSuccess() {
 }
 
 function renderAdvisor() {
+    if (!advisor) return;
     advisor.replaceChildren();
     const card = advisor.closest(".advisor-card");
     card?.classList.toggle("advisor-card-expanded", state.screen === "result" || state.screen === "contact" || state.screen === "success");
@@ -1455,8 +1521,10 @@ function setupProjectShowcase() {
         if (project.url) {
             const link = createElement("a", "text-link showcase-link", project.linkLabel || "Ver proyecto");
             link.href = project.url;
-            link.target = "_blank";
-            link.rel = "noopener noreferrer";
+            if (project.external) {
+                link.target = "_blank";
+                link.rel = "noopener noreferrer";
+            }
             const arrow = createElement("span", "", "→");
             arrow.setAttribute("aria-hidden", "true");
             link.append(" ", arrow);

@@ -1455,3 +1455,88 @@ html[data-theme="light"] .final-card {
     html { scroll-behavior: auto; }
     *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
 }
+
+/* Home V3: portada breve con enlaces a las páginas de profundidad. */
+.section-cta {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    margin-top: 24px;
+}
+
+.solution-card .text-link {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    margin-top: 18px;
+}
+
+.home-questions-section { padding-top: 34px; padding-bottom: 38px; }
+.home-questions-card {
+    max-width: 860px;
+    padding: 25px 22px;
+    border: 1px solid var(--web-border);
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(91, 140, 255, 0.07), rgba(155, 108, 255, 0.05));
+}
+.home-questions-card h2 { max-width: 560px; margin-bottom: 10px; }
+.home-questions-card > p:not(.eyebrow) { max-width: 560px; margin-bottom: 0; color: var(--web-muted); line-height: 1.6; }
+
+.team-section { padding-top: 46px; }
+.team-heading { margin-bottom: 24px; }
+.team-summary-grid { display: grid; gap: 12px; }
+.team-summary-card {
+    display: grid;
+    min-width: 0;
+    min-height: 166px;
+    align-content: start;
+    gap: 8px;
+    padding: 22px;
+    border: 1px solid var(--web-border);
+    border-radius: 18px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.045), rgba(185, 167, 216, 0.025));
+    color: var(--web-text);
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+    transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+.team-summary-name { font-size: 1.13rem; font-weight: 800; letter-spacing: -0.025em; line-height: 1.2; }
+.team-summary-role { color: var(--web-muted); font-size: 0.92rem; line-height: 1.5; }
+.team-summary-action { align-self: end; margin-top: auto; color: var(--web-lilac); font-size: 0.84rem; font-weight: 750; }
+
+.final-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.home-footer .footer-navigation { display: grid; gap: 8px; margin-top: 20px; }
+.home-footer .footer-navigation .text-link { display: inline-flex; width: fit-content; min-height: 26px; align-items: center; }
+.home-footer .footer-contact { display: grid; gap: 25px; }
+.home-footer .footer-contact-card + .footer-contact-card { margin-top: 0; }
+.home-footer .footer-contact-card > p { display: block; }
+.home-footer .footer-contact-card > p:not(.footer-label) { max-width: 250px; line-height: 1.5; }
+
+@media (min-width: 768px) {
+    .team-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .team-summary-card { min-height: 176px; padding: 25px; }
+    .final-actions { align-items: center; }
+}
+
+@media (max-width: 767px) {
+    .section-cta { margin-top: 20px; }
+    .home-questions-section { padding-top: 28px; padding-bottom: 32px; }
+    .home-questions-card { padding: 22px 19px; border-radius: 19px; }
+    .team-section { padding-top: 38px; }
+    .team-summary-card { min-height: 148px; padding: 20px; }
+    .final-actions { display: grid; }
+
+    .home-footer .footer-navigation { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px 14px; margin-top: 18px; }
+    .home-footer .footer-navigation .text-link { min-height: 34px; font-size: 0.86rem; }
+    .home-footer .footer-contact { gap: 0; margin-top: 0; padding: 0; }
+    .home-footer .footer-contact-card { display: grid; gap: 7px; padding: 22px 0; border-top: 1px solid var(--footer-border); }
+    .home-footer .footer-contact-card > p { display: block; margin: 0; }
+    .home-footer .footer-contact-card > p:not(.footer-label) { max-width: 280px; font-size: 0.84rem; }
+    .home-footer .footer-contact-card .text-link { display: inline-flex; width: fit-content; min-height: 36px; border-top: 0; font-size: 0.9rem; }
+}
+
+@media (hover: hover) {
+    .team-summary-card:hover { border-color: rgba(185, 167, 216, 0.5); background: rgba(185, 167, 216, 0.08); box-shadow: 0 12px 26px rgba(155, 108, 255, 0.08); transform: translateY(-2px); }
+}
