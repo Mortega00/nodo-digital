@@ -22,6 +22,8 @@
     white-space: nowrap;
 }
 
+.local-presence-page .local-presence-header .primary-navigation a[aria-current="page"] { color: var(--web-text); }
+
 .local-presence-page .local-presence-hero {
     padding-top: 68px;
     padding-bottom: 66px;

@@ -1353,7 +1353,12 @@ function setupMobileNavigation() {
     toggle.addEventListener("click", () => menu.hidden ? openMenu() : closeMenu());
     menu.querySelectorAll("[data-mobile-menu-close]").forEach(control => control.addEventListener("click", () => closeMenu()));
     menu.querySelectorAll(".mobile-navigation-links a").forEach(link => link.addEventListener("click", event => {
-        const target = document.querySelector(link.getAttribute("href"));
+        const href = link.getAttribute("href");
+        if (!href?.startsWith("#")) {
+            closeMenu();
+            return;
+        }
+        const target = document.querySelector(href);
         if (!target) return;
         event.preventDefault();
         closeMenu(false);

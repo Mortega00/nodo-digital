@@ -22,6 +22,8 @@
     white-space: nowrap;
 }
 
+.design-web-page .design-web-header .primary-navigation a[aria-current="page"] { color: var(--web-text); }
+
 .design-web-hero {
     padding-top: 68px;
     padding-bottom: 66px;

@@ -1171,6 +1171,7 @@ body.team-photo-viewer-open { overflow: hidden; }
 @media (min-width: 1024px) {
     .primary-navigation { display: flex; align-items: center; gap: 18px; margin-inline: auto; }
     .primary-navigation a { color: var(--web-muted); font-size: 0.78rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
+    .primary-navigation a[aria-current="page"] { color: var(--web-text); }
     .mobile-menu-toggle,
     .mobile-navigation { display: none !important; }
     .simple-list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
