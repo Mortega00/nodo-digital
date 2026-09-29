@@ -224,6 +224,13 @@ h2 {
 .header-help-full,
 .header-help-compact { display: none; }
 
+.page-back-link {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
 .mobile-menu-toggle { display: none; }
 .mobile-navigation[hidden] { display: none; }
 .mobile-navigation { position: fixed; inset: 0; z-index: 300; }
@@ -654,6 +661,7 @@ textarea.contact-control { min-height: 112px; resize: vertical; }
 .showcase-dot.is-active { transform: scale(1.22); background: var(--web-purple); }
 .showcase-tab { min-height: 38px; padding: 8px 11px; border: 1px solid var(--web-border); border-radius: 99px; background: transparent; color: var(--web-muted); cursor: pointer; font-size: 0.82rem; font-weight: 700; transition: border-color 180ms ease, background-color 180ms ease, color 180ms ease; }
 .showcase-tab.is-active { border-color: var(--web-border-active); background: var(--web-card); color: var(--web-text); }
+.showcase-more-link { display: inline-flex; order: 1; min-height: 38px; flex: 0 0 auto; align-items: center; padding: 8px 11px; border: 1px solid var(--web-border); border-radius: 99px; color: var(--web-lilac); font-size: 0.82rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
 .continuity-section { padding-top: 28px; }
@@ -966,6 +974,7 @@ body.team-photo-viewer-open { overflow: hidden; }
 
 @media (max-width: 767px) {
     .shell { width: min(calc(100% - 32px), 680px); }
+    .page-back-link { min-height: 40px; margin-bottom: 22px; }
     .site-header { padding: 11px 0; }
     .header-content { gap: 8px; }
     .header-actions { flex: 0 1 auto; gap: 6px; }
@@ -1045,7 +1054,8 @@ body.team-photo-viewer-open { overflow: hidden; }
     .showcase-preview { border-radius: 14px; }
     .showcase-description { margin-bottom: 17px; }
     .showcase-link { min-height: 40px; }
-    .showcase-tabs { display: none; }
+    .showcase-tabs { display: flex; width: calc(100% + 16px); gap: 8px; margin: 12px -16px 0 0; padding: 2px 16px 4px 0; overflow-x: auto; overscroll-behavior-inline: contain; scrollbar-width: none; }
+    .showcase-tabs::-webkit-scrollbar { display: none; }
     .continuity-section { padding-top: 20px; }
     .continuity-card { padding: 23px 19px; border-radius: 19px; }
     .continuity-paths { margin: 20px 0 15px; }

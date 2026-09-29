@@ -114,6 +114,8 @@ address span, .demo-inline { color: var(--muted); font-size: 0.9rem; }
 .category-card p { margin-bottom: 13px; font-size: 0.9rem; }
 .category-card a, .product-card a, .text-link { color: var(--primary-dark); font-size: 0.89rem; font-weight: 800; text-decoration: none; }
 .category-card a:hover, .product-card a:hover, .text-link:hover { text-decoration: underline; }
+.page-back-link { display: inline-flex; min-height: 42px; align-items: center; margin-bottom: 24px; color: var(--primary-dark); font-size: 0.89rem; font-weight: 800; text-decoration: none; }
+.page-back-link:hover { text-decoration: underline; }
 .category-card-featured { background: var(--primary); border-color: var(--primary); }
 .category-card-featured .category-icon, .category-card-featured p, .category-card-featured a { color: #dcf4e7; }
 .category-card-featured h3 { color: #fff; }
@@ -285,6 +287,7 @@ address span, .demo-inline { color: var(--muted); font-size: 0.9rem; }
 
 @media (max-width: 359px) {
     .container { width: min(calc(100% - 28px), var(--container-width)); }
+    .page-back-link { min-height: 40px; margin-bottom: 20px; }
     .header-cta { padding-inline: 10px; font-size: 0.78rem; }
     .hero-actions .button, .location-actions .button { width: 100%; }
     .category-grid, .product-grid { grid-template-columns: minmax(0, 1fr); }

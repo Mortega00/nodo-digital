@@ -242,13 +242,22 @@
 
 .project-detail-explore-links {
     display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     gap: 12px;
+    align-items: center;
 }
 
 .project-detail-explore-links .text-link {
+    min-width: 0;
     min-height: 38px;
-    width: fit-content;
+    width: auto;
+    align-content: center;
+    line-height: 1.35;
 }
+
+.project-detail-explore-previous { grid-column: 1; justify-self: start; text-align: left; }
+.project-detail-explore-all { grid-column: 2; justify-self: center; text-align: center; white-space: nowrap; }
+.project-detail-explore-next { grid-column: 3; justify-self: end; text-align: right; }
 
 .project-detail-final { padding-top: 20px; }
 
@@ -264,9 +273,6 @@
     .project-detail-journey-item { grid-template-columns: minmax(0, 0.38fr) minmax(0, 0.62fr); }
     .project-detail-journey-item:nth-child(even) .project-detail-journey-item-copy { grid-column: 2; grid-row: 1; justify-self: end; }
     .project-detail-journey-item:nth-child(even) .project-detail-visual { grid-column: 1; grid-row: 1; }
-    .project-detail-explore-links { grid-template-columns: 1fr auto 1fr; align-items: center; }
-    .project-detail-explore-links a:nth-child(2) { justify-self: center; }
-    .project-detail-explore-links a:last-child { justify-self: end; text-align: right; }
 }
 
 @media (min-width: 1024px) {
@@ -298,7 +304,10 @@
     .project-detail-section { padding-block: 52px; }
     .project-detail-status { border-radius: 18px; }
     .project-detail-actions .button { width: 100%; }
+    .project-detail-explore { padding-block: 46px; }
+    .project-detail-explore h2 { margin-bottom: 18px; }
     .project-detail-explore-links { gap: 8px; }
+    .project-detail-explore-links .text-link { min-height: 44px; font-size: 0.82rem; }
     .project-detail-final-card { padding: 26px 20px; }
     .project-detail-final-card .button { width: 100%; }
 }

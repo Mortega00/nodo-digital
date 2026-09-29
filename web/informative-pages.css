@@ -25,6 +25,7 @@
 }
 
 .informative-page .info-header .primary-navigation a[aria-current="page"] { color: var(--web-text); }
+.informative-page .info-header .header-actions { display: none; }
 
 .info-hero {
     padding-top: clamp(58px, 9vw, 112px);
@@ -281,4 +282,16 @@
     .info-contact-choice .button,
     .info-final-card .button { width: 100%; }
     .info-process-list li { grid-template-columns: 48px minmax(0, 1fr); gap: 12px; }
+}
+
+@media (max-width: 767px) {
+    .informative-page .info-header .header-content {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 8px;
+    }
+
+    .informative-page .info-header .brand { margin-bottom: 0; }
+    .informative-page .info-header .primary-navigation { display: none; }
+    .informative-page .info-header .header-actions { display: flex; }
 }

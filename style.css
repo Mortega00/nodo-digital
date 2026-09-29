@@ -207,6 +207,19 @@ footer .logo img.spin-360 {
     font-size: 1rem;
 }
 
+.page-back-link {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    margin-bottom: 22px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.page-back-link:hover { color: var(--text-white); }
+
 /* ==========================================================================
    HERO & FRANJA
    ========================================================================== */
@@ -632,6 +645,8 @@ footer .logo img.spin-360 {
     .hero-cta-group .btn {
         width: 100%;
     }
+
+    .page-back-link { min-height: 40px; margin-bottom: 18px; }
 
     /* Grillas a 1 sola columna pareja */
     .pricing-grid,
