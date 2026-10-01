@@ -205,3 +205,9 @@
     .local-presence-page .local-presence-actions { display: grid; }
     .local-presence-page .local-presence-actions .button { width: 100%; }
 }
+
+@media (max-width: 1023px) {
+    .local-presence-page .local-presence-header .header-content { flex-wrap: nowrap; }
+    .local-presence-page .local-presence-header .primary-navigation { display: none; }
+    .local-presence-page .local-presence-header .header-actions { display: flex; }
+}

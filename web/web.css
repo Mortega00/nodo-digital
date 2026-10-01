@@ -207,11 +207,14 @@ h2 {
     font-size: 0.95rem;
     font-weight: 800;
     letter-spacing: 0.08em;
+    perspective: 1000px;
     text-decoration: none;
 }
 
+.brand-mark-float { display: inline-flex; flex: 0 0 auto; line-height: 0; animation: brand-mark-float 4.6s ease-in-out infinite; }
 .brand-mark { width: 30px; height: 30px; object-fit: contain; transform-origin: center; }
 .brand-mark.is-spinning { animation: brand-spin 650ms ease-in-out; }
+.brand-mark.is-returning { animation: brand-return-spin 800ms cubic-bezier(0.34, 1.56, 0.64, 1); }
 
 .header-help,
 .text-link {
@@ -974,6 +977,7 @@ body.team-photo-viewer-open { overflow: hidden; }
 #como-trabajamos,
 #acompanamiento,
 #faq,
+#preguntas,
 #contacto { scroll-margin-top: 78px; }
 
 @media (max-width: 767px) {
@@ -1430,6 +1434,17 @@ html[data-theme="light"] .final-card {
     to { transform: rotate(360deg); }
 }
 
+@keyframes brand-return-spin {
+    0% { transform: scale(1) rotateY(0deg); }
+    50% { transform: scale(1.3) rotateY(180deg); }
+    100% { transform: scale(1) rotateY(360deg); }
+}
+
+@keyframes brand-mark-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+}
+
 @keyframes mobile-navigation-in {
     from { opacity: 0; transform: translateX(14px); }
     to { opacity: 1; transform: translateX(0); }
@@ -1481,6 +1496,7 @@ html[data-theme="light"] .final-card {
 
 @media (prefers-reduced-motion: reduce) {
     .nodo-intro { display: none !important; animation: none !important; }
+    .brand-mark-float { animation: none; }
     html { scroll-behavior: auto; }
     *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
 }

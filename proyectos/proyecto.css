@@ -311,3 +311,10 @@
     .project-detail-final-card { padding: 26px 20px; }
     .project-detail-final-card .button { width: 100%; }
 }
+
+@media (max-width: 1023px) {
+    .project-detail-page .project-detail-header .header-content { display: flex; flex-wrap: nowrap; }
+    .project-detail-page .project-detail-header .brand { margin-bottom: 0; }
+    .project-detail-page .project-detail-header .primary-navigation { display: none; }
+    .project-detail-page .project-detail-header .header-actions { display: flex; }
+}

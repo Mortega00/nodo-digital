@@ -242,3 +242,9 @@
     .design-web-actions .button { width: 100%; }
     .design-web-case-grid { padding: 20px; }
 }
+
+@media (max-width: 1023px) {
+    .design-web-page .design-web-header .header-content { flex-wrap: nowrap; }
+    .design-web-page .design-web-header .primary-navigation { display: none; }
+    .design-web-page .design-web-header .header-actions { display: flex; }
+}

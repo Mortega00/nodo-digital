@@ -196,3 +196,9 @@
     .nativa-case-page .nativa-case-actions { display: grid; }
     .nativa-case-page .nativa-case-actions .button { width: 100%; }
 }
+
+@media (max-width: 1023px) {
+    .nativa-case-page .nativa-case-header .header-content { flex-wrap: nowrap; }
+    .nativa-case-page .nativa-case-header .primary-navigation { display: none; }
+    .nativa-case-page .nativa-case-header .header-actions { display: flex; }
+}

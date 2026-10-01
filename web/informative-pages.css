@@ -313,3 +313,9 @@
     .informative-page .info-header .primary-navigation { display: none; }
     .informative-page .info-header .header-actions { display: flex; }
 }
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .informative-page .info-header .header-content { display: flex; flex-wrap: nowrap; }
+    .informative-page .info-header .primary-navigation { display: none; }
+    .informative-page .info-header .header-actions { display: flex; }
+}

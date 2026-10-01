@@ -1404,6 +1404,13 @@ function setupPageChrome() {
     const header = document.querySelector(".site-header");
     const start = document.getElementById("inicio");
     const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.querySelectorAll(".brand-mark").forEach(mark => {
+        if (mark.parentElement?.classList.contains("brand-mark-float")) return;
+        const wrapper = document.createElement("span");
+        wrapper.className = "brand-mark-float";
+        mark.replaceWith(wrapper);
+        wrapper.append(mark);
+    });
     const scrollToStart = () => start?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
     const spinMark = mark => {
         if (prefersReducedMotion()) return;
@@ -1418,6 +1425,16 @@ function setupPageChrome() {
         const mark = event.target.closest(".brand-mark");
         if (mark) spinMark(mark);
         scrollToStart();
+    }));
+    document.querySelectorAll("a.brand[href='/']:not([data-scroll-top])").forEach(link => link.addEventListener("click", event => {
+        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || prefersReducedMotion()) return;
+        const mark = link.querySelector(".brand-mark");
+        if (!mark) return;
+        event.preventDefault();
+        if (mark.classList.contains("is-returning")) return;
+        mark.classList.add("is-returning");
+        window.setTimeout(() => { window.location.assign(link.href); }, 450);
+        window.setTimeout(() => mark.classList.remove("is-returning"), 850);
     }));
     document.querySelectorAll(".brand-mark").forEach(mark => mark.addEventListener("animationend", () => mark.classList.remove("is-spinning")));
     updateHeader();

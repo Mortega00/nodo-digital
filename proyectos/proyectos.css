@@ -194,6 +194,13 @@
     .projects-final-card .button { width: 100%; }
 }
 
+@media (max-width: 1023px) {
+    .projects-page .projects-header .header-content { display: flex; flex-wrap: nowrap; }
+    .projects-page .projects-header .brand { margin-bottom: 0; }
+    .projects-page .projects-header .primary-navigation { display: none; }
+    .projects-page .projects-header .header-actions { display: flex; }
+}
+
 @media (hover: hover) {
     .project-visual[href]:hover {
         border-color: var(--web-border-active);
