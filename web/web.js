@@ -144,8 +144,9 @@ const showcaseProjects = [
     {
         id: "nativa",
         eyebrow: "PROYECTO REAL",
+        selectorMeta: "Proyecto real · Publicado",
         type: "Landing / presencia digital",
-        name: "NATIVA Estética",
+        name: "NATIVA",
         subtitle: "Remedios de Escalada, Buenos Aires",
         description: "Creamos una presencia digital clara para NATIVA Estética, organizando servicios, información del espacio y contacto en una experiencia simple, rápida y adaptable a celular.",
         tags: ["Responsive", "Servicios claros", "Contacto directo"],
@@ -158,8 +159,23 @@ const showcaseProjects = [
         status: "Publicado"
     },
     {
+        id: "cava366",
+        eyebrow: "PROYECTO REAL · EN DESARROLLO",
+        selectorMeta: "Proyecto real · En desarrollo",
+        type: "Experiencia digital",
+        name: "CAVA366",
+        description: "Una experiencia digital pensada para presentar vinos, facilitar pedidos y ordenar la propuesta de CAVA366.",
+        tags: ["Vinos", "Catas", "Pedidos"],
+        image: "assets/projects/cava366-home.png",
+        imageAlt: "Experiencia de vinos de CAVA366 con copas, botellas y una mesa preparada para una cata.",
+        imageWidth: 1672,
+        imageHeight: 941,
+        status: "En desarrollo"
+    },
+    {
         id: "bloc",
-        eyebrow: "PRODUCTO PROPIO / SISTEMA",
+        eyebrow: "PRODUCTO PROPIO",
+        selectorMeta: "Producto propio",
         type: "Sistema de gestión",
         name: "BLOC",
         subtitle: "Organización y seguimiento del trabajo diario.",
@@ -174,8 +190,24 @@ const showcaseProjects = [
         status: "En desarrollo"
     },
     {
+        id: "rorden",
+        eyebrow: "PRODUCTO PROPIO · PUBLICADO",
+        selectorMeta: "Producto propio · Publicado",
+        name: "RORDEN",
+        description: "Una herramienta simple para anotar, organizar y resolver pendientes con claridad.",
+        tags: ["Pendientes", "Organización", "Claridad"],
+        image: "assets/projects/rorden-clean.png",
+        imageAlt: "Interfaz de RORDEN para crear pendientes, revisarlos y consultarlos en un calendario.",
+        imageWidth: 1910,
+        imageHeight: 985,
+        url: "/proyectos/rorden/",
+        linkLabel: "Ver proyecto",
+        status: "Publicado"
+    },
+    {
         id: "planner",
-        eyebrow: "PRODUCTO PROPIO",
+        eyebrow: "PRODUCTO PROPIO · EN DESARROLLO",
+        selectorMeta: "Producto propio · En desarrollo",
         type: "Organización personal",
         name: "Planner",
         subtitle: "Agenda, tareas, notas, finanzas y objetivos en un mismo espacio.",
@@ -191,7 +223,8 @@ const showcaseProjects = [
     },
     {
         id: "start",
-        eyebrow: "DEMO",
+        eyebrow: "DEMO · PROYECTO DE PRUEBA",
+        selectorMeta: "Demo · Proyecto de prueba",
         type: "Landing de prueba",
         name: "START",
         subtitle: "Una demostración visual de una landing orientada a presentar un programa funcional.",
@@ -1462,16 +1495,11 @@ function setupMobileNavigation() {
 
 function setupProjectShowcase() {
     const showcase = document.getElementById("project-showcase");
-    const viewport = showcase?.querySelector("[data-showcase-viewport]");
     const track = showcase?.querySelector("[data-showcase-track]");
-    const dots = showcase?.querySelector("[data-showcase-dots]");
-    const tabs = showcase?.querySelector("[data-showcase-tabs]");
-    const previous = showcase?.querySelector("[data-showcase-prev]");
-    const next = showcase?.querySelector("[data-showcase-next]");
+    const selector = showcase?.querySelector("[data-showcase-selector]");
     const status = showcase?.querySelector("[data-showcase-status]");
-    if (!showcase || !viewport || !track || !dots || !tabs || !previous || !next || !status || !showcaseProjects.length) return;
+    if (!showcase || !track || !selector || !status || !showcaseProjects.length) return;
 
-    const reducedMotion = () => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const makeProjectCard = project => {
         const card = createElement("article", "showcase-card" + (project.pending ? " showcase-card-pending" : ""));
         const titleId = "showcase-title-" + project.id;
@@ -1504,11 +1532,9 @@ function setupProjectShowcase() {
 
         const content = createElement("div", "showcase-content");
         if (project.eyebrow) content.append(createElement("p", "eyebrow", project.eyebrow));
-        if (project.type) content.append(createElement("p", "showcase-type", project.type));
         const title = createElement("h3", "", project.name);
         title.id = titleId;
         content.append(title);
-        if (project.subtitle) content.append(createElement("p", "showcase-subtitle", project.subtitle));
         if (project.status) content.append(createElement("p", "showcase-status-badge", project.status));
         if (project.pending) content.append(createElement("p", "showcase-pending-copy", "Información pública pendiente de incorporar."));
         if (project.description) content.append(createElement("p", "showcase-description", project.description));
@@ -1518,8 +1544,9 @@ function setupProjectShowcase() {
             project.tags.forEach(tag => tags.append(createElement("li", "", tag)));
             content.append(tags);
         }
+        let link = null;
         if (project.url) {
-            const link = createElement("a", "text-link showcase-link", project.linkLabel || "Ver proyecto");
+            link = createElement("a", "text-link showcase-link", project.linkLabel || "Ver proyecto");
             link.href = project.url;
             if (project.external) {
                 link.target = "_blank";
@@ -1528,79 +1555,54 @@ function setupProjectShowcase() {
             const arrow = createElement("span", "", "→");
             arrow.setAttribute("aria-hidden", "true");
             link.append(" ", arrow);
-            content.append(link);
         }
-        card.append(preview, content);
+        card.append(content, preview);
+        if (link) card.append(link);
         return card;
     };
 
-    const cards = showcaseProjects.map(makeProjectCard);
-    track.replaceChildren(...cards);
-
     let activeIndex = 0;
-    const selectorButtons = [];
-    const makeSelector = (project, index, className, label) => {
-        const button = createButton(className === "showcase-dot" ? "" : project.name, className, () => moveTo(index));
-        button.setAttribute("aria-label", label + project.name);
+    const selectProject = index => {
+        if (!Number.isInteger(index) || !showcaseProjects[index]) return;
+        activeIndex = index;
+        renderActiveProject();
+    };
+    const makeSelector = (project, index) => {
+        const button = createButton("", "showcase-project-option", () => selectProject(index));
+        button.setAttribute("aria-label", "Mostrar proyecto " + project.name);
         button.dataset.showcaseIndex = String(index);
-        selectorButtons.push(button);
+        const name = createElement("span", "showcase-option-name", project.name);
+        const arrow = createElement("span", "showcase-option-arrow", "→");
+        arrow.setAttribute("aria-hidden", "true");
+        const nameRow = createElement("span", "showcase-option-name-row");
+        nameRow.append(name, arrow);
+        button.append(
+            nameRow,
+            createElement("span", "showcase-option-meta", project.selectorMeta || project.eyebrow)
+        );
         return button;
     };
     showcaseProjects.forEach((project, index) => {
-        dots.append(makeSelector(project, index, "showcase-dot", "Ver proyecto: "));
-        tabs.append(makeSelector(project, index, "showcase-tab", "Ver proyecto: "));
+        selector.append(makeSelector(project, index));
     });
 
-    const updateActive = index => {
-        activeIndex = index;
-        cards.forEach((card, cardIndex) => card.classList.toggle("is-active", cardIndex === index));
-        selectorButtons.forEach(button => {
-            const selected = Number(button.dataset.showcaseIndex) === index;
+    const updateControls = () => {
+        const project = showcaseProjects[activeIndex];
+        selector.querySelectorAll("[data-showcase-index]").forEach(button => {
+            const selected = Number(button.dataset.showcaseIndex) === activeIndex;
             button.classList.toggle("is-active", selected);
             button.setAttribute("aria-current", selected ? "true" : "false");
+            button.setAttribute("aria-pressed", selected ? "true" : "false");
         });
-        status.textContent = "Mostrando " + showcaseProjects[index].name + ". Proyecto " + (index + 1) + " de " + showcaseProjects.length + ".";
+        status.textContent = "Mostrando " + project.name + ". Proyecto " + (activeIndex + 1) + " de " + showcaseProjects.length + ".";
     };
-    const moveTo = index => {
-        const targetIndex = ((index % cards.length) + cards.length) % cards.length;
-        viewport.scrollTo({ left: cards[targetIndex].offsetLeft, behavior: reducedMotion() ? "auto" : "smooth" });
-        updateActive(targetIndex);
+    const renderActiveProject = () => {
+        const project = showcaseProjects[activeIndex];
+        track.replaceChildren(makeProjectCard(project));
+        updateControls();
     };
-    previous.addEventListener("click", () => moveTo(activeIndex - 1));
-    next.addEventListener("click", () => moveTo(activeIndex + 1));
-    viewport.addEventListener("keydown", event => {
-        if (event.key === "ArrowLeft") {
-            event.preventDefault();
-            moveTo(activeIndex - 1);
-        }
-        if (event.key === "ArrowRight") {
-            event.preventDefault();
-            moveTo(activeIndex + 1);
-        }
-    });
 
-    let scrollFrame = 0;
-    let scrollSettleTimer = 0;
-    viewport.addEventListener("scroll", () => {
-        if (scrollFrame) return;
-        scrollFrame = window.requestAnimationFrame(() => {
-            scrollFrame = 0;
-            const center = viewport.scrollLeft + viewport.clientWidth / 2;
-            let closestIndex = 0;
-            let closestDistance = Number.POSITIVE_INFINITY;
-            cards.forEach((card, index) => {
-                const cardCenter = card.offsetLeft + card.offsetWidth / 2;
-                const distance = Math.abs(cardCenter - center);
-                if (distance < closestDistance) {
-                    closestDistance = distance;
-                    closestIndex = index;
-                }
-            });
-            window.clearTimeout(scrollSettleTimer);
-            scrollSettleTimer = window.setTimeout(() => updateActive(closestIndex), 110);
-        });
-    }, { passive: true });
-    updateActive(0);
+    renderActiveProject();
 }
 
 function setupFaqAccordion() {

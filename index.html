@@ -109,13 +109,15 @@
                     <p>Sitios, sistemas y soluciones creadas para necesidades diferentes.</p>
                 </div>
                 <section class="project-showcase" id="project-showcase" aria-label="Proyectos de NODO">
-                    <p class="showcase-hint">Deslizá para ver más proyectos.</p>
-                    <div class="showcase-viewport" data-showcase-viewport tabindex="0" aria-label="Carrusel de proyectos"><div class="showcase-track" data-showcase-track></div></div>
-                    <div class="showcase-controls">
-                        <div class="showcase-arrows"><button class="showcase-arrow" type="button" data-showcase-prev aria-label="Ver proyecto anterior"><span class="showcase-arrow-icon showcase-arrow-icon-prev" aria-hidden="true"></span></button><button class="showcase-arrow" type="button" data-showcase-next aria-label="Ver proyecto siguiente"><span class="showcase-arrow-icon showcase-arrow-icon-next" aria-hidden="true"></span></button></div>
-                        <div class="showcase-dots" data-showcase-dots aria-label="Elegir proyecto"></div>
+                    <div class="showcase-layout">
+                        <div class="showcase-viewport"><div class="showcase-track" data-showcase-track></div></div>
+                        <aside class="showcase-selector" aria-label="Elegir proyecto destacado">
+                            <div class="showcase-selector-scroll">
+                                <div class="showcase-project-list" data-showcase-selector></div>
+                                <a class="showcase-more-link" href="/proyectos/">Ver más proyectos <span aria-hidden="true">→</span></a>
+                            </div>
+                        </aside>
                     </div>
-                    <div class="showcase-tabs" data-showcase-tabs aria-label="Elegir proyecto"><a class="showcase-more-link" href="/proyectos/">Ver más proyectos <span aria-hidden="true">→</span></a></div>
                     <p class="visually-hidden" data-showcase-status aria-live="polite"></p>
                 </section>
             </div>
