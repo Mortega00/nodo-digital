@@ -6,34 +6,37 @@
   const images = window.RAICES_IMAGES || {};
   const root = document.body.dataset.root || "./";
   const page = document.body.dataset.page || "home";
+  const isFilePreview = window.location.protocol === "file:";
 
   const escapeHTML = value => String(value ?? "").replace(/[&<>'"]/g, character => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#039;", "\"": "&quot;"
   })[character]);
   const textValue = value => String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const route = path => `${root}${path}`;
+  const propertiesRoute = () => route(isFilePreview ? "propiedades/index.html" : "propiedades/");
+  const propertyRoute = id => `${route(isFilePreview ? "propiedad/index.html" : "propiedad/")}?id=${encodeURIComponent(id)}`;
   const formatNumber = value => new Intl.NumberFormat("es-AR").format(value);
   const formatPrice = property => `${property.currency} ${formatNumber(property.price)}${property.operation === "alquiler" ? " / mes" : ""}`;
   const operationLabel = operation => operation === "alquiler" ? "Alquiler" : "Venta";
   const propertyTypeLabel = type => ({ departamento: "Departamento", casa: "Casa", ph: "PH", terreno: "Terreno" })[type] || type;
   const propertyImages = property => images[property.imageSet] || [];
+  const brandMark = `<span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path d="M6 7v12a6 6 0 0 0 6 6h14"></path><path d="M26 7v5a5 5 0 0 1-5 5H11"></path><circle cx="16" cy="17" r="2.7"></circle></svg></span>`;
 
   function headerMarkup() {
     const active = page === "properties" || page === "property" ? "properties" : page;
     const navigation = [
       ["home", route(""), "Inicio"],
-      ["properties", route("propiedades/"), "Propiedades"],
+      ["properties", propertiesRoute(), "Propiedades"],
       ["zones", route("#zonas"), "Zonas"],
       ["about", route("#nosotros"), "Nosotros"],
       ["valuation", route("#tasacion"), "Tasá tu propiedad"]
     ];
     const navLinks = navigation.map(([id, href, label]) => `<a href="${href}"${active === id ? ' aria-current="page"' : ""}>${label}</a>`).join("");
     return `
-      <div class="demo-notice" role="note">Demo NODO · Propiedades e imágenes temporales de referencia.</div>
       <header class="site-header" data-site-header>
         <div class="container header-inner">
           <a class="brand" href="${route("")}" aria-label="Raíces Urbanas, ir al inicio">
-            <span class="brand-mark" aria-hidden="true"></span>
+            ${brandMark}
             <span class="brand-name"><strong>RAÍCES URBANAS</strong><small>INMOBILIARIA</small></span>
           </a>
           <nav class="desktop-nav" aria-label="Navegación principal">${navLinks}</nav>
@@ -50,13 +53,13 @@
     return `<footer class="site-footer">
       <div class="container footer-grid">
         <div>
-          <a class="brand" href="${route("")}" aria-label="Raíces Urbanas, ir al inicio"><span class="brand-mark" aria-hidden="true"></span><span class="brand-name"><strong>RAÍCES URBANAS</strong><small>INMOBILIARIA</small></span></a>
+          <a class="brand" href="${route("")}" aria-label="Raíces Urbanas, ir al inicio">${brandMark}<span class="brand-name"><strong>RAÍCES URBANAS</strong><small>INMOBILIARIA</small></span></a>
           <p>Una experiencia inmobiliaria clara para explorar propiedades en CABA y Zona Sur.</p>
         </div>
-        <nav class="footer-nav" aria-label="Navegación secundaria"><a href="${route("propiedades/")}">Propiedades</a><a href="${route("#zonas")}">Zonas</a><a href="${route("#tasacion")}">Tasá tu propiedad</a></nav>
+        <nav class="footer-nav" aria-label="Navegación secundaria"><a href="${propertiesRoute()}">Propiedades</a><a href="${route("#zonas")}">Zonas</a><a href="${route("#tasacion")}">Tasá tu propiedad</a></nav>
         <nav class="footer-nav" aria-label="Contacto"><a href="${whatsAppLink("Quiero hacer una consulta sobre una propiedad.")}" target="_blank" rel="noopener noreferrer">WhatsApp</a><a href="${route("#contacto")}">Contactar</a><a href="${route("#nosotros")}">Nosotros</a></nav>
       </div>
-      <div class="container footer-bottom"><span>© ${new Date().getFullYear()} Raíces Urbanas · Demo comercial de NODO</span><span>Contenido y datos ficticios para demostración.</span></div>
+      <div class="container footer-bottom"><span>© ${new Date().getFullYear()} Raíces Urbanas</span><span>Demo desarrollada por NODO · Datos, precios e imágenes de referencia.</span></div>
     </footer>`;
   }
 
@@ -70,6 +73,7 @@
     const footerTarget = document.querySelector("[data-footer]");
     if (headerTarget) headerTarget.innerHTML = headerMarkup();
     if (footerTarget) footerTarget.innerHTML = footerMarkup();
+    document.querySelectorAll("[data-properties-link]").forEach(link => { link.href = propertiesRoute(); });
 
     const header = document.querySelector("[data-site-header]");
     if (header) {
@@ -149,7 +153,7 @@
   function propertyCard(property, loading = "lazy") {
     const cardImages = propertyImages(property);
     const image = cardImages[0] || "";
-    const detailURL = `${route("propiedad/")}?id=${encodeURIComponent(property.id)}`;
+    const detailURL = propertyRoute(property.id);
     const metadata = [`${property.rooms} amb.`, `${property.bedrooms} dorm.`, `${property.totalArea} m²`];
     if (property.parking) metadata.push("Coch.");
     return `<a class="property-card" href="${detailURL}" aria-label="Ver ${escapeHTML(property.title)}">
@@ -159,6 +163,9 @@
   }
 
   function initHome() {
+    document.querySelectorAll("[data-properties-location]").forEach(link => {
+      link.href = `${propertiesRoute()}?location=${encodeURIComponent(link.dataset.propertiesLocation)}`;
+    });
     document.querySelectorAll("[data-ru-image]").forEach(image => {
       image.src = images[image.dataset.ruImage] || "";
     });
@@ -195,7 +202,7 @@
       searchForm.addEventListener("submit", event => {
         event.preventDefault();
         const filters = readForm(searchForm);
-        window.location.href = `${route("propiedades/")}${serializeFilters(filters)}`;
+        window.location.href = `${propertiesRoute()}${serializeFilters(filters)}`;
       });
     }
     initValuationForm();
@@ -290,16 +297,67 @@
     return "Todas las propiedades";
   }
 
+  function activeFilterChips(filters) {
+    const priceLabels = filters.operation === "alquiler"
+      ? { low: "Hasta ARS 800.000", middle: "ARS 800.000 a 1.100.000", high: "Más de ARS 1.100.000" }
+      : { low: "Hasta USD 150.000", middle: "USD 150.000 a 250.000", high: "Más de USD 250.000" };
+    const labels = {
+      operation: filters.operation ? (filters.operation === "venta" ? "Comprar" : "Alquilar") : "",
+      location: filters.location,
+      propertyType: filters.propertyType ? propertyTypeLabel(filters.propertyType) : "",
+      rooms: filters.rooms ? `${filters.rooms}${filters.rooms === "4" ? "+" : ""} amb.` : "",
+      price: filters.price ? priceLabels[filters.price] : "",
+      bedrooms: filters.bedrooms ? `${filters.bedrooms}+ dorm.` : "",
+      bathrooms: filters.bathrooms ? `${filters.bathrooms}+ baños` : "",
+      minArea: filters.minArea ? `Desde ${filters.minArea} m²` : "",
+      maxArea: filters.maxArea ? `Hasta ${filters.maxArea} m²` : "",
+      parking: filters.parking ? "Cochera" : "",
+      patio: filters.patio ? "Patio" : "",
+      garden: filters.garden ? "Jardín" : "",
+      balcony: filters.balcony ? "Balcón" : "",
+      terrace: filters.terrace ? "Terraza" : "",
+      pool: filters.pool ? "Pileta" : ""
+    };
+    return Object.entries(labels).filter(([, label]) => label).map(([key, label]) => ({ key, label }));
+  }
+
+  function activeFiltersMarkup(filters) {
+    const chips = activeFilterChips(filters);
+    if (!chips.length) return "";
+    return `<div class="active-filter-summary" aria-label="Filtros activos"><span>Filtros activos</span>${chips.map(({ key, label }) => `<button type="button" data-remove-filter="${key}" aria-label="Quitar filtro ${escapeHTML(label)}">${escapeHTML(label)} <b aria-hidden="true">×</b></button>`).join("")}</div>`;
+  }
+
+  function updateResultsUrl(filters) {
+    const url = `${propertiesRoute()}${serializeFilters(filters)}`;
+      if (isFilePreview) {
+      window.location.assign(url);
+      return true;
+    }
+    window.history.replaceState({}, "", url);
+    return false;
+  }
+
   function initResults() {
     const target = document.querySelector("[data-results-page]");
     if (!target) return;
     let filters = readFilters();
     let sortMode = "recent";
+    target.addEventListener("click", event => {
+      const button = event.target.closest("[data-remove-filter]");
+      if (!button || !target.contains(button)) return;
+      event.preventDefault();
+      const nextFilters = { ...filters };
+      delete nextFilters[button.dataset.removeFilter];
+      filters = nextFilters;
+      if (!updateResultsUrl(filters)) render();
+    });
     const render = () => {
+      const canSortByPrice = Boolean(filters.operation);
+      if (!canSortByPrice && ["price-low", "price-high"].includes(sortMode)) sortMode = "recent";
       const results = sortProperties(filterProperties(filters), sortMode);
       document.title = `${resultsHeading(filters).replace(/<[^>]*>/g, "")} | Raíces Urbanas · Demo NODO`;
-      target.innerHTML = `<section class="page-intro"><div class="container"><div class="breadcrumb"><a href="${route("")}">Inicio</a><span aria-hidden="true">/</span><span>Propiedades</span></div><h1>${resultsHeading(filters)}</h1><p>Explorá opciones seleccionadas en CABA y Zona Sur. Los datos son parte de esta demostración.</p></div></section>
-        <section class="section"><div class="container results-layout">${filterPanelMarkup(filters)}<div><div class="results-toolbar"><div><button class="button button-secondary mobile-filter-trigger" type="button" data-open-filters>Filtros</button><h2>${results.length} ${results.length === 1 ? "propiedad encontrada" : "propiedades encontradas"}</h2><p>${filters.operation ? `Mostrando opciones para ${operationLabel(filters.operation).toLowerCase()}.` : "Usá los filtros para encontrar una opción."}</p></div><div class="sort-field"><label for="sort-properties">Ordenar por</label><select id="sort-properties" data-sort><option value="recent">Más recientes</option><option value="price-low">Menor precio</option><option value="price-high">Mayor precio</option><option value="area">Mayor superficie</option></select></div></div>
+    target.innerHTML = `<section class="page-intro"><div class="container"><div class="breadcrumb"><a href="${route("")}">Inicio</a><span aria-hidden="true">/</span><span>Propiedades</span></div><h1>${resultsHeading(filters)}</h1><p>Explorá opciones seleccionadas en CABA y Zona Sur. Los datos son parte de esta demostración.</p></div></section>
+        <section class="section"><div class="container results-layout">${filterPanelMarkup(filters)}<div><div class="results-toolbar"><div><button class="button button-secondary mobile-filter-trigger" type="button" data-open-filters>Filtros</button><h2>${results.length} ${results.length === 1 ? "propiedad encontrada" : "propiedades encontradas"}</h2><p>${filters.operation ? `Mostrando opciones para ${operationLabel(filters.operation).toLowerCase()}.` : "Usá los filtros para encontrar una opción."}</p></div><div class="sort-field"><label for="sort-properties">Ordenar por</label><select id="sort-properties" data-sort><option value="recent"${sortMode === "recent" ? " selected" : ""}>Más recientes</option><option value="price-low"${sortMode === "price-low" ? " selected" : ""}${canSortByPrice ? "" : " disabled"}>Menor precio${canSortByPrice ? "" : " · elegí operación"}</option><option value="price-high"${sortMode === "price-high" ? " selected" : ""}${canSortByPrice ? "" : " disabled"}>Mayor precio${canSortByPrice ? "" : " · elegí operación"}</option><option value="area"${sortMode === "area" ? " selected" : ""}>Mayor superficie</option></select>${canSortByPrice ? "" : '<p class="sort-hint">Elegí Comprar o Alquilar para ordenar por precio.</p>'}</div></div>${activeFiltersMarkup(filters)}
           ${results.length ? `<div class="property-grid">${results.map(property => propertyCard(property)).join("")}</div>` : `<div class="empty-state"><div><p class="eyebrow">SIN COINCIDENCIAS</p><h3>No encontramos propiedades con esos criterios.</h3><p>Probá ampliando tu búsqueda o quitando algunos filtros.</p><button class="button button-primary" type="button" data-clear-filters>Limpiar filtros</button></div></div>`}
         </div></div></section>`;
       bindResultsEvents();
@@ -316,16 +374,15 @@
       form?.addEventListener("submit", event => {
         event.preventDefault();
         filters = readForm(form);
-        window.history.replaceState({}, "", `${route("propiedades/")}${serializeFilters(filters)}`);
-        render();
+        const navigating = updateResultsUrl(filters);
+        if (!navigating) render();
         panel?.classList.remove("is-open");
         document.body.classList.remove("ru-menu-open");
       });
       form?.elements.operation.addEventListener("change", () => updatePriceSelect(form));
       target.querySelectorAll("[data-clear-filters]").forEach(button => button.addEventListener("click", () => {
         filters = {};
-        window.history.replaceState({}, "", route("propiedades/"));
-        render();
+        if (!updateResultsUrl(filters)) render();
       }));
       target.querySelector("[data-sort]")?.addEventListener("change", event => { sortMode = event.target.value; render(); });
       target.querySelector("[data-open-filters]")?.addEventListener("click", () => {
@@ -357,7 +414,7 @@
     ];
     const message = `Hola, estoy interesado/a en la propiedad ${property.id} — ${property.title}. Quisiera recibir más información.`;
     const visitMessage = `Hola, quiero coordinar una visita por la propiedad ${property.id} — ${property.title}.`;
-    target.innerHTML = `<section class="detail-intro"><div class="container"><div class="breadcrumb"><a href="${route("")}">Inicio</a><span aria-hidden="true">/</span><a href="${route("propiedades/")}">Propiedades</a><span aria-hidden="true">/</span><span>${property.id}</span></div><div class="detail-heading"><div><div class="detail-label"><span>${property.id}</span><span>${operationLabel(property.operation).toUpperCase()}</span></div><h1>${escapeHTML(property.title)}</h1><p>${escapeHTML(property.neighborhood)} · ${escapeHTML(property.region)}</p></div><div><p class="detail-price">${formatPrice(property)}</p><p class="detail-expenses">${escapeHTML(property.expenses)}</p></div></div></div></section>
+    target.innerHTML = `<section class="detail-intro"><div class="container"><div class="breadcrumb"><a href="${route("")}">Inicio</a><span aria-hidden="true">/</span><a href="${propertiesRoute()}">Propiedades</a><span aria-hidden="true">/</span><span>${property.id}</span></div><div class="detail-heading"><div><div class="detail-label"><span>${property.id}</span><span>${operationLabel(property.operation).toUpperCase()}</span></div><h1>${escapeHTML(property.title)}</h1><p>${escapeHTML(property.neighborhood)} · ${escapeHTML(property.region)}</p></div><div><p class="detail-price">${formatPrice(property)}</p><p class="detail-expenses">${escapeHTML(property.expenses)}</p></div></div></div></section>
       <section aria-label="Galería de la propiedad"><div class="container"><div class="gallery">${gallery.slice(0, 3).map((image, index) => `<button class="gallery-item" type="button" data-gallery-index="${index}" aria-label="Ver foto ${index + 1} de ${gallery.length}"><img src="${image}" alt="Imagen temporal de referencia de ${escapeHTML(property.title)}, foto ${index + 1}" width="1200" height="800"${index ? ' loading="lazy"' : ""}></button>`).join("")}<button class="gallery-all" type="button" data-open-gallery>Ver todas las fotos <span aria-hidden="true">→</span></button></div></div></section>
       <section class="section"><div class="container detail-layout"><div class="detail-content"><ul class="property-facts">${facts.map(([value, label]) => `<li><strong>${escapeHTML(value)}</strong><span>${label}</span></li>`).join("")}</ul><div class="detail-copy"><h2>Descripción</h2><p>${escapeHTML(property.description)}</p></div><div class="amenities"><h2>Características</h2><ul class="amenity-list">${property.amenities.map(item => `<li>${escapeHTML(item)}</li>`).join("")}</ul></div><div class="location-card"><p class="eyebrow">UBICACIÓN</p><h2>${escapeHTML(property.neighborhood)} · ${escapeHTML(property.region)}</h2><p>La ubicación se presenta por barrio o localidad para esta demo. Una integración real podría sumar mapa, radio de búsqueda y puntos de interés.</p></div></div><aside class="contact-box"><p class="eyebrow">CONSULTA DIRECTA</p><h2>¿Te interesa esta propiedad?</h2><p>Escribinos y recibí información para avanzar con claridad.</p><a class="button button-light" href="${whatsAppLink(message)}" target="_blank" rel="noopener noreferrer">Consultar por WhatsApp <span aria-hidden="true">→</span></a><a class="button button-secondary" href="${whatsAppLink(visitMessage)}" target="_blank" rel="noopener noreferrer">Coordinar una visita</a></aside></div></section>
       <dialog class="gallery-dialog" data-gallery-dialog aria-label="Galería de ${escapeHTML(property.title)}"><div class="dialog-inner"><div class="dialog-header"><strong>${escapeHTML(property.title)}</strong><button class="dialog-close" type="button" data-close-gallery aria-label="Cerrar galería">×</button></div><div class="dialog-stage"><img data-dialog-image src="${gallery[0]}" alt=""></div><div class="dialog-footer"><button class="dialog-nav" type="button" data-gallery-prev aria-label="Foto anterior">←</button><span data-gallery-count>1 / ${gallery.length}</span><button class="dialog-nav" type="button" data-gallery-next aria-label="Foto siguiente">→</button></div></div></dialog>`;

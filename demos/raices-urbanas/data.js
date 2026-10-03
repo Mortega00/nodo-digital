@@ -14,69 +14,53 @@ const tempImage = (id, width = 1400) =>
 
 /* Imágenes temporales centralizadas: reemplazar exclusivamente estas URLs al contar con material definitivo. */
 window.RAICES_IMAGES = {
-  hero: tempImage("photo-1600585154363-67eb9e2e2099", 1800),
+  hero: tempImage("photo-1564013799919-ab600027ffc6", 1800),
   palermo: [
-    tempImage("photo-1600210492486-724fe5c67fb0"),
-    tempImage("photo-1600566753086-00f18fb6b3ea"),
-    tempImage("photo-1600585154526-990dced4db0d"),
-    tempImage("photo-1600607688969-a5bfcd646154"),
-    tempImage("photo-1600047509807-ba8f99d2cdde")
+    tempImage("photo-1522708323590-d24dbb6b0267"),
+    tempImage("photo-1484154218962-a197022b5858"),
+    tempImage("photo-1505693416388-ac5ce068fe85")
   ],
   belgrano: [
-    tempImage("photo-1600607687939-ce8a6c25118c"),
-    tempImage("photo-1600566753190-17f0baa2a6c3"),
-    tempImage("photo-1600585154340-be6161a56a0c"),
-    tempImage("photo-1600607687920-4e2a09cf159d"),
-    tempImage("photo-1600607688969-a5bfcd646154")
+    tempImage("photo-1502672260266-1c1ef2d93688"),
+    tempImage("photo-1554995207-c18c203602cb"),
+    tempImage("photo-1600607687939-ce8a6c25118c")
   ],
   caballito: [
-    tempImage("photo-1600566752355-35792bedcfea"),
-    tempImage("photo-1600585154363-67eb9e2e2099"),
-    tempImage("photo-1600210491892-03d54c0aaf87"),
-    tempImage("photo-1600566753190-17f0baa2a6c3"),
-    tempImage("photo-1600607688960-e095ff83135c")
+    tempImage("photo-1616486338812-3dadae4b4ace"),
+    tempImage("photo-1511818966892-d7d671e672a2"),
+    tempImage("photo-1600566752355-35792bedcfea")
   ],
   villaUrquiza: [
-    tempImage("photo-1600585154340-be6161a56a0c"),
-    tempImage("photo-1600607687920-4e2a09cf159d"),
-    tempImage("photo-1600210491892-03d54c0aaf87"),
-    tempImage("photo-1600607688969-a5bfcd646154"),
-    tempImage("photo-1600585154526-990dced4db0d")
+    tempImage("photo-1600585154526-990dced4db0d"),
+    tempImage("photo-1600047509807-ba8f99d2cdde"),
+    tempImage("photo-1600585152915-d208bec867a1")
   ],
   adrogue: [
-    tempImage("photo-1600585154363-67eb9e2e2099"),
-    tempImage("photo-1600607687939-ce8a6c25118c"),
-    tempImage("photo-1600566753086-00f18fb6b3ea"),
-    tempImage("photo-1600210492486-724fe5c67fb0"),
-    tempImage("photo-1600607688960-e095ff83135c")
+    tempImage("photo-1564013799919-ab600027ffc6"),
+    tempImage("photo-1605276374104-dee2a0ed3cd6"),
+    tempImage("photo-1507089947368-19c1da9775ae")
   ],
   lomas: [
+    tempImage("photo-1600210492486-724fe5c67fb0"),
     tempImage("photo-1600607687920-4e2a09cf159d"),
-    tempImage("photo-1600566752355-35792bedcfea"),
-    tempImage("photo-1600210491892-03d54c0aaf87"),
-    tempImage("photo-1600607688969-a5bfcd646154"),
-    tempImage("photo-1600047509807-ba8f99d2cdde")
+    tempImage("photo-1600566753190-17f0baa2a6c3")
   ],
   banfield: [
     tempImage("photo-1600607688960-e095ff83135c"),
-    tempImage("photo-1600210492486-724fe5c67fb0"),
-    tempImage("photo-1600566753086-00f18fb6b3ea"),
-    tempImage("photo-1600585154363-67eb9e2e2099"),
-    tempImage("photo-1600047509807-ba8f99d2cdde")
+    tempImage("photo-1600210491892-03d54c0aaf87"),
+    tempImage("photo-1600566753086-00f18fb6b3ea")
   ],
   canning: [
-    tempImage("photo-1600607687939-ce8a6c25118c"),
-    tempImage("photo-1600607688960-e095ff83135c"),
-    tempImage("photo-1600585154340-be6161a56a0c"),
-    tempImage("photo-1600566753190-17f0baa2a6c3"),
-    tempImage("photo-1600047509807-ba8f99d2cdde")
+    tempImage("photo-1600585154363-67eb9e2e2099"),
+    tempImage("photo-1600607688969-a5bfcd646154"),
+    tempImage("photo-1600585154340-be6161a56a0c")
   ],
   zones: {
     caba: tempImage("photo-1519501025264-65ba15a82390"),
-    adrogue: tempImage("photo-1600585154363-67eb9e2e2099"),
-    lomas: tempImage("photo-1600607687920-4e2a09cf159d"),
+    adrogue: tempImage("photo-1564013799919-ab600027ffc6"),
+    lomas: tempImage("photo-1600210492486-724fe5c67fb0"),
     banfield: tempImage("photo-1600607688960-e095ff83135c"),
-    canning: tempImage("photo-1600607687939-ce8a6c25118c")
+    canning: tempImage("photo-1605276374104-dee2a0ed3cd6")
   }
 };
 
