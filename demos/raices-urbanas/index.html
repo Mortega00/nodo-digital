@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="theme-color" content="#24302a">
+  <title>Raíces Urbanas | Propiedades en CABA y Zona Sur · Demo NODO</title>
+  <meta name="description" content="Demo inmobiliaria de Raíces Urbanas: buscá propiedades para comprar o alquilar en CABA y Zona Sur.">
+  <link rel="canonical" href="https://nododigital.com.ar/demos/raices-urbanas/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Raíces Urbanas | Demo inmobiliaria de NODO">
+  <meta property="og:description" content="Una experiencia demo para buscar propiedades, consultar y solicitar una tasación.">
+  <meta property="og:url" content="https://nododigital.com.ar/demos/raices-urbanas/">
+  <meta property="og:site_name" content="Raíces Urbanas · Demo NODO">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Raíces Urbanas | Demo inmobiliaria de NODO">
+  <meta name="twitter:description" content="Una experiencia demo para buscar propiedades, consultar y solicitar una tasación.">
+  <link rel="stylesheet" href="styles.css">
+  <script src="data.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body class="ru-site" data-page="home" data-root="./">
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <div data-header></div>
+
+  <main id="contenido">
+    <section class="hero" aria-labelledby="hero-title">
+      <img class="hero-media" data-ru-image="hero" alt="" width="1800" height="1050" fetchpriority="high">
+      <div class="hero-overlay" aria-hidden="true"></div>
+      <div class="container">
+        <div class="hero-copy">
+          <p class="eyebrow">CABA · ZONA SUR</p>
+          <h1 id="hero-title">Encontrá tu lugar.</h1>
+          <p>Propiedades seleccionadas para vivir, invertir y empezar lo que sigue.</p>
+        </div>
+        <!-- El buscador se genera como componente funcional desde app.js. -->
+        <div data-home-search-slot></div>
+      </div>
+    </section>
+
+    <section class="section section-featured" aria-labelledby="featured-title">
+      <div class="container">
+        <div class="section-heading">
+          <div><p class="eyebrow">SELECCIÓN DESTACADA</p><h2 id="featured-title">Propiedades para empezar a explorar</h2></div>
+          <p>Una selección que conecta departamentos en CABA con casas y espacios exteriores en Zona Sur.</p>
+        </div>
+        <div class="featured-grid" data-featured-properties></div>
+        <a class="section-link" href="propiedades/">Ver todas las propiedades <span aria-hidden="true">→</span></a>
+      </div>
+    </section>
+
+    <section class="section zones-section" id="zonas" aria-labelledby="zones-title">
+      <div class="container">
+        <div class="section-heading">
+          <div><p class="eyebrow">EXPLORAR POR ZONA</p><h2 id="zones-title">Barrios para distintas formas de vivir</h2></div>
+          <p>CABA y Zona Sur, conectadas por una búsqueda más simple y una selección pensada para cada momento.</p>
+        </div>
+        <div class="zone-grid">
+          <a class="zone-card" href="propiedades/?location=CABA"><img data-ru-zone-image="caba" alt="Vista urbana temporal de referencia para CABA" width="1100" height="850" loading="lazy"><span><strong>CABA</strong><small>Ciudad, conectividad y vida urbana</small></span></a>
+          <a class="zone-card" href="propiedades/?location=Adrogu%C3%A9"><img data-ru-zone-image="adrogue" alt="Casa temporal de referencia para Adrogué" width="900" height="700" loading="lazy"><span><strong>Adrogué</strong><small>Verde, calma y vida residencial</small></span></a>
+          <a class="zone-card" href="propiedades/?location=Lomas%20de%20Zamora"><img data-ru-zone-image="lomas" alt="Departamento temporal de referencia para Lomas de Zamora" width="900" height="700" loading="lazy"><span><strong>Lomas de Zamora</strong><small>Centro, servicios y cercanía</small></span></a>
+          <a class="zone-card" href="propiedades/?location=Banfield"><img data-ru-zone-image="banfield" alt="Casa temporal de referencia para Banfield" width="900" height="700" loading="lazy"><span><strong>Banfield</strong><small>Barrios con identidad propia</small></span></a>
+          <a class="zone-card" href="propiedades/?location=Canning"><img data-ru-zone-image="canning" alt="Casa temporal de referencia para Canning" width="900" height="700" loading="lazy"><span><strong>Canning</strong><small>Más espacio y vida exterior</small></span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section valuation" id="tasacion" aria-labelledby="valuation-title">
+      <div class="container valuation-grid">
+        <div>
+          <p class="eyebrow">TASACIÓN</p>
+          <h2 id="valuation-title">¿Estás pensando en vender?</h2>
+          <p>Conocé el valor de tu propiedad y tomá la próxima decisión con información clara.</p>
+        </div>
+        <form class="valuation-form" data-valuation-form>
+          <h2>Solicitar tasación</h2>
+          <div class="form-row"><div class="field"><label for="valuation-type">Tipo de propiedad</label><select id="valuation-type" name="propertyType" required><option value="">Elegí una opción</option><option>Departamento</option><option>Casa</option><option>PH</option><option>Terreno</option></select></div><div class="field"><label for="valuation-location">Ubicación</label><input id="valuation-location" name="location" placeholder="Barrio o localidad" required></div></div>
+          <div class="form-row"><div class="field"><label for="valuation-rooms">Ambientes</label><select id="valuation-rooms" name="rooms" required><option value="">Elegí una opción</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option></select></div><div class="field"><label for="valuation-area">Superficie aproximada</label><input id="valuation-area" name="area" inputmode="numeric" placeholder="m²" required></div></div>
+          <div class="form-row"><div class="field"><label for="valuation-name">Nombre</label><input id="valuation-name" name="name" autocomplete="name" required></div><div class="field"><label for="valuation-phone">WhatsApp</label><input id="valuation-phone" name="phone" inputmode="tel" autocomplete="tel" required></div></div>
+          <button class="button button-primary" type="submit">Solicitar tasación <span aria-hidden="true">→</span></button>
+        </form>
+      </div>
+    </section>
+
+    <section class="section" id="nosotros" aria-labelledby="about-title">
+      <div class="container about-grid">
+        <div><p class="eyebrow">RAÍCES URBANAS</p><h2 id="about-title">Una búsqueda clara para una decisión importante</h2></div>
+        <div><p>Raíces Urbanas conecta personas con lugares donde pueden vivir, crecer, invertir o empezar una nueva etapa. La experiencia está pensada para encontrar una propiedad, consultar sin vueltas y tener herramientas claras para vender.</p><ul class="service-list"><li><span>01</span>Propiedades presentadas con información esencial</li><li><span>02</span>Búsqueda simple por zona, tipo y características</li><li><span>03</span>Consulta directa con contexto de la propiedad</li></ul></div>
+      </div>
+    </section>
+
+    <section class="section contact-section" id="contacto" aria-labelledby="contact-title">
+      <div class="container"><div class="contact-card"><div><p class="eyebrow">CONTACTO</p><h2 id="contact-title">¿Querés avanzar con una búsqueda?</h2><p>Contanos qué estás buscando y te orientamos desde el primer paso.</p></div><div class="contact-card-actions"><a class="button button-primary" href="https://wa.me/5491100000000?text=Hola%2C%20quisiera%20hacer%20una%20consulta%20sobre%20una%20propiedad." target="_blank" rel="noopener noreferrer">Hablar por WhatsApp <span aria-hidden="true">→</span></a><a class="button button-secondary" href="propiedades/">Ver propiedades</a></div></div></div>
+    </section>
+  </main>
+
+  <div data-footer></div>
+</body>
+</html>
