@@ -217,11 +217,13 @@ address span, .demo-inline { color: var(--muted); font-size: 0.9rem; }
 .footer-grid nav a:hover, .footer-grid > div:last-child a:hover { text-decoration: underline; }
 .footer-contact { margin-bottom: 3px; color: var(--text); font-weight: 800; }
 .footer-note { padding: 16px 0; border-top: 1px solid #cfddd7; color: #637872; font-size: 0.77rem; }
-.nodo-strip { padding: 17px 0; background: #183130; color: #d4e2dd; }
-.nodo-strip .container { display: grid; gap: 12px; align-items: center; }
-.nodo-strip p { display: grid; gap: 3px; margin: 0; color: #d4e2dd; font-size: 0.83rem; }
-.nodo-strip strong { color: #fff; }
-.nodo-strip a { width: fit-content; color: #b7e5cf; font-size: 0.85rem; font-weight: 800; text-decoration: none; }
+.nodo-strip { padding: 52px 0; background: #183130; color: #d4e2dd; }
+.nodo-strip .container { display: grid; max-width: 760px; gap: 13px; align-items: start; }
+.nodo-strip p { margin: 0; color: #d4e2dd; font-size: 0.98rem; line-height: 1.6; }
+.nodo-strip .nodo-strip-label { margin-bottom: 8px; color: #9ed4c2; font-size: 0.7rem; font-weight: 800; letter-spacing: .13em; }
+.nodo-strip h2 { max-width: 570px; margin: 0 0 9px; color: #fff; font-size: clamp(1.72rem, 5vw, 2.55rem); line-height: 1.08; }
+.nodo-strip a { width: fit-content; min-height: 46px; display: inline-flex; align-items: center; margin-top: 5px; padding: 11px 16px; border-radius: 9px; background: #d4e2dd; color: #183130; font-size: 0.9rem; font-weight: 800; text-decoration: none; }
+.nodo-strip small { color: #a8beb6; font-size: 0.75rem; }
 .nodo-strip a:hover { text-decoration: underline; }
 
 .whatsapp-float { position: fixed; z-index: 25; right: max(17px, env(safe-area-inset-right)); bottom: max(17px, env(safe-area-inset-bottom)); display: grid; width: 56px; height: 56px; place-items: center; border-radius: 50%; background: #25d366; box-shadow: 0 11px 25px rgba(9, 86, 41, 0.26); color: #fff; transition: transform 160ms ease, box-shadow 160ms ease; }
@@ -269,8 +271,6 @@ address span, .demo-inline { color: var(--muted); font-size: 0.9rem; }
     .final-cta p:not(.eyebrow) { margin-bottom: 0; }
     .footer-grid { grid-template-columns: 1.3fr 0.7fr 0.85fr; gap: 45px; }
     .footer-grid > div:last-child { grid-column: auto; }
-    .nodo-strip .container { grid-template-columns: 1fr auto; }
-    .nodo-strip p { display: flex; gap: 12px; }
     .whatsapp-float { right: 25px; bottom: 25px; width: auto; min-width: 56px; grid-template-columns: 28px auto; gap: 8px; padding: 0 17px; border-radius: 99px; }
     .whatsapp-float span { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal; font-size: 0.9rem; font-weight: 800; }
 }

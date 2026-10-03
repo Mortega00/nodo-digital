@@ -50,7 +50,7 @@
   }
 
   function footerMarkup() {
-    return `<footer class="site-footer">
+    return `<aside class="nodo-commercial-cta" aria-labelledby="nodo-commercial-title"><div class="container"><p class="eyebrow">DEMO NODO</p><h2 id="nodo-commercial-title">¿Te gusta esta idea para tu negocio?</h2><p>Podemos adaptar esta experiencia a tu marca, contenido y necesidades.</p><a class="button button-light" href="/contacto/">Adaptar a mi negocio <span aria-hidden="true">→</span></a><small>Desarrollado como demo por NODO</small></div></aside><footer class="site-footer">
       <div class="container footer-grid">
         <div>
           <a class="brand" href="${route("")}" aria-label="Raíces Urbanas, ir al inicio">${brandMark}<span class="brand-name"><strong>RAÍCES URBANAS</strong><small>INMOBILIARIA</small></span></a>

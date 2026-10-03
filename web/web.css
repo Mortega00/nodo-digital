@@ -629,6 +629,20 @@ textarea.contact-control { min-height: 112px; resize: vertical; }
     background: linear-gradient(145deg, rgba(155, 108, 255, 0.065), transparent 56%);
 }
 
+.demos-home-section { background: linear-gradient(145deg, rgba(91, 140, 255, 0.055), transparent 62%); }
+.demos-home-shell { max-width: 940px; }
+.demos-home-heading { max-width: 700px; margin-bottom: 28px; }
+.demos-home-heading > p:last-child { margin-bottom: 0; color: var(--web-muted); }
+.demos-home-grid { display: grid; gap: 10px; }
+.demo-home-link { display: grid; min-width: 0; gap: 7px; padding: 14px; border: 1px solid var(--web-border); border-radius: 18px; background: linear-gradient(145deg, rgba(255, 255, 255, 0.045), rgba(185, 167, 216, 0.025)); color: var(--web-text); text-decoration: none; transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease; }
+.demo-home-preview { display: block; aspect-ratio: 16 / 9; overflow: hidden; margin-bottom: 5px; border: 1px solid var(--web-border); border-radius: 11px; background: var(--web-card-strong); }
+.demo-home-preview img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.demo-home-type { color: var(--web-lilac); font-size: 0.66rem; font-weight: 800; letter-spacing: 0.09em; line-height: 1.4; }
+.demo-home-link strong { font-size: 1.14rem; letter-spacing: -0.025em; }
+.demo-home-link em { color: var(--web-muted); font-size: 0.86rem; font-style: normal; font-weight: 700; }
+.demo-home-link b { color: var(--web-lilac); font-size: 1rem; }
+.demos-home-more { display: inline-flex; min-height: 42px; align-items: center; margin-top: 22px; }
+
 .work-shell { max-width: 940px; }
 .work-heading { max-width: 680px; margin-bottom: 28px; }
 .work-heading > p:last-child { margin-bottom: 0; color: var(--web-muted); }
@@ -1056,6 +1070,9 @@ body.team-photo-viewer-open { overflow: hidden; }
 
     .work-section { padding-top: 58px; }
     .work-heading { margin-bottom: 22px; }
+    .demos-home-heading { margin-bottom: 22px; }
+    .demo-home-link { min-height: 0; padding: 14px; }
+    .demos-home-more { margin-top: 18px; }
     .showcase-card { gap: 14px; }
     .showcase-preview { border-radius: 14px; }
     .showcase-content { padding: 0 2px 2px; }
@@ -1165,6 +1182,7 @@ body.team-photo-viewer-open { overflow: hidden; }
     .showcase-card { gap: 16px; }
     .showcase-preview { min-height: 0; }
     .showcase-content { padding: 0 2px 2px; }
+    .demos-home-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .solution-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .reviews-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .materials-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
