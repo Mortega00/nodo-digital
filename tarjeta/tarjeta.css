@@ -1,0 +1,192 @@
+.tarjeta-page {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+}
+
+.tarjeta-header {
+    position: relative;
+    z-index: 2;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--web-border);
+    background: var(--web-header-bg);
+    backdrop-filter: blur(14px);
+}
+
+.tarjeta-header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.tarjeta-brand { width: fit-content; }
+.tarjeta-header-content .theme-toggle { margin-left: auto; }
+
+.tarjeta-main {
+    display: grid;
+    flex: 1;
+    place-items: center;
+    padding: clamp(32px, 6vw, 72px) 20px clamp(40px, 7vw, 84px);
+}
+
+.tarjeta-experience {
+    display: grid;
+    width: min(100%, 720px);
+    justify-items: center;
+}
+
+.tarjeta-stage {
+    display: grid;
+    width: 100%;
+    place-items: center;
+    perspective: 1400px;
+}
+
+.tarjeta-card {
+    --tarjeta-tilt-x: 0deg;
+    --tarjeta-tilt-y: 0deg;
+    width: min(100%, 680px);
+    aspect-ratio: 1075 / 721;
+    padding: 0;
+    border: 0;
+    border-radius: clamp(15px, 2.4vw, 22px);
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+.tarjeta-card-tilt,
+.tarjeta-card-flip {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+}
+
+.tarjeta-card-tilt {
+    transform: rotateX(var(--tarjeta-tilt-x)) rotateY(var(--tarjeta-tilt-y));
+    transition: transform 180ms ease-out, filter 240ms ease;
+    will-change: transform;
+}
+
+.tarjeta-card-flip {
+    transition: transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+}
+
+.tarjeta-card.is-flipped .tarjeta-card-flip {
+    transform: rotateY(180deg);
+}
+
+.tarjeta-card-face {
+    position: absolute;
+    inset: 0;
+    display: block;
+    overflow: hidden;
+    border-radius: inherit;
+    background-color: #101014;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: rotateY(0deg);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.2), 0 3px 9px rgba(0, 0, 0, 0.16);
+}
+
+.tarjeta-card-face--front {
+    background-image: url("../assets/tarjeta/nodo-card-dark-front.png");
+}
+
+.tarjeta-card-face--back {
+    background-image: url("../assets/tarjeta/nodo-card-dark-back.png");
+    transform: rotateY(180deg);
+}
+
+html[data-theme="light"] .tarjeta-card-face--front {
+    background-color: #fff;
+    background-image: url("../assets/tarjeta/nodo-card-light-front.png");
+}
+
+html[data-theme="light"] .tarjeta-card-face--back {
+    background-color: #fff;
+    background-image: url("../assets/tarjeta/nodo-card-light-back.png");
+}
+
+.tarjeta-card-face--front::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+    pointer-events: none;
+    background: linear-gradient(112deg, transparent 39%, rgba(155, 108, 255, 0.02) 46%, rgba(185, 167, 216, 0.21) 50%, rgba(91, 140, 255, 0.05) 54%, transparent 61%);
+    opacity: 0;
+    transform: translateX(-56%);
+}
+
+.tarjeta-card.is-introducing .tarjeta-card-tilt {
+    animation: tarjeta-card-arrival 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.tarjeta-card.is-introducing .tarjeta-card-face--front::after {
+    animation: tarjeta-card-sheen 1100ms 150ms ease-out both;
+}
+
+.tarjeta-card:focus-visible {
+    outline: 3px solid var(--web-blue);
+    outline-offset: 8px;
+}
+
+.tarjeta-instruction {
+    margin: 22px 0 0;
+    color: var(--web-dim);
+    font-size: 0.86rem;
+    text-align: center;
+}
+
+.tarjeta-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+@media (hover: hover) {
+    .tarjeta-card:hover .tarjeta-card-tilt { filter: brightness(1.015); }
+}
+
+@media (max-width: 479px) {
+    .tarjeta-header { padding: 14px 0; }
+    .tarjeta-main { padding-inline: 16px; }
+    .tarjeta-actions { display: grid; width: 100%; }
+    .tarjeta-actions .button { width: 100%; }
+}
+
+@media (min-width: 720px) {
+    .tarjeta-main { padding-top: 58px; }
+    .tarjeta-instruction { margin-top: 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tarjeta-card-tilt,
+    .tarjeta-card-flip { transition: none; }
+    .tarjeta-card.is-introducing .tarjeta-card-tilt,
+    .tarjeta-card.is-introducing .tarjeta-card-face--front::after { animation: none; }
+}
+
+@keyframes tarjeta-card-arrival {
+    0% { opacity: 0; transform: translateY(10px) rotateX(2.5deg) rotateY(-6deg) scale(0.988); }
+    58% { opacity: 1; transform: translateY(0) rotateX(-0.8deg) rotateY(2.2deg) scale(1); }
+    100% { opacity: 1; transform: rotateX(0) rotateY(0) scale(1); }
+}
+
+@keyframes tarjeta-card-sheen {
+    0% { opacity: 0; transform: translateX(-56%); }
+    24% { opacity: 0.8; }
+    76% { opacity: 0.42; }
+    100% { opacity: 0; transform: translateX(56%); }
+}

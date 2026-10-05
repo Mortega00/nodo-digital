@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es-AR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Tarjeta digital interactiva de NODO.">
+    <title>Tarjeta digital | NODO</title>
+    <link rel="canonical" href="https://nododigital.com.ar/tarjeta/">
+    <link rel="icon" type="image/png" href="../assets/logo.png">
+    <link rel="apple-touch-icon" href="../assets/logo.png">
+    <script>
+        (() => {
+            try {
+                const savedTheme = window.localStorage.getItem("nodo_web_theme");
+                if (savedTheme === "light" || savedTheme === "dark") document.documentElement.dataset.theme = savedTheme;
+            } catch {
+                // La tarjeta mantiene el tema claro si el almacenamiento no está disponible.
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="../web/web.css">
+    <link rel="stylesheet" href="tarjeta.css">
+</head>
+<body class="tarjeta-page">
+    <header class="tarjeta-header">
+        <div class="shell tarjeta-header-content">
+            <a class="brand tarjeta-brand" href="/" aria-label="Visitar NODO">
+                <img class="brand-mark" src="../assets/logo.png" alt="">
+                <span>NODO</span>
+            </a>
+            <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Activar modo oscuro" aria-pressed="true"><span class="theme-toggle-icon" aria-hidden="true">☾</span></button>
+        </div>
+    </header>
+
+    <main class="tarjeta-main">
+        <section class="tarjeta-experience" aria-labelledby="tarjeta-title">
+            <h1 class="visually-hidden" id="tarjeta-title">Tarjeta digital de NODO</h1>
+            <div class="tarjeta-stage">
+                <button class="tarjeta-card" id="tarjeta-card" type="button" aria-label="Ver dorso de la tarjeta de NODO" aria-pressed="false">
+                    <span class="tarjeta-card-tilt">
+                        <span class="tarjeta-card-flip">
+                            <span class="tarjeta-card-face tarjeta-card-face--front" aria-hidden="true"></span>
+                            <span class="tarjeta-card-face tarjeta-card-face--back" aria-hidden="true"></span>
+                        </span>
+                    </span>
+                </button>
+            </div>
+            <p class="tarjeta-instruction" id="tarjeta-instruction">Tocá la tarjeta para verla de ambos lados.</p>
+            <nav class="tarjeta-actions" aria-label="Acciones de NODO">
+                <a class="button button-primary" href="https://wa.me/5491130700900?text=Hola%2C%20quer%C3%ADa%20consultarles%20por%20mi%20negocio." target="_blank" rel="noopener noreferrer">Hablar con NODO <span aria-hidden="true">↗</span></a>
+                <a class="button button-secondary" href="/">Visitar NODO <span aria-hidden="true">→</span></a>
+            </nav>
+        </section>
+    </main>
+
+    <script src="tarjeta.js"></script>
+</body>
+</html>
