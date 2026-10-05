@@ -30,6 +30,7 @@
 
 .hola-page .hola-hero {
     padding: clamp(52px, 10vw, 92px) 0 28px;
+    overflow: clip;
 }
 
 .hola-page .hola-card,
@@ -42,11 +43,32 @@
 }
 
 .hola-page .hola-card {
+    position: relative;
     padding: clamp(28px, 7vw, 48px);
     background:
         radial-gradient(circle at 100% 0, rgba(91, 140, 255, 0.14), transparent 16rem),
         radial-gradient(circle at 0 100%, rgba(155, 108, 255, 0.11), transparent 18rem),
         var(--web-card);
+}
+
+.hola-page .hola-card-copy {
+    position: relative;
+    z-index: 1;
+}
+
+.hola-page .hola-nodi {
+    position: absolute;
+    z-index: 0;
+    top: -36px;
+    right: -42px;
+    width: 144px;
+    pointer-events: none;
+}
+
+.hola-page .hola-nodi img {
+    display: block;
+    width: 100%;
+    height: auto;
 }
 
 .hola-page .hola-card .eyebrow {
@@ -241,5 +263,17 @@
     .hola-page .hola-path-button {
         width: auto;
         justify-self: start;
+    }
+}
+
+@media (min-width: 768px) {
+    .hola-page .hola-card {
+        overflow: visible;
+    }
+
+    .hola-page .hola-nodi {
+        top: -82px;
+        right: -96px;
+        width: 280px;
     }
 }
