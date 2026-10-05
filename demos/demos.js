@@ -20,18 +20,6 @@ const NODO_DEMOS = [
         image: "/assets/projects/movia-hero.png",
         alt: "Hero de la demo MOVIA con una propuesta digital para ortopedia",
         imagePosition: "center 24%"
-    },
-    {
-        id: "cava366",
-        name: "CAVA366",
-        type: "PROYECTO REAL · EN DESARROLLO",
-        description: "Una experiencia digital en desarrollo para presentar vinos, catas y la propuesta de CAVA366.",
-        href: "https://cava366.vercel.app/",
-        cta: "Ver versión actual",
-        image: "/assets/projects/cava366-home.png",
-        alt: "Versión actual de la experiencia digital de CAVA366",
-        imagePosition: "center 22%",
-        external: true
     }
 ];
 

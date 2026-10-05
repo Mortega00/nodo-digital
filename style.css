@@ -445,6 +445,12 @@ footer .logo img.spin-360 {
     border: 1px solid rgba(162, 89, 255, 0.3);
 }
 
+.status-experiment {
+    background: rgba(59, 130, 246, 0.1);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
 .hub-categories-grid,
 .projects-grid,
 .roadmap-grid {
@@ -1302,7 +1308,7 @@ a:visited {
 
 /* Hamburguesa NODO */
 .mobile-toggle {
-    display: flex;
+    display: none;
     background: transparent;
     border: none;
     cursor: pointer;
@@ -1324,6 +1330,10 @@ a:visited {
 
 /* Reglas Exclusivas para Mobile (< 768px) */
 @media (max-width: 767px) {
+    .mobile-toggle {
+        display: flex;
+    }
+
     /* Scroll horizontal de planes */
     .solutions-grid {
         display: flex !important;
@@ -2222,6 +2232,16 @@ body.modal-open {
     }
 }
 
+@media (max-width: 899px) {
+    .navbar .nav-menu {
+        display: none;
+    }
+
+    .mobile-toggle {
+        display: flex;
+    }
+}
+
 @media (max-width: 767px) {
     .navbar .nav-menu {
         display: none;
@@ -3070,6 +3090,18 @@ body.modal-open {
     .progressive-details summary {
         min-height: 44px;
     }
+
+    .hero-section .badge-pill {
+        max-width: 100%;
+    }
+
+    .hero-section .badge-text,
+    .hero-section .gradient-text,
+    .hero-section .hero-subtitle {
+        min-width: 0;
+        overflow-wrap: anywhere;
+        white-space: normal;
+    }
 }
 
 /* Sistema NODO: proceso audiovisual con disclosure progresivo */
@@ -3143,7 +3175,6 @@ body.modal-open {
     pointer-events: none;
 }
 
-.process-media video,
 .process-modal-media video {
     position: relative;
     z-index: 1;
@@ -3155,7 +3186,6 @@ body.modal-open {
     transition: opacity 0.25s ease, transform 0.3s ease;
 }
 
-.process-media video.is-ready,
 .process-modal-media video.is-ready {
     opacity: 1;
 }
@@ -3270,10 +3300,6 @@ body.modal-open {
         transform: translateY(-3px);
     }
 
-    .process-card:hover .process-media video.is-ready {
-        transform: scale(1.015);
-    }
-
     .process-card:hover .process-card-cta {
         color: var(--text-white);
     }
@@ -3323,7 +3349,6 @@ body.modal-open {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .process-media video,
     .process-modal-media video,
     .process-card > .process-card-cta span {
         transition: none;

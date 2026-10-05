@@ -1,5 +1,4 @@
 const WHATSAPP_NUMBER = "5491130700900";
-const NATIVA_ESTETICA_URL = "https://mortega00.github.io/estetica-natalia/#inicio";
 
 const processSteps = {
     understand: {
@@ -57,7 +56,7 @@ const solutionGuides = {
         goodFit: ["Querés presentar mejor tu negocio", "Necesitás consultas o reservas", "Tenés una oferta concreta para comunicar"],
         notFit: ["Ya tenés una web que cumple ese objetivo", "Lo que necesitás es gestionar procesos internos"],
         whenItMakesSense: "Cuando necesitás comunicar algo de forma clara y no hace falta construir un sitio grande o un sistema completo.",
-        examples: ["NATIVA: una landing que organiza tratamientos y facilita consultas y reservas."],
+        examples: ["Una web de prueba que organiza una propuesta y su recorrido."],
         relatedModule: "modules/landing-pages.html",
         ctaLabel: "Explorar Landing Pages"
     },
@@ -93,7 +92,7 @@ const solutionGuides = {
         goodFit: ["Necesitás funciones propias", "Querés crear una experiencia de uso específica", "Una necesidad concreta merece una herramienta"],
         notFit: ["Una web simple ya puede resolverlo", "Existe una herramienta disponible que cubre la necesidad"],
         whenItMakesSense: "Cuando la solución necesita funciones propias y una experiencia pensada para que alguien haga una tarea concreta.",
-        examples: ["START, QARTA, MyLuna y otros productos del ecosistema NODO."],
+        examples: ["BLOC: una aplicación propia en desarrollo dentro del Ecosistema."],
         relatedModule: "modules/aplicaciones.html",
         ctaLabel: "Explorar Aplicaciones"
     }
@@ -119,22 +118,16 @@ const glossaryTerms = {
 };
 
 const projects = [
-    // TODO NODO: revisar manualmente estados públicos de Planner, MyLuna y extensiones START antes del lanzamiento.
-    { id: "nativa-estetica", title: "Nativa Estética", category: "Landing Pages", description: "Landing page diseñada para ordenar servicios de estética y facilitar consultas o reservas.", status: "available", statusLabel: "Disponible", url: NATIVA_ESTETICA_URL, tags: ["Responsive", "Reservas", "WhatsApp"], context: "NATIVA necesitaba una presencia digital que acompañara una experiencia de atención presencial.", challenge: "Ordenar tratamientos y transmitir confianza sin sumar fricción entre una visita y una consulta.", solution: "Diseñamos una landing clara, responsive y orientada al contacto directo.", objective: "Hacer más simple entender los servicios y dar el siguiente paso hacia una reserva.", technologies: ["Landing page", "Responsive", "WhatsApp"] },
-    { id: "start-program", title: "START", category: "Training", description: "Sistema de entrenamiento estructurado para progresar semana a semana.", status: "available", statusLabel: "Disponible", url: "https://mortega00.github.io/start/", tags: ["Training", "Método", "Progreso"], context: "START reúne una forma de planificar el entrenamiento sin depender de la improvisación.", challenge: "Convertir una rutina dispersa en un recorrido simple de seguir.", solution: "Estructuramos bloques de progresión y una experiencia fácil de consultar.", objective: "Ayudar a entrenar con un método sostenido en el tiempo.", technologies: ["Producto digital", "Planificación", "UX"] },
-    { id: "start-app", title: "START App", category: "Training", description: "Aplicación para seguimiento de cargas, descansos y métricas de rendimiento.", status: "development", statusLabel: "En desarrollo", url: "#", tags: ["App", "Métricas", "Training"], context: "Una extensión natural de START para acompañar el seguimiento diario.", challenge: "Reunir datos de entrenamiento sin volver compleja la experiencia.", solution: "Definimos una herramienta enfocada en registrar lo importante.", objective: "Dar visibilidad al progreso y facilitar los ajustes.", technologies: ["Aplicación", "Métricas", "Producto"] },
-    { id: "start-nutrition", title: "START Nutrition", category: "Training", description: "Herramientas para acompañar hábitos nutricionales y entrenamiento.", status: "coming-soon", statusLabel: "Próximamente", url: "#", tags: ["Nutrición", "Hábitos", "Training"], context: "Un área futura dentro del ecosistema START.", challenge: "Conectar hábitos y entrenamiento con información simple de usar.", solution: "Estamos definiendo el alcance de las herramientas necesarias.", objective: "Acompañar el entrenamiento desde una mirada integral.", technologies: ["Producto", "Hábitos", "Planning"] },
-    { id: "qarta", title: "QARTA", category: "Gastronomía", description: "Propuesta para ordenar cartas, promociones y comunicación en gastronomía.", status: "development", statusLabel: "En desarrollo", url: "#", tags: ["QR", "Menú", "Producto"], context: "QARTA nace alrededor de las necesidades cotidianas de comunicación en comercios gastronómicos.", challenge: "Actualizar la información de carta sin depender de soportes estáticos.", solution: "Estamos diseñando una experiencia de menú y comunicación pensada para cada comercio.", objective: "Hacer más clara la elección del cliente y más ágil la gestión del negocio.", technologies: ["QR", "Producto digital", "UX"] },
-    { id: "bloc", title: "BLOC", category: "Sistemas", description: "Sistema para organizar información y procesos de trabajo.", status: "development", statusLabel: "En desarrollo", url: "#", tags: ["Sistema", "Organización", "Procesos"], context: "Un producto propio orientado a ordenar el trabajo alrededor de información accionable.", challenge: "Evitar que tareas y decisiones queden repartidas entre herramientas inconexas.", solution: "Definimos una base de sistema clara, enfocada en el flujo de trabajo.", objective: "Centralizar lo necesario para seguir procesos con contexto.", technologies: ["Sistema", "Flujos", "UX"] },
-    { id: "planner", title: "Planner", category: "Sistemas", description: "Herramienta para planificar proyectos, tareas y entregables.", status: "coming-soon", statusLabel: "Próximamente", url: "#", tags: ["Planificación", "Proyectos", "Sistema"], context: "Una exploración de NODO alrededor de la organización de proyectos.", challenge: "Convertir una planificación dispersa en una vista útil para actuar.", solution: "Estamos definiendo un sistema visual simple para prioridades y entregables.", objective: "Hacer más fácil planificar sin perder contexto.", technologies: ["Sistema", "Planning", "Producto"] },
-    { id: "myluna", title: "MyLuna", category: "Aplicaciones", description: "Aplicación propia en exploración para resolver una necesidad concreta.", status: "development", statusLabel: "En desarrollo", url: "#", tags: ["Aplicación", "Producto", "UX"], context: "MyLuna forma parte de las aplicaciones que NODO construye y prueba internamente.", challenge: "Convertir una necesidad cotidiana en una herramienta clara y cercana.", solution: "Estamos validando la experiencia y las funciones esenciales del producto.", objective: "Crear una aplicación útil, simple y lista para evolucionar.", technologies: ["Aplicación", "Producto", "UX"] },
-    { id: "automation-whatsapp", title: "Automatización de WhatsApp", category: "Automatización", description: "Flujos para ordenar consultas, respuestas y seguimiento sin trabajo manual repetitivo.", status: "development", statusLabel: "En desarrollo", url: "#", tags: ["WhatsApp", "Flujos", "Procesos"], context: "Una línea de soluciones aplicable a necesidades distintas, no un caso de cliente específico.", challenge: "Dar respuestas consistentes y mantener el seguimiento de las consultas.", solution: "Diseñamos flujos que conectan los pasos operativos necesarios.", objective: "Reducir tareas repetitivas y mejorar el recorrido de atención.", technologies: ["Automatización", "WhatsApp", "Integraciones"] }
+    { id: "rorden", title: "RORDEN", category: "Sistema · Producto propio", description: "Una herramienta para anotar, organizar y resolver pendientes con claridad.", status: "available", statusLabel: "PUBLICADO", url: "https://rorden.netlify.app/", tags: ["Organización", "Pendientes", "Herramienta"], context: "RORDEN nace como un producto propio para reunir pendientes y poder revisarlos con una vista clara.", challenge: "Evitar que las cosas por resolver queden repartidas entre notas, memoria y mensajes.", solution: "Construimos una interfaz para registrar pendientes, revisarlos y mantenerlos ordenados.", objective: "Herramienta funcional y publicada. La ficha muestra una interfaz real del producto.", technologies: ["Producto propio", "Organización", "Interfaz"] },
+    { id: "planner", title: "Planner", category: "Sistema · Producto propio", description: "Una herramienta en desarrollo para planificar proyectos, tareas y prioridades.", status: "development", statusLabel: "EN DESARROLLO", url: "#", tags: ["Planificación", "Proyectos", "Sistema"], context: "Planner explora una forma de reunir tareas, agenda, notas y objetivos dentro de un mismo entorno.", challenge: "Hacer visible qué sigue sin perder el contexto de cada área de trabajo.", solution: "El desarrollo actual reúne vistas de planificación y seguimiento que siguen en evolución.", objective: "Se clasifica como en desarrollo: existen interfaces reales, pero el producto todavía no se presenta como publicado.", technologies: ["Producto propio", "Planificación", "Interfaz"] },
+    { id: "bloc", title: "BLOC", category: "Aplicación · Producto propio", description: "Una aplicación en desarrollo para ordenar información y procesos de trabajo.", status: "development", statusLabel: "EN DESARROLLO", url: "#", tags: ["Aplicación", "Organización", "Procesos"], context: "BLOC es un producto propio que explora cómo centralizar información accionable para el trabajo cotidiano.", challenge: "Evitar que tareas, decisiones y datos queden repartidos entre herramientas inconexas.", solution: "El desarrollo actual define una base visual para organizar flujos y seguimiento de procesos.", objective: "Producto propio en desarrollo. La interfaz disponible corresponde al estado actual de exploración.", technologies: ["Producto propio", "Aplicación", "Flujos"] },
+    { id: "start-program", title: "START", category: "Laboratorio · Training", description: "Una web de prueba que explora la presentación de un programa de entrenamiento.", status: "experiment", statusLabel: "EXPERIMENTO", url: "https://mortega00.github.io/start/", tags: ["Training", "Web", "Laboratorio"], context: "START es una prueba dentro del territorio Training de NODO.", challenge: "Explorar cómo ordenar visualmente un programa de entrenamiento y su método.", solution: "Construimos una web de prueba para recorrer esa propuesta de forma clara.", objective: "Se presenta como experimento y web de prueba; no como un producto comercial disponible.", technologies: ["Experimento", "Web", "Training"] },
+    { id: "cava366", title: "CAVA366", category: "Gastronomía · Proyecto real", description: "Un desarrollo web real en curso para un proyecto gastronómico.", status: "development", statusLabel: "EN DESARROLLO", url: "https://cava366.vercel.app/", tags: ["Web", "Gastronomía", "Desarrollo"], context: "CAVA366 es un proyecto real que se encuentra actualmente en desarrollo.", challenge: "El desarrollo continúa en curso, por lo que no se presentan resultados ni una versión final cerrada.", solution: "La ficha permite reconocer el proyecto y su estado sin convertirlo en un caso comercial terminado.", objective: "PROYECTO REAL · EN DESARROLLO.", technologies: ["Proyecto real", "Web", "Gastronomía"] },
+    { id: "qarta", title: "QARTA", category: "Gastronomía · Exploración", description: "Una exploración en curso sobre cartas, productos y comunicación gastronómica.", status: "experiment", statusLabel: "EXPERIMENTO", url: "#", tags: ["QR", "Menú", "Exploración"], context: "QARTA explora necesidades cotidianas de comunicación en entornos gastronómicos.", challenge: "Pensar una experiencia más clara para consultar productos y cartas.", solution: "El alcance sigue en exploración y no se presenta como producto terminado.", objective: "Experimento interno en evolución.", technologies: ["Exploración", "QR", "Gastronomía"] },
+    { id: "automation-whatsapp", title: "Flujos de WhatsApp", category: "Automatizaciones · Exploración", description: "Una exploración para ordenar consultas, respuestas y seguimiento sin repetir pasos manuales.", status: "development", statusLabel: "EN DESARROLLO", url: "#", tags: ["WhatsApp", "Flujos", "Procesos"], context: "Una línea de exploración alrededor de procesos repetitivos de atención y seguimiento.", challenge: "Definir qué pasos pueden conectarse sin perder el contexto de cada consulta.", solution: "Estamos probando flujos que ordenan acciones repetitivas entre herramientas y personas.", objective: "Exploración en desarrollo; no es una oferta empaquetada.", technologies: ["Automatización", "WhatsApp", "Procesos"] }
 ];
 
-const partnerBrands = [
-    // TODO: copiar logo adjunto de NATIVA a assets/brands/nativa.png.
-    { name: "NATIVA Estética", type: "Proyecto para cliente", logo: null, url: NATIVA_ESTETICA_URL }
-];
+const partnerBrands = [];
 
 function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character]);
@@ -442,7 +435,6 @@ function setupProcessExperience() {
     if (!dialog || Object.values(elements).some(element => !element)) return;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const inlineVideos = cards.map(card => card.querySelector(".process-media video")).filter(Boolean);
     let lastFocus = null;
     let activeAudio = null;
 
@@ -508,7 +500,7 @@ function setupProcessExperience() {
         source.src = step.video;
         source.type = "video/mp4";
         video.appendChild(source);
-        video.addEventListener("loadeddata", () => video.classList.add("is-ready"), { once: true });
+        video.addEventListener("playing", () => video.classList.add("is-ready"), { once: true });
         video.addEventListener("error", () => video.remove(), { once: true });
 
         elements.media.replaceChildren(fallback, video);
@@ -600,30 +592,6 @@ function setupProcessExperience() {
         if (event.key === "Escape" && !modal.hidden) close();
     });
 
-    if (reducedMotion || !("IntersectionObserver" in window)) return;
-
-    const visibleVideos = new Set();
-    const pauseInlineVideos = () => inlineVideos.forEach(video => video.pause());
-    const updateInlinePlayback = () => {
-        pauseInlineVideos();
-        if (document.hidden || !visibleVideos.size) return;
-        const activeVideo = [...visibleVideos].sort((first, second) => {
-            const firstDistance = Math.abs(first.getBoundingClientRect().top + first.clientHeight / 2 - window.innerHeight / 2);
-            const secondDistance = Math.abs(second.getBoundingClientRect().top + second.clientHeight / 2 - window.innerHeight / 2);
-            return firstDistance - secondDistance;
-        })[0];
-        activeVideo.play().catch(() => {});
-    };
-    const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) visibleVideos.add(entry.target);
-            else visibleVideos.delete(entry.target);
-        });
-        updateInlinePlayback();
-    }, { rootMargin: "160px 0px", threshold: 0.15 });
-
-    inlineVideos.forEach(video => observer.observe(video));
-    document.addEventListener("visibilitychange", updateInlinePlayback);
 }
 
 function setupBrandMarquee() {

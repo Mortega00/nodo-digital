@@ -646,6 +646,14 @@ textarea.contact-control { min-height: 112px; resize: vertical; }
 .work-shell { max-width: 940px; }
 .work-heading { max-width: 680px; margin-bottom: 28px; }
 .work-heading > p:last-child { margin-bottom: 0; color: var(--web-muted); }
+.nativa-feature { display: grid; gap: 18px; padding: 14px; border: 1px solid var(--web-border); border-radius: 22px; background: linear-gradient(145deg, rgba(255, 255, 255, 0.045), rgba(185, 167, 216, 0.025)); }
+.nativa-feature-visual { display: block; overflow: hidden; border: 1px solid var(--web-border); border-radius: 14px; background: var(--web-card-strong); }
+.nativa-feature-visual img { display: block; width: 100%; height: auto; aspect-ratio: 1440 / 760; object-fit: cover; }
+.nativa-feature-copy { display: grid; align-content: center; gap: 14px; padding: 4px 2px 6px; }
+.nativa-feature-copy h3 { margin: 0; font-size: clamp(1.35rem, 2.6vw, 2rem); letter-spacing: -0.04em; line-height: 1.08; }
+.nativa-feature-copy > p:not(.nativa-feature-type) { margin: 0; color: var(--web-muted); line-height: 1.62; }
+.nativa-feature-copy .text-link { width: fit-content; margin-top: 2px; }
+.nativa-feature-type { margin: 0; color: var(--web-lilac); font-size: 0.76rem; font-weight: 800; letter-spacing: 0.09em; line-height: 1.35; }
 
 .project-showcase,
 .showcase-layout,
@@ -1177,6 +1185,9 @@ body.team-photo-viewer-open { overflow: hidden; }
     .advisor-section { padding-top: 62px; }
     .advisor-card { padding: 24px; }
     .showcase-layout { display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(235px, 0.9fr); align-items: start; gap: 18px; }
+    .nativa-feature { grid-template-columns: minmax(0, 1.38fr) minmax(230px, 0.92fr); align-items: stretch; gap: 22px; padding: 18px; }
+    .nativa-feature-visual { min-height: 100%; }
+    .nativa-feature-visual img { height: 100%; }
     .showcase-selector { align-self: end; }
     .showcase-more-link { align-self: flex-start; min-height: 36px; margin-top: 24px; padding: 7px 10px; border: 1px solid var(--web-border); border-radius: 10px; background: rgba(255, 255, 255, 0.025); }
     .showcase-card { gap: 16px; }
