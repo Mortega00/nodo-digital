@@ -90,6 +90,10 @@
     margin-top: 18px;
 }
 
+.info-service-card { display: flex; flex-direction: column; }
+.info-service-card > p:not(.info-card-label) { margin-bottom: 18px; }
+.info-service-card .text-link { min-height: 44px; margin-top: auto; }
+
 .info-card-status {
     display: inline-flex;
     min-height: 32px;
@@ -240,6 +244,9 @@
 
 @media (min-width: 768px) {
     .info-card-grid-four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .info-service-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .info-service-card h3 { min-block-size: 2.24em; }
+    .info-service-card:last-child { grid-column: 1 / -1; }
     .info-link-panel { grid-template-columns: minmax(0, 1fr) auto; }
     .info-two-column { grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr); }
     .info-contact-choice { grid-template-columns: minmax(0, 1fr) auto; }
@@ -247,6 +254,10 @@
 
 @media (min-width: 1024px) {
     .info-card-grid-four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .info-service-card-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .info-service-card { grid-column: span 2; }
+    .info-service-card:nth-child(4) { grid-column: 2 / span 2; }
+    .info-service-card:nth-child(5) { grid-column: 4 / span 2; }
 }
 
 @media (max-width: 719px) {
