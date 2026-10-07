@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, follow">
+    <meta name="theme-color" content="#f6f0e9">
+    <meta name="description" content="MORA Accesorios es una demostración de tienda online creada por NODO.">
+    <title>MORA Accesorios | Demo e-commerce de NODO</title>
+    <link rel="canonical" href="https://nododigital.com.ar/demos/mora/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="MORA Accesorios | Demo e-commerce de NODO">
+    <meta property="og:description" content="Una demostración de catálogo, producto y carrito para una tienda online.">
+    <meta property="og:url" content="https://nododigital.com.ar/demos/mora/">
+    <meta property="og:site_name" content="MORA Accesorios · Demo NODO">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="MORA Accesorios | Demo e-commerce de NODO">
+    <meta name="twitter:description" content="Una demostración de catálogo, producto y carrito para una tienda online.">
+    <link rel="stylesheet" href="mora.css">
+    <script src="mora-data.js" defer></script>
+    <script src="mora-app.js" defer></script>
+</head>
+<body class="mora-site" data-page="home" data-root="./">
+    <a class="mora-skip-link" href="#contenido">Saltar al contenido</a>
+    <div data-mora-header></div>
+    <main id="contenido">
+        <section class="mora-hero" aria-labelledby="mora-hero-title">
+            <div class="mora-container mora-hero-grid">
+                <div class="mora-hero-copy">
+                    <p class="mora-kicker">ACCESORIOS PARA TODOS LOS DÍAS</p>
+                    <h1 id="mora-hero-title">Cosas simples para llevar cerca.</h1>
+                    <p>Una selección de bolsos, objetos y detalles elegidos para acompañar tus días sin ocupar de más.</p>
+                    <a class="mora-button mora-button-primary" href="catalogo/">Ver catálogo <span aria-hidden="true">→</span></a>
+                </div>
+                <figure class="mora-hero-product"><img src="assets/mora-001-tote-alma.jpg" alt="Tote de lona bordó de MORA Accesorios." width="1200" height="1200" fetchpriority="high"><figcaption>Ediciones pensadas para usar y regalar.</figcaption></figure>
+            </div>
+        </section>
+
+        <section class="mora-section mora-category-section" aria-labelledby="mora-categories-title">
+            <div class="mora-container"><div class="mora-section-heading"><p class="mora-kicker">EXPLORÁ POR TIPO</p><h2 id="mora-categories-title">Encontrá un detalle que haga lugar.</h2></div><div class="mora-category-grid" data-home-categories></div></div>
+        </section>
+
+        <section class="mora-section mora-featured-section" aria-labelledby="mora-featured-title">
+            <div class="mora-container"><div class="mora-section-heading mora-heading-row"><div><p class="mora-kicker">SELECCIÓN MORA</p><h2 id="mora-featured-title">Favoritos para empezar.</h2></div><a class="mora-text-link" href="catalogo/">Ver todo <span aria-hidden="true">→</span></a></div><div class="mora-product-grid" data-home-products></div></div>
+        </section>
+
+        <section class="mora-section mora-benefits-section" aria-labelledby="mora-benefits-title">
+            <div class="mora-container"><div class="mora-section-heading"><p class="mora-kicker">COMPRA SIMPLE</p><h2 id="mora-benefits-title">Elegí a tu ritmo.</h2></div><ul class="mora-benefit-grid"><li><strong>Productos claros</strong><span>Fotos, variantes y detalles para decidir con calma.</span></li><li><strong>Carrito sin vueltas</strong><span>Revisá cantidades y subtotal antes de avanzar.</span></li><li><strong>Coordinación directa</strong><span>Elegí retiro o envío a coordinar por WhatsApp.</span></li></ul></div>
+        </section>
+    </main>
+    <div data-mora-footer></div>
+    <p class="mora-announcer" id="mora-announcer" role="status" aria-live="polite" aria-atomic="true"></p>
+</body>
+</html>

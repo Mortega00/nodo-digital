@@ -1,0 +1,228 @@
+:root {
+    --mora-paper: #f6f0e9;
+    --mora-surface: #fffdf9;
+    --mora-ink: #292321;
+    --mora-muted: #706863;
+    --mora-line: #ded3cb;
+    --mora-wine: #7c2634;
+    --mora-coral: #c95d4c;
+    --mora-olive: #687058;
+    --mora-shadow: 0 14px 34px rgba(65, 42, 37, 0.08);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body.mora-site { min-width: 320px; margin: 0; overflow-x: hidden; background: var(--mora-paper); color: var(--mora-ink); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.55; }
+.mora-site h1, .mora-site h2, .mora-site h3, .mora-site p { margin-top: 0; }
+.mora-site h1, .mora-site h2, .mora-site h3 { letter-spacing: -0.055em; line-height: 1.04; text-wrap: balance; }
+.mora-site a { color: inherit; }
+.mora-container { width: min(calc(100% - 40px), 1180px); margin-inline: auto; }
+.mora-skip-link { position: fixed; z-index: 100; top: 12px; left: 12px; transform: translateY(-180%); padding: 10px 14px; border-radius: 8px; background: var(--mora-ink); color: #fff; font-weight: 800; text-decoration: none; }
+.mora-skip-link:focus { transform: translateY(0); }
+
+.mora-demo-note { border-bottom: 1px solid rgba(41, 35, 33, 0.1); background: #ede3da; color: var(--mora-muted); font-size: 0.72rem; font-weight: 650; letter-spacing: 0.02em; }
+.mora-demo-note .mora-container { display: flex; min-height: 33px; align-items: center; gap: 10px; }
+.mora-demo-note a { color: var(--mora-wine); font-weight: 850; letter-spacing: 0.1em; text-decoration: none; }
+.mora-header { position: sticky; z-index: 20; top: 0; border-bottom: 1px solid var(--mora-line); background: rgba(246, 240, 233, 0.94); backdrop-filter: blur(12px); }
+.mora-header-inner { display: flex; min-height: 72px; align-items: center; justify-content: space-between; gap: 24px; }
+.mora-brand { display: inline-grid; gap: 0; color: var(--mora-ink); font-weight: 900; letter-spacing: 0.16em; line-height: 1; text-decoration: none; }
+.mora-brand > span { font-size: 1.16rem; }
+.mora-brand small { margin-top: 4px; color: var(--mora-wine); font-size: 0.51rem; font-weight: 850; letter-spacing: 0.21em; }
+.mora-nav { display: flex; align-items: center; gap: 18px; font-size: 0.88rem; font-weight: 750; }
+.mora-nav > a { display: inline-flex; min-height: 44px; align-items: center; gap: 8px; color: var(--mora-ink); text-decoration: none; }
+.mora-nav > a:not(.mora-cart-link):hover, .mora-nav > a:not(.mora-cart-link):focus-visible, .mora-nav > a[aria-current="page"] { color: var(--mora-wine); }
+.mora-cart-link { padding: 0 13px; border: 1px solid var(--mora-ink); border-radius: 999px; background: var(--mora-ink); color: #fff !important; }
+.mora-cart-link:hover, .mora-cart-link:focus-visible { background: var(--mora-wine); border-color: var(--mora-wine); }
+.mora-cart-badge { display: inline-grid; min-width: 21px; height: 21px; place-items: center; padding-inline: 4px; border-radius: 99px; background: #fff; color: var(--mora-ink); font-size: 0.72rem; font-variant-numeric: tabular-nums; }
+
+.mora-kicker { margin-bottom: 11px; color: var(--mora-wine); font-size: 0.7rem; font-weight: 850; letter-spacing: 0.15em; line-height: 1.4; }
+.mora-button { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; gap: 10px; max-width: 100%; padding: 12px 19px; border: 1px solid transparent; border-radius: 999px; font: inherit; font-size: 0.92rem; font-weight: 800; line-height: 1.2; text-align: center; text-decoration: none; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease, color 160ms ease; }
+.mora-button:hover { transform: translateY(-1px); }
+.mora-site a.mora-button.mora-button-primary, .mora-site a.mora-button.mora-button-primary:visited { border-color: var(--mora-wine); background: var(--mora-wine); color: #fff; }
+.mora-site a.mora-button.mora-button-primary:hover, .mora-site a.mora-button.mora-button-primary:focus-visible { border-color: #61202b; background: #61202b; color: #fff; }
+.mora-site a.mora-button.mora-button-primary:active { transform: translateY(0); border-color: #4d1821; background: #4d1821; color: #fff; }
+.mora-hero-copy > .mora-button-primary { min-width: 143px; border-color: var(--mora-wine); }
+.mora-nodo-cta a.mora-button.mora-button-light, .mora-nodo-cta a.mora-button.mora-button-light:visited { min-width: 191px; border-color: #f4b2a4; background: #f4b2a4; color: var(--mora-ink); box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16); }
+.mora-nodo-cta a.mora-button.mora-button-light:hover, .mora-nodo-cta a.mora-button.mora-button-light:focus-visible { border-color: #e89b8d; background: #e89b8d; color: var(--mora-ink); }
+.mora-nodo-cta a.mora-button.mora-button-light:active { transform: translateY(0); border-color: #dc887c; background: #dc887c; color: var(--mora-ink); }
+.mora-text-link, .mora-back-link { display: inline-flex; min-height: 42px; align-items: center; gap: 7px; color: var(--mora-wine); font-size: 0.87rem; font-weight: 800; text-decoration: none; }
+.mora-text-link:hover, .mora-text-link:focus-visible, .mora-back-link:hover, .mora-back-link:focus-visible { color: var(--mora-coral); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+
+.mora-hero { padding: clamp(50px, 7vw, 92px) 0 clamp(54px, 8vw, 100px); overflow: hidden; background: linear-gradient(112deg, #f6f0e9 0%, #f6f0e9 48%, #ebded3 100%); }
+.mora-hero-grid { display: grid; align-items: center; gap: 32px; }
+.mora-hero-copy { max-width: 620px; }
+.mora-hero h1 { max-width: 620px; margin-bottom: 20px; font-size: clamp(2.75rem, 7.5vw, 5.45rem); }
+.mora-hero-copy > p:not(.mora-kicker) { max-width: 525px; margin-bottom: 27px; color: var(--mora-muted); font-size: clamp(1rem, 2vw, 1.15rem); line-height: 1.7; }
+.mora-hero-product { position: relative; width: min(100%, 520px); margin: 0 auto; }
+.mora-hero-product::before { position: absolute; z-index: 0; inset: 10% 3% 7%; border-radius: 50%; background: radial-gradient(circle, rgba(124, 38, 52, 0.16), transparent 68%); content: ""; filter: blur(4px); }
+.mora-hero-product img { position: relative; z-index: 1; display: block; width: 100%; height: auto; border-radius: 2px; box-shadow: var(--mora-shadow); }
+.mora-hero-product figcaption { position: relative; z-index: 2; margin-top: 11px; color: var(--mora-muted); font-size: 0.78rem; text-align: right; }
+
+.mora-section { padding: clamp(58px, 8vw, 100px) 0; }
+.mora-section-heading { max-width: 680px; margin-bottom: clamp(27px, 4vw, 43px); }
+.mora-section-heading h2 { margin-bottom: 0; font-size: clamp(2rem, 4.2vw, 3.35rem); }
+.mora-heading-row { display: flex; align-items: end; justify-content: space-between; gap: 20px; }
+.mora-category-section { border-top: 1px solid var(--mora-line); }
+.mora-category-grid { display: grid; gap: 10px; }
+.mora-category-card { position: relative; display: grid; min-height: 128px; align-content: space-between; padding: 20px; overflow: hidden; border: 1px solid var(--mora-line); border-radius: 3px; background: var(--mora-surface); color: var(--mora-ink); text-decoration: none; transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease; }
+.mora-category-card::after { position: absolute; right: -22px; bottom: -34px; width: 105px; height: 105px; border: 1px solid rgba(124, 38, 52, 0.18); border-radius: 50%; content: ""; }
+.mora-category-card:hover, .mora-category-card:focus-visible { border-color: var(--mora-wine); box-shadow: var(--mora-shadow); transform: translateY(-2px); }
+.mora-category-card span { position: relative; z-index: 1; font-size: 1.22rem; font-weight: 850; letter-spacing: -0.045em; }
+.mora-category-card small { position: relative; z-index: 1; max-width: 220px; color: var(--mora-muted); font-size: 0.82rem; line-height: 1.45; }
+.mora-category-card b { position: absolute; z-index: 1; right: 19px; top: 19px; color: var(--mora-wine); font-size: 1.1rem; }
+.mora-featured-section { background: #efe4da; }
+.mora-product-grid { display: grid; gap: 16px; }
+.mora-product-card { display: flex; min-width: 0; flex-direction: column; overflow: hidden; border: 1px solid var(--mora-line); border-radius: 3px; background: var(--mora-surface); }
+.mora-product-image { display: block; aspect-ratio: 1; overflow: hidden; background: #ece5dd; }
+.mora-product-image img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center; transition: transform 260ms ease; }
+.mora-product-image:hover img, .mora-product-image:focus-visible img { transform: scale(1.025); }
+.mora-product-card-copy { display: flex; min-height: 208px; flex: 1; flex-direction: column; padding: 18px; }
+.mora-product-category { margin-bottom: 7px; color: var(--mora-wine); font-size: 0.65rem; font-weight: 850; letter-spacing: 0.14em; text-transform: uppercase; }
+.mora-product-card h3 { margin-bottom: 9px; font-size: clamp(1.08rem, 2.3vw, 1.32rem); }
+.mora-product-card h3 a { text-decoration: none; }
+.mora-product-card-copy > p:not(.mora-product-category) { margin-bottom: 17px; color: var(--mora-muted); font-size: 0.87rem; line-height: 1.55; }
+.mora-product-card-bottom { display: grid; gap: 10px; margin-top: auto; }
+.mora-product-card-bottom strong { font-size: 0.94rem; font-variant-numeric: tabular-nums; }
+.mora-product-card-bottom .mora-text-link { min-height: 34px; font-size: 0.8rem; }
+.mora-benefit-grid { display: grid; gap: 0; margin: 0; padding: 0; border-top: 1px solid var(--mora-line); list-style: none; }
+.mora-benefit-grid li { display: grid; gap: 7px; padding: 20px 0; border-bottom: 1px solid var(--mora-line); }
+.mora-benefit-grid strong { font-size: 1.16rem; letter-spacing: -0.035em; }
+.mora-benefit-grid span { max-width: 360px; color: var(--mora-muted); font-size: 0.9rem; }
+
+.mora-page-intro { padding: clamp(48px, 7vw, 82px) 0 35px; }
+.mora-page-intro .mora-back-link { margin-bottom: 28px; }
+.mora-page-intro h1, .mora-cart-page h1 { max-width: 730px; margin-bottom: 17px; font-size: clamp(2.45rem, 6vw, 4.75rem); }
+.mora-page-intro > .mora-container > p:last-child { max-width: 620px; margin-bottom: 0; color: var(--mora-muted); font-size: 1.02rem; line-height: 1.65; }
+.mora-catalog-section { padding-bottom: clamp(65px, 9vw, 110px); }
+.mora-catalog-controls { display: grid; gap: 17px; margin-bottom: 25px; }
+.mora-category-filter { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 3px; scrollbar-width: none; }
+.mora-category-filter::-webkit-scrollbar { display: none; }
+.mora-category-filter button { min-height: 43px; flex: 0 0 auto; padding: 9px 13px; border: 1px solid var(--mora-line); border-radius: 999px; background: transparent; color: var(--mora-ink); font: inherit; font-size: 0.83rem; font-weight: 750; cursor: pointer; }
+.mora-category-filter button[aria-pressed="true"], .mora-category-filter button:hover, .mora-category-filter button:focus-visible { border-color: var(--mora-wine); background: var(--mora-wine); color: #fff; }
+.mora-sort-label { display: inline-grid; width: fit-content; gap: 5px; color: var(--mora-muted); font-size: 0.77rem; font-weight: 750; }
+.mora-sort-label select { min-height: 43px; min-width: 172px; padding: 8px 32px 8px 11px; border: 1px solid var(--mora-line); border-radius: 3px; background: var(--mora-surface); color: var(--mora-ink); font: inherit; font-size: 0.9rem; }
+.mora-empty-copy { color: var(--mora-muted); }
+
+.mora-product-page { padding: clamp(38px, 5vw, 66px) 0 clamp(70px, 10vw, 120px); }
+.mora-product-page .mora-back-link { margin-bottom: 26px; }
+.mora-product-layout { display: grid; gap: 31px; }
+.mora-product-visual { margin: 0; overflow: hidden; background: #ece5dd; }
+.mora-product-visual img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; object-position: center; }
+.mora-product-info { max-width: 530px; }
+.mora-product-info h1 { margin-bottom: 13px; font-size: clamp(2.25rem, 5.6vw, 4rem); }
+.mora-product-price { margin-bottom: 23px; font-size: 1.18rem; font-weight: 850; font-variant-numeric: tabular-nums; }
+.mora-product-description { margin-bottom: 28px; color: var(--mora-muted); line-height: 1.72; }
+.mora-variant-field, .mora-delivery-field { min-width: 0; margin: 0 0 23px; padding: 0; border: 0; }
+.mora-variant-field legend, .mora-delivery-field legend { margin-bottom: 10px; font-size: 0.88rem; font-weight: 800; }
+.mora-variant-field > div { display: flex; flex-wrap: wrap; gap: 8px; }
+.mora-variant { min-height: 43px; padding: 9px 13px; border: 1px solid var(--mora-line); border-radius: 999px; background: var(--mora-surface); color: var(--mora-ink); font: inherit; font-size: 0.85rem; font-weight: 750; cursor: pointer; }
+.mora-variant[aria-pressed="true"], .mora-variant:hover, .mora-variant:focus-visible { border-color: var(--mora-wine); background: var(--mora-wine); color: #fff; }
+.mora-buy-actions { display: grid; gap: 15px; padding-top: 22px; border-top: 1px solid var(--mora-line); }
+.mora-input-label { display: block; margin-bottom: 8px; font-size: 0.8rem; font-weight: 800; }
+.mora-quantity { display: inline-grid; grid-template-columns: 42px 42px 42px; min-height: 42px; overflow: hidden; border: 1px solid var(--mora-line); border-radius: 3px; background: var(--mora-surface); }
+.mora-quantity button { border: 0; background: transparent; color: var(--mora-ink); font: inherit; font-size: 1.2rem; cursor: pointer; }
+.mora-quantity button:hover, .mora-quantity button:focus-visible { background: #ede3da; }
+.mora-quantity output { display: grid; place-items: center; border-inline: 1px solid var(--mora-line); font-size: 0.88rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.mora-product-demo-note { margin: 15px 0 0; color: var(--mora-muted); font-size: 0.78rem; line-height: 1.5; }
+
+.mora-cart-page { padding: clamp(52px, 7vw, 86px) 0 clamp(72px, 9vw, 112px); }
+.mora-cart-heading { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin-bottom: 32px; }
+.mora-cart-heading .mora-kicker { margin-bottom: 8px; }
+.mora-text-button, .mora-remove-button { min-height: 42px; padding: 6px 0; border: 0; background: transparent; color: var(--mora-wine); font: inherit; font-size: 0.84rem; font-weight: 800; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+.mora-cart-layout { display: grid; gap: 30px; }
+.mora-cart-list { display: grid; gap: 16px; margin: 0; padding: 0; list-style: none; }
+.mora-cart-line { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--mora-line); }
+.mora-cart-line > img { width: 92px; height: 92px; object-fit: contain; object-position: center; background: #ece5dd; }
+.mora-cart-line-copy h2 { margin-bottom: 4px; font-size: 1.15rem; }
+.mora-cart-line-copy strong { display: block; margin-top: 9px; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+.mora-cart-variant { margin: 0; color: var(--mora-muted); font-size: 0.82rem; }
+.mora-cart-line-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 11px; }
+.mora-cart-line-actions .mora-remove-button { min-height: 38px; }
+.mora-line-total { grid-column: 2; margin: -3px 0 0; font-size: 0.82rem; font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; }
+.mora-continue-link { margin-top: 18px; }
+.mora-cart-summary { align-self: start; padding: 21px; border: 1px solid var(--mora-line); border-radius: 3px; background: var(--mora-surface); box-shadow: var(--mora-shadow); }
+.mora-cart-summary .mora-kicker { margin-bottom: 18px; }
+.mora-summary-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 23px; padding-bottom: 18px; border-bottom: 1px solid var(--mora-line); font-size: 0.96rem; }
+.mora-summary-row strong { font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.mora-delivery-field { display: grid; gap: 9px; }
+.mora-delivery-field label { display: flex; min-height: 40px; align-items: center; gap: 9px; color: var(--mora-muted); font-size: 0.88rem; }
+.mora-delivery-field input { width: 17px; height: 17px; accent-color: var(--mora-wine); }
+.mora-cart-summary .mora-button { width: 100%; margin-bottom: 13px; }
+.mora-cart-summary > p:last-child { margin: 0; color: var(--mora-muted); font-size: 0.76rem; line-height: 1.5; }
+.mora-empty-cart { max-width: 660px; padding-block: 30px 65px; }
+.mora-empty-cart h1 { margin-bottom: 17px; }
+.mora-empty-cart > p:not(.mora-kicker) { max-width: 490px; margin-bottom: 24px; color: var(--mora-muted); }
+
+.mora-nodo-cta { padding: clamp(54px, 7vw, 92px) 0; background: var(--mora-ink); color: #fff; }
+.mora-nodo-cta h2 { max-width: 630px; margin-bottom: 15px; font-size: clamp(2rem, 4.5vw, 3.45rem); }
+.mora-nodo-cta p:not(.mora-kicker) { max-width: 550px; margin-bottom: 24px; color: #ddd4cf; }
+.mora-nodo-cta .mora-kicker { color: #f4b2a4; }
+.mora-footer { padding: 39px 0; border-top: 1px solid rgba(255, 255, 255, 0.12); background: var(--mora-ink); color: #fff; }
+.mora-footer-grid { display: grid; gap: 27px; }
+.mora-brand-footer { color: #fff; }
+.mora-brand-footer small { color: #f4b2a4; }
+.mora-footer p { margin: 10px 0 0; color: #d4c8c2; font-size: 0.84rem; }
+.mora-footer nav { display: grid; gap: 8px; }
+.mora-footer nav a { color: #fff; font-size: 0.87rem; font-weight: 750; text-decoration: none; }
+.mora-footer nav a:hover, .mora-footer nav a:focus-visible { color: #f4b2a4; text-decoration: underline; text-underline-offset: 4px; }
+.mora-footer-demo { max-width: 310px; line-height: 1.55; }
+.mora-announcer { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+.mora-site :focus-visible { outline: 3px solid var(--mora-coral); outline-offset: 3px; }
+
+@media (max-width: 359px) {
+    .mora-container { width: min(calc(100% - 28px), 1180px); }
+    .mora-demo-note span { display: none; }
+    .mora-header-inner { gap: 12px; }
+    .mora-nav { gap: 10px; font-size: 0.79rem; }
+    .mora-cart-link { padding-inline: 9px; }
+    .mora-product-grid { grid-template-columns: minmax(0, 1fr); }
+    .mora-heading-row { align-items: start; flex-direction: column; gap: 4px; }
+}
+
+@media (min-width: 360px) {
+    .mora-product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .mora-product-card-copy { min-height: 225px; padding: 14px; }
+    .mora-product-card h3 { font-size: 1.02rem; }
+    .mora-product-card-copy > p:not(.mora-product-category) { font-size: 0.79rem; }
+}
+
+@media (min-width: 560px) {
+    .mora-category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .mora-benefit-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .mora-benefit-grid li { min-height: 142px; padding: 21px; border-right: 1px solid var(--mora-line); }
+    .mora-benefit-grid li:last-child { border-right: 0; }
+    .mora-product-card-copy { min-height: 214px; padding: 17px; }
+}
+
+@media (min-width: 700px) {
+    .mora-hero-grid { grid-template-columns: minmax(0, 1.08fr) minmax(260px, 0.72fr); gap: 42px; }
+    .mora-hero-product { margin-right: 0; }
+    .mora-product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+    .mora-product-card-copy { min-height: 218px; }
+    .mora-catalog-controls { grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
+    .mora-product-layout { grid-template-columns: minmax(0, 1fr) minmax(300px, 0.76fr); align-items: start; gap: 42px; }
+    .mora-product-info { padding-top: 9px; }
+    .mora-cart-line { grid-template-columns: 116px minmax(0, 1fr) auto; gap: 20px; }
+    .mora-cart-line > img { width: 116px; height: 116px; }
+    .mora-line-total { grid-column: 3; align-self: start; margin-top: 7px; }
+    .mora-cart-layout { grid-template-columns: minmax(0, 1fr) minmax(270px, 0.42fr); gap: 38px; }
+    .mora-footer-grid { grid-template-columns: minmax(0, 1.1fr) minmax(140px, 0.55fr) minmax(220px, 0.75fr); align-items: start; }
+}
+
+@media (min-width: 1024px) {
+    .mora-header-inner { min-height: 78px; }
+    .mora-hero { padding-block: 100px 116px; }
+    .mora-category-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .mora-product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .mora-product-card-copy { min-height: 225px; }
+    .mora-cart-summary { position: sticky; top: 99px; }
+}
+
+@media (max-width: 699px) {
+    .mora-product-info .mora-buy-actions { position: sticky; z-index: 5; bottom: max(9px, env(safe-area-inset-bottom)); padding: 14px; border: 1px solid var(--mora-line); border-radius: 3px; background: rgba(255, 253, 249, 0.96); box-shadow: var(--mora-shadow); }
+    .mora-product-info .mora-buy-actions .mora-button { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+}
