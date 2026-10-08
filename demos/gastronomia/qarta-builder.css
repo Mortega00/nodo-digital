@@ -112,6 +112,21 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .qarta-builder-preview__frame { aspect-ratio: 3 / 4; min-height: 560px; background: var(--qarta-builder-paper); }
 .qarta-builder-preview iframe { display: block; width: 100%; height: 100%; min-height: 560px; border: 0; background: var(--qarta-builder-paper); }
 
+.qarta-builder-modal { width: min(100% - 32px, 560px); max-height: min(760px, calc(100dvh - 32px)); border: 1px solid var(--qarta-builder-line); padding: 0; color: var(--qarta-builder-ink); background: var(--qarta-builder-panel); box-shadow: var(--qarta-builder-shadow); }
+.qarta-builder-modal::backdrop { background: rgb(32 37 34 / 44%); backdrop-filter: blur(3px); }
+.qarta-builder-modal__panel { padding: clamp(20px, 4vw, 32px); }
+.qarta-builder-modal__head { display: flex; align-items: start; justify-content: space-between; gap: 18px; }
+.qarta-builder-modal__head p { margin: 0 0 5px; color: var(--qarta-builder-accent); font-size: .63rem; font-weight: 900; letter-spacing: .13em; }
+.qarta-builder-modal__head h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 500; letter-spacing: -.04em; }
+.qarta-builder-modal__panel > p:not(.qarta-builder-modal__url):not(.qarta-builder-modal__status) { margin: 22px 0 0; color: var(--qarta-builder-muted); }
+.qarta-builder-modal__url { margin: 18px 0 0; overflow-wrap: anywhere; border: 1px solid var(--qarta-builder-line); padding: 11px; background: var(--qarta-builder-paper); color: var(--qarta-builder-ink); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .72rem; line-height: 1.5; }
+.qarta-builder-modal__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.qarta-builder-modal__qr { display: grid; place-items: center; min-height: 180px; margin-top: 22px; border: 1px dashed var(--qarta-builder-line); padding: 20px; background: var(--qarta-builder-paper); text-align: center; }
+.qarta-builder-modal__qr img { display: block; width: min(100%, 260px); height: auto; image-rendering: auto; }
+.qarta-builder-modal__qr p { max-width: 290px; margin: 0; color: var(--qarta-builder-muted); font-size: .82rem; }
+.qarta-builder-modal__status { min-height: 1.35em; margin: 15px 0 0; color: var(--qarta-builder-accent); font-size: .78rem; font-weight: 700; }
+.qarta-builder-modal__status[data-type="error"] { color: var(--qarta-builder-danger); }
+
 .qarta-builder-site :focus-visible { outline: 3px solid color-mix(in srgb, var(--qarta-builder-accent) 70%, #fff); outline-offset: 3px; }
 
 @media (max-width: 1180px) {
@@ -137,6 +152,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .qarta-builder-preview__frame, .qarta-builder-preview iframe { min-height: min(108vw, 640px); }
   .qarta-builder-savebar { align-items: stretch; flex-direction: column; bottom: 10px; }
   .qarta-builder-savebar .qarta-builder-inline-button { width: 100%; }
+  .qarta-builder-modal__actions .qarta-builder-inline-button { flex: 1 1 auto; }
 }
 
 @media (max-width: 410px) {

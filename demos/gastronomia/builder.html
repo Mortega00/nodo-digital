@@ -20,6 +20,7 @@
         <strong>QARTA <small>BUILDER</small></strong>
       </a>
       <div class="qarta-builder-header__actions">
+        <button class="qarta-builder-button qarta-builder-button--quiet" type="button" data-builder-action="import">Importar QARTA</button>
         <button class="qarta-builder-button qarta-builder-button--quiet" type="button" data-builder-action="new">Nuevo comercio</button>
         <button class="qarta-builder-button" type="button" data-builder-action="save">Guardar QARTA</button>
       </div>
@@ -46,5 +47,7 @@
       </aside>
     </div>
   </main>
+  <input id="qarta-builder-import" type="file" accept="application/json,.json" hidden>
+  <dialog id="qarta-builder-share" class="qarta-builder-modal" aria-labelledby="qarta-builder-modal-title"></dialog>
 </body>
 </html>

@@ -10,8 +10,14 @@
   const form = document.getElementById("qarta-builder-form");
   const notice = document.getElementById("qarta-builder-notice");
   const preview = document.getElementById("qarta-builder-preview");
+  const importInput = document.getElementById("qarta-builder-import");
+  const shareDialog = document.getElementById("qarta-builder-share");
 
-  if (!library || !form || !notice || !preview) return;
+  if (!library || !form || !notice || !preview || !importInput || !shareDialog) return;
+
+  const EXPORT_FORMAT = "qarta";
+  const EXPORT_VERSION = 1;
+  const MAX_IMPORT_BYTES = 1024 * 1024;
 
   const DEFAULT_COLORS = {
     ink: "#202522",
@@ -43,6 +49,9 @@
   let editingSlug = "";
   let previewTimer = 0;
   let feedback = { type: "", message: "", errors: [] };
+  let openSections = new Set(["builder-identity"]);
+  let sectionsInitialized = false;
+  let activeShareRestaurant = null;
 
   const escapeHtml = (value = "") => String(value)
     .replaceAll("&", "&amp;")
@@ -98,12 +107,47 @@
       return "";
     }
   };
+  const safeLocalAsset = (value) => {
+    const source = typeof value === "string" ? value.trim() : "";
+    if (!source || /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(source)) return "";
+    return safeUrl(source);
+  };
   const safeWhatsApp = (value) => String(value || "").replace(/\D/g, "").slice(0, 18);
   const tagsFromValue = (value) => String(value || "")
     .split(",")
     .map((item) => cleanText(item, 40))
     .filter(Boolean)
     .slice(0, 10);
+  const createRestaurantId = () => {
+    const uuid = window.crypto?.randomUUID?.();
+    return uuid ? `qarta-${uuid}` : `qarta-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  };
+  const generatedPublicUrl = (slug) => {
+    const url = new URL("index.html", window.location.href);
+    url.searchParams.set("r", slug);
+    return url.href;
+  };
+  const publicUrlFor = (restaurant) => {
+    const configured = safeUrl(restaurant?.contact?.publicUrl);
+    if (configured) {
+      const parsed = new URL(configured, window.location.href);
+      if (parsed.searchParams.get("r") === restaurant?.slug) return parsed.href;
+    }
+    return generatedPublicUrl(restaurant?.slug || "");
+  };
+  const appendSlug = (base, suffix) => `${base.slice(0, Math.max(1, 60 - suffix.length - 1))}-${suffix}`;
+  const slugIsAvailable = (slug, excludedSlug = "") => !staticSlugs.has(slug)
+    && !savedRestaurants.some((restaurant) => restaurant.slug === slug && restaurant.slug !== excludedSlug);
+  const nextAvailableSlug = (value, mode = "import") => {
+    const base = slugify(value) || "qarta";
+    const initial = mode === "copy" ? appendSlug(base, "copia") : base;
+    if (slugIsAvailable(initial)) return initial;
+    for (let index = 2; index < 1000; index += 1) {
+      const candidate = appendSlug(initial, String(index));
+      if (slugIsAvailable(candidate)) return candidate;
+    }
+    return appendSlug(base, Date.now().toString(36).slice(-6));
+  };
   const statusLabel = (status) => ({ draft: "Borrador", active: "Activo", inactive: "Inactivo" })[status] || "Borrador";
   const selectOptions = (items, selected) => items.map((item) => `<option value="${escapeHtml(item)}" ${item === selected ? "selected" : ""}>${escapeHtml(item)}</option>`).join("");
   const fieldId = (path) => `qarta-builder-${path.replace(/[^a-z0-9]+/gi, "-")}`;
@@ -127,6 +171,7 @@
 
   function createRestaurant() {
     return {
+      id: createRestaurantId(),
       slug: "nuevo-comercio",
       status: "draft",
       isDemo: true,
@@ -163,6 +208,7 @@
     const slug = slugify(input.slug) || "nuevo-comercio";
     const normalized = {
       ...base,
+      id: cleanText(input.id, 80) || base.id,
       slug,
       status: ["draft", "active", "inactive"].includes(input.status) ? input.status : "draft",
       brand: {
@@ -230,7 +276,7 @@
         image: safeUrl(item?.image),
         imageAlt: cleanText(item?.imageAlt, 180),
       })).slice(0, 20) : [],
-      qr: { asset: safeUrl(input.qr?.asset), target: safeUrl(input.qr?.target), label: cleanText(input.qr?.label, 70) || base.qr.label },
+      qr: { asset: safeLocalAsset(input.qr?.asset), target: safeUrl(input.qr?.target), label: cleanText(input.qr?.label, 70) || base.qr.label },
       products: Array.isArray(input.products) ? input.products.map((item, index) => ({
         id: cleanId(item?.id, `producto-${index + 1}`),
         name: cleanText(item?.name, 100),
@@ -259,7 +305,7 @@
       description: cleanText(input.meta?.description, 240) || normalized.brand.description,
       image: safeUrl(input.meta?.image) || normalized.hero.image,
     };
-    normalized.contact.publicUrl = normalized.contact.publicUrl || `https://nododigital.com.ar/demos/gastronomia/?r=${encodeURIComponent(normalized.slug)}`;
+    normalized.contact.publicUrl = publicUrlFor(normalized);
     normalized.qr.target = normalized.qr.target || normalized.contact.publicUrl;
     return normalized;
   }
@@ -309,7 +355,8 @@
   }
 
   function section(id, title, description, content, open = false) {
-    return `<details class="qarta-builder-section" ${open ? "open" : ""}><summary><span><strong>${escapeHtml(title)}</strong><small>${escapeHtml(description)}</small></span><i aria-hidden="true">+</i></summary><div class="qarta-builder-section__body" id="${id}">${content}</div></details>`;
+    const isOpen = sectionsInitialized ? openSections.has(id) : open;
+    return `<details class="qarta-builder-section" ${isOpen ? "open" : ""}><summary><span><strong>${escapeHtml(title)}</strong><small>${escapeHtml(description)}</small></span><i aria-hidden="true">+</i></summary><div class="qarta-builder-section__body" id="${id}">${content}</div></details>`;
   }
 
   function actionButton(label, action, attributes = "", kind = "quiet") {
@@ -318,7 +365,7 @@
 
   function renderLibrary() {
     const list = savedRestaurants.length
-      ? `<ul class="qarta-builder-library__list">${savedRestaurants.map((restaurant) => `<li><div><strong>${escapeHtml(restaurant.brand.name || "Sin nombre")}</strong><span>${escapeHtml(restaurant.slug)} · ${escapeHtml(statusLabel(restaurant.status))}</span></div><div class="qarta-builder-library__actions">${actionButton("Editar", "edit", `data-slug="${escapeHtml(restaurant.slug)}"`)}${actionButton("Ver", "view", `data-slug="${escapeHtml(restaurant.slug)}"`)}${actionButton("Eliminar", "delete", `data-slug="${escapeHtml(restaurant.slug)}"`, "danger")}</div></li>`).join("")}</ul>`
+      ? `<ul class="qarta-builder-library__list">${savedRestaurants.map((restaurant) => `<li><div><strong>${escapeHtml(restaurant.brand.name || "Sin nombre")}</strong><span>${escapeHtml(restaurant.slug)} · ${escapeHtml(statusLabel(restaurant.status))}</span></div><div class="qarta-builder-library__actions">${actionButton("Ver", "view", `data-slug="${escapeHtml(restaurant.slug)}"`)}${actionButton("Editar", "edit", `data-slug="${escapeHtml(restaurant.slug)}"`)}${actionButton("Duplicar", "duplicate", `data-slug="${escapeHtml(restaurant.slug)}"`)}${actionButton("Compartir", "share", `data-slug="${escapeHtml(restaurant.slug)}"`)}${actionButton("Exportar", "export", `data-slug="${escapeHtml(restaurant.slug)}"`)}${actionButton("Eliminar", "delete", `data-slug="${escapeHtml(restaurant.slug)}"`, "danger")}</div></li>`).join("")}</ul>`
       : `<p class="qarta-builder-empty">Todavía no creaste ninguna QARTA en este navegador.</p>`;
     library.innerHTML = `<section class="qarta-builder-library"><div class="qarta-builder-library__head"><div><p>MIS QARTAS</p><h1>Comercios locales</h1></div>${actionButton("Nuevo comercio", "new", "", "dark")}</div>${list}</section>`;
   }
@@ -379,6 +426,10 @@
       ${inputField("Etiqueta de retiro", "contact.pickupLabel", draft.contact.pickupLabel, { max: 140 })}
       ${inputField("URL pública", "contact.publicUrl", draft.contact.publicUrl, { type: "url", max: 500, valueType: "url" })}
       ${inputField("Instagram", "contact.instagramUrl", draft.contact.instagramUrl, { type: "url", max: 500, valueType: "url" })}
+    </div><div class="qarta-builder-subheading">QR local</div><div class="qarta-builder-fields">
+      ${inputField("Asset QR local", "qr.asset", draft.qr.asset, { max: 500, valueType: "local-asset", hint: "No se generan ni cargan QR remotos desde QARTA." })}
+      ${inputField("URL del QR", "qr.target", draft.qr.target, { type: "url", max: 500, valueType: "url" })}
+      ${inputField("Etiqueta QR", "qr.label", draft.qr.label, { max: 70 })}
     </div><div class="qarta-builder-list-head"><strong>Horarios</strong>${actionButton("Agregar horario", "add-schedule")}</div><div class="qarta-builder-repeat-list">${schedule}</div>`, false);
   }
 
@@ -446,6 +497,11 @@
   }
 
   function render() {
+    const sections = form.querySelectorAll?.(".qarta-builder-section");
+    if (sections?.length) {
+      openSections = new Set([...sections].filter((section) => section.open).map((section) => section.querySelector(".qarta-builder-section__body")?.id).filter(Boolean));
+      sectionsInitialized = true;
+    }
     renderLibrary();
     renderNotice();
     renderForm();
@@ -469,9 +525,21 @@
     if (control.dataset.valueType === "number") return numberInputValue(control.value);
     if (control.dataset.valueType === "tags") return tagsFromValue(control.value);
     if (control.dataset.valueType === "url") return safeUrl(control.value);
+    if (control.dataset.valueType === "local-asset") return safeLocalAsset(control.value);
     if (control.dataset.valueType === "whatsapp") return safeWhatsApp(control.value);
     if (control.dataset.valueType === "color") return safeColor(control.value, "#000000");
     return control.value;
+  }
+
+  function controlFeedback(control) {
+    const value = String(control.value || "").trim();
+    if (control.required && !value) return "Completá este campo requerido antes de guardar.";
+    if (control.dataset.valueType === "number" && (value === "" || !Number.isFinite(Number(value)) || Number(value) < 0)) return "Ingresá un precio válido: cero o un número positivo.";
+    if (control.dataset.valueType === "url" && value && !safeUrl(value)) return "La URL no es segura o no tiene un formato válido.";
+    if (control.dataset.valueType === "local-asset" && value && !safeLocalAsset(value)) return "El QR debe usar una ruta local segura, no una URL remota.";
+    if (control.dataset.valueType === "color" && value && !safeColor(value, "")) return "El color no tiene un formato hexadecimal válido.";
+    if (control.dataset.valueType === "whatsapp" && value && safeWhatsApp(value) !== value) return "El WhatsApp se guardará sólo con números y código de país.";
+    return "";
   }
 
   function schedulePreview(immediate = false) {
@@ -488,22 +556,22 @@
     else previewTimer = window.setTimeout(update, 280);
   }
 
-  function validationErrors() {
+  function validationErrors(candidate = draft, { checkSlugAvailability = true, excludedSlug = editingSlug } = {}) {
     const errors = [];
-    const slug = slugify(draft.slug);
-    if (!cleanText(draft.brand.name, 80)) errors.push("Ingresá el nombre del comercio.");
+    const slug = slugify(candidate.slug);
+    if (!cleanText(candidate.brand.name, 80)) errors.push("Ingresá el nombre del comercio.");
     if (!slug) errors.push("Ingresá un slug válido.");
-    if (slug && staticSlugs.has(slug)) errors.push("Ese slug pertenece a un comercio estático de QARTA.");
-    if (slug && savedRestaurants.some((restaurant) => restaurant.slug === slug && restaurant.slug !== editingSlug)) errors.push("Ese slug ya está usado por otra QARTA del Builder.");
+    if (checkSlugAvailability && slug && staticSlugs.has(slug)) errors.push("Ese slug pertenece a un comercio estático de QARTA.");
+    if (checkSlugAvailability && slug && savedRestaurants.some((restaurant) => restaurant.slug === slug && restaurant.slug !== excludedSlug)) errors.push("Ese slug ya está usado por otra QARTA del Builder.");
     const categoryIds = new Set();
-    draft.categories.forEach((category, index) => {
+    candidate.categories.forEach((category, index) => {
       const id = slugify(category.id);
       if (!id || !cleanText(category.label, 80)) errors.push(`Completá ID y etiqueta de la categoría ${index + 1}.`);
       if (id && categoryIds.has(id)) errors.push(`La categoría ${index + 1} repite el ID “${id}”.`);
       categoryIds.add(id);
     });
     const productIds = new Set();
-    draft.products.forEach((product, index) => {
+    candidate.products.forEach((product, index) => {
       const label = `producto ${index + 1}`;
       const id = slugify(product.id);
       if (!id || !cleanText(product.name, 100)) errors.push(`Completá ID y nombre del ${label}.`);
@@ -527,7 +595,7 @@
       });
     });
     const promotionIds = new Set();
-    draft.promotions.forEach((promotion, index) => {
+    candidate.promotions.forEach((promotion, index) => {
       const id = slugify(promotion.id);
       if (!id || !cleanText(promotion.title, 160)) errors.push(`Completá ID y título de la promoción ${index + 1}.`);
       if (id && promotionIds.has(id)) errors.push(`La promoción ${index + 1} repite el ID “${id}”.`);
@@ -535,6 +603,49 @@
       if (promotion.startsAt && promotion.endsAt && promotion.startsAt > promotion.endsAt) errors.push(`La promoción ${index + 1} termina antes de empezar.`);
     });
     return errors;
+  }
+
+  function isSafeOptionalUrl(value) {
+    return value === undefined || value === null || value === "" || (typeof value === "string" && Boolean(safeUrl(value)));
+  }
+
+  function containsMarkup(value) {
+    if (typeof value === "string") return /<\s*\/?[a-z!][^>]*>/i.test(value);
+    if (Array.isArray(value)) return value.some(containsMarkup);
+    if (isRecord(value)) return Object.values(value).some(containsMarkup);
+    return false;
+  }
+
+  function importValidationErrors(payload) {
+    const errors = [];
+    if (!isRecord(payload) || payload.format !== EXPORT_FORMAT) return ["El archivo no usa el formato QARTA reconocido."];
+    if (payload.version !== EXPORT_VERSION) return [`La versión ${String(payload.version || "sin versión")} no es compatible con este Builder.`];
+    const restaurant = payload.restaurant;
+    if (!isStoredRestaurantShape(restaurant)) return ["El comercio importado no tiene la estructura mínima esperada."];
+    if (!restaurant.categories.every(isRecord)
+      || !restaurant.products.every((product) => isRecord(product) && Array.isArray(product.variants) && Array.isArray(product.extras) && Array.isArray(product.tags) && product.variants.every(isRecord) && product.extras.every(isRecord))
+      || !restaurant.promotions.every(isRecord)
+      || !restaurant.schedule.every(isRecord)) return ["El archivo contiene elementos internos con un formato no válido."];
+    if (restaurant.categories.length > 40 || restaurant.products.length > 200 || restaurant.promotions.length > 20 || restaurant.schedule.length > 14) errors.push("El archivo supera los límites razonables de categorías, productos, promociones u horarios.");
+    restaurant.products.forEach((product, index) => {
+      if (!isRecord(product) || (Array.isArray(product.variants) && product.variants.length > 20) || (Array.isArray(product.extras) && product.extras.length > 20) || (Array.isArray(product.tags) && product.tags.length > 10)) errors.push(`El producto ${index + 1} supera un límite permitido o no tiene un formato válido.`);
+    });
+    Object.entries(PRESENTATION_OPTIONS).forEach(([key, options]) => {
+      if (restaurant.presentation[key] && !options.includes(restaurant.presentation[key])) errors.push(`La opción de presentación “${key}” no es válida.`);
+    });
+    if (restaurant.presentation.colors !== undefined) {
+      if (!isRecord(restaurant.presentation.colors)) errors.push("Los colores de presentación no tienen un formato válido.");
+      else Object.entries(restaurant.presentation.colors).forEach(([key, value]) => {
+        if (!Object.hasOwn(DEFAULT_COLORS, key) || typeof value !== "string" || !safeColor(value, "")) errors.push(`El color “${key}” no es válido.`);
+      });
+    }
+    const urls = [restaurant.hero.image, restaurant.meta?.image, restaurant.contact.publicUrl, restaurant.contact.instagramUrl, restaurant.qr?.target];
+    restaurant.products.forEach((product) => urls.push(product?.image));
+    restaurant.promotions.forEach((promotion) => urls.push(promotion?.image));
+    if (urls.some((url) => !isSafeOptionalUrl(url))) errors.push("El archivo contiene una URL no permitida.");
+    if (restaurant.qr?.asset && !safeLocalAsset(restaurant.qr.asset)) errors.push("El asset QR debe ser una ruta local segura.");
+    if (containsMarkup(restaurant)) errors.push("El archivo contiene HTML no permitido.");
+    return [...errors, ...validationErrors(restaurant, { checkSlugAvailability: false, excludedSlug: "" })];
   }
 
   function saveRestaurant() {
@@ -553,6 +664,183 @@
     setFeedback("success", `“${restaurant.brand.name}” quedó guardada en este navegador.`);
     render();
     schedulePreview(true);
+  }
+
+  function downloadFile(filename, contents, type) {
+    if (!window.Blob || !window.URL?.createObjectURL) {
+      setFeedback("error", "Este navegador no permite descargar archivos desde el Builder.");
+      return false;
+    }
+    const url = window.URL.createObjectURL(new Blob([contents], { type }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.hidden = true;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => window.URL.revokeObjectURL(url), 0);
+    return true;
+  }
+
+  function exportRestaurant(restaurant) {
+    if (!restaurant) return;
+    const payload = {
+      format: EXPORT_FORMAT,
+      version: EXPORT_VERSION,
+      exportedAt: new Date().toISOString(),
+      restaurant: clone(restaurant),
+    };
+    if (downloadFile(`${restaurant.slug}.qarta.json`, JSON.stringify(payload, null, 2), "application/json")) {
+      setFeedback("success", `“${restaurant.brand.name}” se exportó como JSON.`);
+    }
+  }
+
+  function duplicateRestaurant(source) {
+    if (!source) return;
+    const duplicate = clone(source);
+    duplicate.id = createRestaurantId();
+    duplicate.slug = nextAvailableSlug(source.slug, "copy");
+    duplicate.brand.name = cleanText(`${source.brand.name || source.slug} — Copia`, 80);
+    duplicate.contact.publicUrl = generatedPublicUrl(duplicate.slug);
+    duplicate.qr = { ...duplicate.qr, target: duplicate.contact.publicUrl };
+    const normalized = normalizeRestaurant(duplicate);
+    savedRestaurants.push(normalized);
+    if (!persistRestaurants()) {
+      savedRestaurants = savedRestaurants.filter((restaurant) => restaurant.id !== normalized.id);
+      return;
+    }
+    editingSlug = normalized.slug;
+    draft = clone(normalized);
+    setFeedback("success", `Se creó “${normalized.brand.name}” para que la edites.`);
+    render();
+    schedulePreview(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function shareStatus(message, type = "success") {
+    const status = shareDialog.querySelector("[data-qarta-share-status]");
+    if (!status) return;
+    status.dataset.type = type;
+    status.textContent = message;
+  }
+
+  function qrAssetFor(restaurant) {
+    return safeLocalAsset(restaurant?.qr?.asset);
+  }
+
+  function renderShareDialog(view = "share") {
+    if (!activeShareRestaurant) return;
+    const restaurant = activeShareRestaurant;
+    const url = publicUrlFor(restaurant);
+    const qrAsset = qrAssetFor(restaurant);
+    const localQr = Boolean(qrAsset);
+    const title = view === "qr" ? "Código QR" : "Compartir QARTA";
+    const content = view === "qr"
+      ? `<div class="qarta-builder-modal__qr">${qrAsset ? `<img src="${escapeHtml(qrAsset)}" alt="Código QR de ${escapeHtml(restaurant.brand.name)}">` : `<p>No hay un asset QR local configurado todavía para esta QARTA.</p>`}</div>
+         <p class="qarta-builder-modal__url">${escapeHtml(url)}</p>
+         <div class="qarta-builder-modal__actions">${actionButton("Copiar enlace", "copy-link", "", "dark")}${localQr ? actionButton("Descargar QR", "download-qr") : ""}${actionButton("Volver", "open-share")}</div>`
+      : `<p>Compartí la carta pública de <strong>${escapeHtml(restaurant.brand.name)}</strong>.</p>
+         <p class="qarta-builder-modal__url">${escapeHtml(url)}</p>
+         <div class="qarta-builder-modal__actions">${actionButton("Copiar enlace", "copy-link", "", "dark")}${actionButton("WhatsApp", "share-whatsapp")}${actionButton("Ver QR", "open-qr")}</div>`;
+    shareDialog.innerHTML = `<article class="qarta-builder-modal__panel"><div class="qarta-builder-modal__head"><div><p>QARTA COMPARTIR</p><h2 id="qarta-builder-modal-title">${title}</h2></div>${actionButton("Cerrar", "close-share")}</div>${content}<p class="qarta-builder-modal__status" data-qarta-share-status role="status" aria-live="polite"></p></article>`;
+  }
+
+  function openShareDialog(restaurant) {
+    if (!restaurant) return;
+    activeShareRestaurant = restaurant;
+    renderShareDialog();
+    if (typeof shareDialog.showModal === "function") shareDialog.showModal();
+    else shareDialog.setAttribute("open", "");
+  }
+
+  function closeShareDialog() {
+    if (typeof shareDialog.close === "function" && shareDialog.open) shareDialog.close();
+    else shareDialog.removeAttribute("open");
+    activeShareRestaurant = null;
+  }
+
+  async function copyShareLink() {
+    if (!activeShareRestaurant) return;
+    const url = publicUrlFor(activeShareRestaurant);
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const helper = document.createElement("textarea");
+        helper.value = url;
+        helper.setAttribute("readonly", "");
+        helper.style.position = "fixed";
+        helper.style.opacity = "0";
+        document.body.append(helper);
+        helper.select();
+        const copied = document.execCommand?.("copy");
+        helper.remove();
+        if (!copied) throw new Error("clipboard-unavailable");
+      }
+      shareStatus("Enlace copiado.");
+    } catch {
+      shareStatus("No pudimos copiar el enlace. Podés seleccionarlo manualmente.", "error");
+    }
+  }
+
+  function shareWithWhatsApp() {
+    if (!activeShareRestaurant) return;
+    const url = publicUrlFor(activeShareRestaurant);
+    const message = `Mirá la carta de ${activeShareRestaurant.brand.name}:\n${url}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+  }
+
+  function downloadQrAsset() {
+    if (!activeShareRestaurant) return;
+    const asset = qrAssetFor(activeShareRestaurant);
+    if (!asset) {
+      shareStatus("La descarga sólo está disponible para un asset QR local.", "error");
+      return;
+    }
+    const link = document.createElement("a");
+    link.href = asset;
+    link.download = `${activeShareRestaurant.slug}-qr`;
+    link.hidden = true;
+    document.body.append(link);
+    link.click();
+    link.remove();
+  }
+
+  async function importRestaurant(file) {
+    if (!file) return;
+    if (file.size > MAX_IMPORT_BYTES) {
+      setFeedback("error", "El archivo supera el límite de 1 MB para una QARTA.");
+      return;
+    }
+    if (file.type && !["application/json", "text/json"].includes(file.type) && !/\.json$/i.test(file.name)) {
+      setFeedback("error", "Elegí un archivo JSON de QARTA.");
+      return;
+    }
+    try {
+      const payload = JSON.parse(await file.text());
+      const errors = importValidationErrors(payload);
+      if (errors.length) {
+        setFeedback("error", "No pudimos importar esta QARTA.", errors);
+        return;
+      }
+      const imported = normalizeRestaurant(payload.restaurant);
+      const originalSlug = imported.slug;
+      imported.id = createRestaurantId();
+      imported.slug = nextAvailableSlug(originalSlug);
+      if (imported.slug !== originalSlug) imported.contact.publicUrl = generatedPublicUrl(imported.slug);
+      imported.qr.target = imported.qr.target || imported.contact.publicUrl;
+      draft = clone(imported);
+      editingSlug = "";
+      setFeedback("success", imported.slug === originalSlug ? "La QARTA se cargó para revisión. Guardala cuando esté lista." : `La QARTA se cargó con el slug disponible “${imported.slug}”. Revisala y guardala.`);
+      render();
+      schedulePreview(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch {
+      setFeedback("error", "No pudimos leer ese archivo JSON.");
+    } finally {
+      importInput.value = "";
+    }
   }
 
   function addCategory() {
@@ -574,6 +862,10 @@
     const action = button.dataset.builderAction;
     const index = Number(button.dataset.index);
     const productIndex = Number(button.dataset.productIndex);
+    if (action === "import") {
+      importInput.click();
+      return;
+    }
     if (action === "new") {
       draft = createRestaurant();
       editingSlug = "";
@@ -598,6 +890,24 @@
       if (slug) window.open(`index.html?r=${encodeURIComponent(slug)}`, "_blank", "noopener,noreferrer");
       return;
     }
+    if (action === "duplicate") {
+      duplicateRestaurant(savedRestaurants.find((item) => item.slug === button.dataset.slug));
+      return;
+    }
+    if (action === "share") {
+      openShareDialog(savedRestaurants.find((item) => item.slug === button.dataset.slug));
+      return;
+    }
+    if (action === "export") {
+      exportRestaurant(savedRestaurants.find((item) => item.slug === button.dataset.slug));
+      return;
+    }
+    if (action === "close-share") { closeShareDialog(); return; }
+    if (action === "open-share") { renderShareDialog(); return; }
+    if (action === "open-qr") { renderShareDialog("qr"); return; }
+    if (action === "copy-link") { copyShareLink(); return; }
+    if (action === "share-whatsapp") { shareWithWhatsApp(); return; }
+    if (action === "download-qr") { downloadQrAsset(); return; }
     if (action === "delete") {
       const restaurant = savedRestaurants.find((item) => item.slug === button.dataset.slug);
       if (!restaurant || !window.confirm(`¿Eliminar “${restaurant.brand.name || restaurant.slug}”? Esta acción sólo borra su configuración local.`)) return;
@@ -641,15 +951,24 @@
     const control = event.target.closest("[data-field]");
     if (!control) return;
     setAtPath(draft, control.dataset.field, valueFromControl(control));
-    feedback = { type: "", message: "", errors: [] };
+    const message = controlFeedback(control);
+    if (message) setFeedback("error", message);
+    else setFeedback("", "");
     schedulePreview();
   });
   form.addEventListener("change", (event) => {
     const control = event.target.closest("[data-field]");
     if (!control) return;
     setAtPath(draft, control.dataset.field, valueFromControl(control));
-    feedback = { type: "", message: "", errors: [] };
+    const message = controlFeedback(control);
+    if (message) setFeedback("error", message);
+    else setFeedback("", "");
     schedulePreview();
+  });
+
+  importInput.addEventListener("change", () => { importRestaurant(importInput.files?.[0]); });
+  shareDialog.addEventListener("click", (event) => {
+    if (event.target === shareDialog) closeShareDialog();
   });
 
   render();
