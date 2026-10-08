@@ -166,6 +166,8 @@
   window.QARTA_CONFIG = {
     defaultRestaurantSlug: "sushi-demo",
     storagePrefix: "nodo_qarta_cart_v1",
+    builderStorageKey: "nodo_qarta_builder_v1",
+    builderPreviewStorageKey: "nodo_qarta_builder_preview_v1",
   };
   window.QARTA_RESTAURANTS = {
     [sushiDemo.slug]: sushiDemo,

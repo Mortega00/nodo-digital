@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#202522">
+  <title>QARTA Builder | NODO</title>
+  <meta name="description" content="Herramienta interna para configurar cartas digitales QARTA.">
+  <link rel="stylesheet" href="qarta-builder.css">
+  <script defer src="qarta-data.js"></script>
+  <script defer src="qarta-builder.js"></script>
+</head>
+<body class="qarta-builder-site">
+  <a class="qarta-builder-skip" href="#builder-editor">Saltar al editor</a>
+  <header class="qarta-builder-header">
+    <div class="qarta-builder-header__inner">
+      <a class="qarta-builder-brand" href="/" aria-label="NODO, inicio">
+        <span aria-hidden="true">N</span>
+        <strong>QARTA <small>BUILDER</small></strong>
+      </a>
+      <div class="qarta-builder-header__actions">
+        <button class="qarta-builder-button qarta-builder-button--quiet" type="button" data-builder-action="new">Nuevo comercio</button>
+        <button class="qarta-builder-button" type="button" data-builder-action="save">Guardar QARTA</button>
+      </div>
+    </div>
+  </header>
+  <main class="qarta-builder-main" id="builder-editor">
+    <div class="qarta-builder-workspace">
+      <section class="qarta-builder-editor" aria-label="Editor de comercio">
+        <div id="qarta-builder-library"></div>
+        <div id="qarta-builder-notice" class="qarta-builder-notice" role="status" aria-live="polite"></div>
+        <form id="qarta-builder-form" novalidate></form>
+      </section>
+      <aside class="qarta-builder-preview" aria-label="Vista previa en vivo">
+        <div class="qarta-builder-preview__head">
+          <div>
+            <p>VISTA PREVIA</p>
+            <strong>Motor público QARTA</strong>
+          </div>
+          <span>Sin guardar</span>
+        </div>
+        <div class="qarta-builder-preview__frame">
+          <iframe id="qarta-builder-preview" title="Vista previa de la carta QARTA" loading="eager"></iframe>
+        </div>
+      </aside>
+    </div>
+  </main>
+</body>
+</html>

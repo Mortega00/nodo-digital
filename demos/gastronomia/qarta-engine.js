@@ -5,9 +5,14 @@
   const dialog = document.getElementById("qarta-dialog");
   const announcer = document.getElementById("qarta-announcer");
   const config = window.QARTA_CONFIG || {};
-  const restaurants = window.QARTA_RESTAURANTS || {};
+  const staticRestaurants = window.QARTA_RESTAURANTS || {};
   const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
   const money = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
+
+  const requestedSlug = new URLSearchParams(window.location.search).get("r");
+  const previewMode = new URLSearchParams(window.location.search).get("preview") === "1";
+  const builderStorageKey = config.builderStorageKey || "nodo_qarta_builder_v1";
+  const builderPreviewStorageKey = config.builderPreviewStorageKey || "nodo_qarta_builder_preview_v1";
 
   const escapeHtml = (value = "") => String(value)
     .replaceAll("&", "&amp;")
@@ -17,7 +22,160 @@
     .replaceAll("'", "&#039;");
   const formatMoney = (value) => money.format(Number(value) || 0);
   const cssVariableName = (name) => String(name).replace(/[A-Z]/g, (character) => `-${character.toLowerCase()}`);
+  const presentationOptions = {
+    skin: new Set(["sushi-editorial", "direct"]),
+    heroLayout: new Set(["plate", "stacked"]),
+    cardLayout: new Set(["image-led", "compact"]),
+    density: new Set(["airy", "compact"]),
+  };
+  const colorKeys = new Set(["ink", "paper", "paperStrong", "accent", "accentDeep", "warm", "line"]);
+  const safeColor = (value) => /^#[0-9a-f]{6}$/i.test(String(value || "").trim()) ? String(value).trim() : "";
+  const safeUrl = (value = "") => {
+    const source = String(value).trim();
+    if (!source || /^(?:javascript|data|vbscript):/i.test(source)) return "";
+    try {
+      const parsed = new URL(source, window.location.href);
+      return ["http:", "https:"].includes(parsed.protocol) ? source : "";
+    } catch {
+      return "";
+    }
+  };
   const toDate = (value) => (value ? new Date(`${value}T00:00:00`) : null);
+  const isRecord = (value) => Boolean(value) && typeof value === "object" && !Array.isArray(value);
+  const isValidSlug = (value) => typeof value === "string" && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
+  const runtimeText = (value, max = 500) => typeof value === "string" ? value.replace(/[\u0000-\u001F\u007F]/g, " ").trim().slice(0, max) : "";
+  const runtimePrice = (value) => {
+    const price = Number(value);
+    return Number.isFinite(price) && price >= 0 ? price : 0;
+  };
+
+  function normalizeRuntimeRestaurant(source) {
+    if (!isRecord(source)
+      || !isValidSlug(source.slug)
+      || !isRecord(source.brand)
+      || !isRecord(source.presentation)
+      || !isRecord(source.contact)
+      || !isRecord(source.hero)
+      || !isRecord(source.copy)
+      || !Array.isArray(source.categories)
+      || !Array.isArray(source.products)
+      || !Array.isArray(source.promotions)
+      || !Array.isArray(source.schedule)) return null;
+
+    return {
+      ...source,
+      slug: source.slug,
+      brand: {
+        ...source.brand,
+        name: runtimeText(source.brand.name, 80),
+        shortName: runtimeText(source.brand.shortName, 12),
+        descriptor: runtimeText(source.brand.descriptor, 100),
+        tagline: runtimeText(source.brand.tagline, 160),
+        description: runtimeText(source.brand.description, 360),
+      },
+      presentation: {
+        ...source.presentation,
+        colors: isRecord(source.presentation.colors) ? source.presentation.colors : {},
+      },
+      contact: {
+        ...source.contact,
+        whatsapp: runtimeText(source.contact.whatsapp, 24),
+        locationLabel: runtimeText(source.contact.locationLabel, 140),
+        pickupLabel: runtimeText(source.contact.pickupLabel, 140),
+        publicUrl: runtimeText(source.contact.publicUrl, 500),
+        instagramUrl: runtimeText(source.contact.instagramUrl, 500),
+      },
+      hero: {
+        ...source.hero,
+        eyebrow: runtimeText(source.hero.eyebrow, 90),
+        title: runtimeText(source.hero.title, 160),
+        copy: runtimeText(source.hero.copy, 360),
+        image: runtimeText(source.hero.image, 500),
+        imageAlt: runtimeText(source.hero.imageAlt, 180),
+        primaryCta: runtimeText(source.hero.primaryCta, 70),
+        secondaryCta: runtimeText(source.hero.secondaryCta, 70),
+      },
+      copy: source.copy,
+      categories: source.categories.filter(isRecord).map((category) => ({
+        ...category,
+        id: runtimeText(category.id, 60),
+        label: runtimeText(category.label, 80),
+        description: runtimeText(category.description, 160),
+      })),
+      products: source.products.filter(isRecord).map((product) => ({
+        ...product,
+        id: runtimeText(product.id, 60),
+        name: runtimeText(product.name, 100),
+        description: runtimeText(product.description, 360),
+        category: runtimeText(product.category, 60),
+        price: runtimePrice(product.price),
+        image: runtimeText(product.image, 500),
+        imageAlt: runtimeText(product.imageAlt, 180),
+        tags: Array.isArray(product.tags) ? product.tags.map((tag) => runtimeText(tag, 40)).filter(Boolean).slice(0, 10) : [],
+        variants: Array.isArray(product.variants) ? product.variants.filter(isRecord).map((variant) => ({
+          ...variant,
+          id: runtimeText(variant.id, 60),
+          label: runtimeText(variant.label, 90),
+          priceDelta: runtimePrice(variant.priceDelta),
+        })) : [],
+        extras: Array.isArray(product.extras) ? product.extras.filter(isRecord).map((extra) => ({
+          ...extra,
+          id: runtimeText(extra.id, 60),
+          label: runtimeText(extra.label, 90),
+          price: runtimePrice(extra.price),
+        })) : [],
+      })),
+      promotions: source.promotions.filter(isRecord).map((promotion) => ({
+        ...promotion,
+        id: runtimeText(promotion.id, 60),
+        eyebrow: runtimeText(promotion.eyebrow, 90),
+        title: runtimeText(promotion.title, 160),
+        copy: runtimeText(promotion.copy, 360),
+        note: runtimeText(promotion.note, 220),
+        image: runtimeText(promotion.image, 500),
+        imageAlt: runtimeText(promotion.imageAlt, 180),
+      })),
+      schedule: source.schedule.filter(isRecord).map((entry) => ({
+        ...entry,
+        days: runtimeText(entry.days, 70),
+        hours: runtimeText(entry.hours, 70),
+      })),
+      meta: isRecord(source.meta) ? source.meta : {},
+      qr: isRecord(source.qr) ? source.qr : {},
+    };
+  }
+
+  const staticSlugs = new Set(Object.keys(staticRestaurants));
+  const readStoredRestaurants = () => {
+    try {
+      const parsed = JSON.parse(window.localStorage.getItem(builderStorageKey) || "{}");
+      const items = Array.isArray(parsed) ? parsed : parsed?.restaurants;
+      if (!Array.isArray(items)) return {};
+      return items.reduce((collection, item) => {
+        const restaurant = normalizeRuntimeRestaurant(item);
+        if (!restaurant || staticSlugs.has(restaurant.slug) || collection[restaurant.slug]) return collection;
+        collection[restaurant.slug] = restaurant;
+        return collection;
+      }, {});
+    } catch {
+      return {};
+    }
+  };
+  const readPreviewRestaurant = () => {
+    try {
+      return normalizeRuntimeRestaurant(JSON.parse(window.sessionStorage.getItem(builderPreviewStorageKey) || "null"));
+    } catch {
+      return null;
+    }
+  };
+  const selectedSlug = requestedSlug || config.defaultRestaurantSlug;
+  const fallbackRestaurant = staticRestaurants[config.defaultRestaurantSlug] || Object.values(staticRestaurants)[0] || null;
+  const builderRestaurants = readStoredRestaurants();
+  const previewRestaurant = previewMode ? readPreviewRestaurant() : null;
+  const previewRecovered = previewMode && !previewRestaurant;
+  const restaurant = previewMode
+    ? (previewRestaurant || fallbackRestaurant)
+    : (staticRestaurants[selectedSlug] || builderRestaurants[selectedSlug]);
   const DEFAULT_COPY = {
     heroCaption: "Carta de la semana",
     navigation: {
@@ -76,9 +234,6 @@
     window.setTimeout(() => { announcer.textContent = message; }, 30);
   };
 
-  const requestedSlug = new URLSearchParams(window.location.search).get("r");
-  const restaurant = restaurants[requestedSlug || config.defaultRestaurantSlug];
-
   if (!app) return;
 
   if (!restaurant) {
@@ -123,11 +278,13 @@
 
   function applyPresentation() {
     const colors = restaurant.presentation?.colors || {};
-    document.body.dataset.qartaSkin = restaurant.presentation?.skin || "default";
-    document.body.dataset.qartaHero = restaurant.presentation?.heroLayout || "default";
-    document.body.dataset.qartaCards = restaurant.presentation?.cardLayout || "default";
-    document.body.dataset.qartaDensity = restaurant.presentation?.density || "default";
-    Object.entries(colors).forEach(([name, value]) => document.documentElement.style.setProperty(`--qarta-${cssVariableName(name)}`, value));
+    Object.entries(presentationOptions).forEach(([key, options]) => {
+      document.body.dataset[`qarta${key[0].toUpperCase()}${key.slice(1)}`] = options.has(restaurant.presentation?.[key]) ? restaurant.presentation[key] : "default";
+    });
+    Object.entries(colors).forEach(([name, value]) => {
+      const color = colorKeys.has(name) ? safeColor(value) : "";
+      if (color) document.documentElement.style.setProperty(`--qarta-${cssVariableName(name)}`, color);
+    });
   }
 
   function applyMetadata() {
@@ -172,6 +329,7 @@
   }
 
   function readCart() {
+    if (previewMode) return [];
     try {
       let discarded = false;
       const cart = normalizeCart(JSON.parse(window.localStorage.getItem(storageKey) || "[]"), () => { discarded = true; });
@@ -194,6 +352,7 @@
   }
 
   function persistCart() {
+    if (previewMode) return;
     try {
       window.localStorage.setItem(storageKey, JSON.stringify(state.cart));
     } catch {
@@ -270,7 +429,7 @@
   }
 
   function media(src, alt, className = "", eager = false) {
-    const source = String(src || "").trim();
+    const source = safeUrl(src);
     return `<div class="qarta-media ${className}">
       ${source ? `<img src="${escapeHtml(source)}" alt="${escapeHtml(alt || "")}" ${eager ? "fetchpriority=\"high\"" : "loading=\"lazy\""} decoding="async" data-qarta-image>` : ""}
       <span class="qarta-media__fallback" aria-hidden="true">Imagen próximamente</span>
@@ -341,11 +500,9 @@
     const featured = products.filter((product) => product.featured).slice(0, 4);
     const promotions = activePromotions();
     const howSteps = copySteps();
-    const colorVars = Object.entries(restaurant.presentation?.colors || {}).map(([name, value]) => `--qarta-${cssVariableName(name)}:${escapeHtml(value)}`).join(";");
-    app.style.cssText = colorVars;
     app.innerHTML = `
       <div class="qarta-demo-strip" role="note">
-        <div class="shell">Demo gastronómica de NODO · Marca, carta, precios y horarios ficticios.</div>
+        <div class="shell">${previewRecovered ? "La vista previa no está disponible; mostramos la carta base de forma segura." : "Demo gastronómica de NODO · Marca, carta, precios y horarios ficticios."}</div>
       </div>
       <header class="qarta-header" data-nav-open="false">
         <div class="shell qarta-header__inner">
@@ -432,7 +589,7 @@
            <div class="shell qarta-local">
              <div><p class="qarta-kicker">${escapeHtml(copyValue(["local", "eyebrow"]))}</p><h2 id="qarta-local-title">${escapeHtml(restaurant.contact.locationLabel || "Nuestro local")}</h2><p>${escapeHtml(copyValue(["local", "copy"]))}</p></div>
              <div class="qarta-local__details"><div><strong>${escapeHtml(copyValue(["local", "scheduleTitle"]))}</strong>${(restaurant.schedule || []).map((entry) => `<span>${escapeHtml(entry.days)} <b>${escapeHtml(entry.hours)}</b></span>`).join("")}</div>
-               <div class="qarta-qr-slot">${restaurant.qr?.asset ? `<img src="${escapeHtml(restaurant.qr.asset)}" alt="Código QR para abrir la carta" loading="lazy">` : `<p><strong>${escapeHtml(restaurant.qr?.label || "Link de la carta")}</strong><a href="${escapeHtml(restaurant.qr?.target || restaurant.contact.publicUrl || "#")}" target="_blank" rel="noopener noreferrer">${escapeHtml(restaurant.qr?.target || restaurant.contact.publicUrl || "")}</a><small>${escapeHtml(copyValue(["local", "qrMissingNote"]))}</small></p>`}</div>
+               <div class="qarta-qr-slot">${safeUrl(restaurant.qr?.asset) ? `<img src="${escapeHtml(safeUrl(restaurant.qr.asset))}" alt="Código QR para abrir la carta" loading="lazy">` : `<p><strong>${escapeHtml(restaurant.qr?.label || "Link de la carta")}</strong><a href="${escapeHtml(safeUrl(restaurant.qr?.target || restaurant.contact.publicUrl) || "#")}" target="_blank" rel="noopener noreferrer">${escapeHtml(restaurant.qr?.target || restaurant.contact.publicUrl || "")}</a><small>${escapeHtml(copyValue(["local", "qrMissingNote"]))}</small></p>`}</div>
             </div>
           </div>
         </section>
@@ -543,6 +700,10 @@
   }
 
   function handleCheckout(form) {
+    if (previewMode) {
+      announce("Vista previa: el pedido no se envía desde el Builder.");
+      return;
+    }
     if (pruneCart() || !state.cart.length) {
       renderCartDialog();
       announce(state.cartNotice || "Tu pedido está vacío.");
