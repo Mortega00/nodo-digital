@@ -34,6 +34,12 @@
     cardLayout: ["image-led", "compact"],
     density: ["airy", "compact"],
   };
+  const PRESENTATION_LABELS = {
+    skin: { "sushi-editorial": "Editorial", direct: "Directo" },
+    heroLayout: { plate: "Texto e imagen lateral", stacked: "Imagen arriba" },
+    cardLayout: { "image-led": "Imagen protagonista", compact: "Compacto" },
+    density: { airy: "Con aire", compact: "Más compacto" },
+  };
   const COLOR_LABELS = {
     ink: "Tinta",
     paper: "Fondo",
@@ -150,6 +156,7 @@
   };
   const statusLabel = (status) => ({ draft: "Borrador", active: "Activo", inactive: "Inactivo" })[status] || "Borrador";
   const selectOptions = (items, selected) => items.map((item) => `<option value="${escapeHtml(item)}" ${item === selected ? "selected" : ""}>${escapeHtml(item)}</option>`).join("");
+  const presentationOptions = (key, selected) => PRESENTATION_OPTIONS[key].map((item) => `<option value="${escapeHtml(item)}" ${item === selected ? "selected" : ""}>${escapeHtml(PRESENTATION_LABELS[key]?.[item] || item)}</option>`).join("");
   const fieldId = (path) => `qarta-builder-${path.replace(/[^a-z0-9]+/gi, "-")}`;
 
   function copyDefaults() {
@@ -383,11 +390,11 @@
 
   function renderPresentation() {
     const colors = Object.entries(COLOR_LABELS).map(([key, label]) => inputField(label, `presentation.colors.${key}`, draft.presentation.colors[key], { type: "color", valueType: "color" })).join("");
-    return section("builder-presentation", "Presentación", "Opciones seguras que entiende QARTA.", `<div class="qarta-builder-fields">
-      ${inputField("Skin", "presentation.skin", draft.presentation.skin, { type: "select", options: selectOptions(PRESENTATION_OPTIONS.skin, draft.presentation.skin) })}
-      ${inputField("Hero", "presentation.heroLayout", draft.presentation.heroLayout, { type: "select", options: selectOptions(PRESENTATION_OPTIONS.heroLayout, draft.presentation.heroLayout) })}
-      ${inputField("Cards", "presentation.cardLayout", draft.presentation.cardLayout, { type: "select", options: selectOptions(PRESENTATION_OPTIONS.cardLayout, draft.presentation.cardLayout) })}
-      ${inputField("Densidad", "presentation.density", draft.presentation.density, { type: "select", options: selectOptions(PRESENTATION_OPTIONS.density, draft.presentation.density) })}
+    return section("builder-presentation", "Diseño", "Elegí cómo se presenta la carta. No cambia productos ni pedidos.", `<div class="qarta-builder-fields">
+      ${inputField("Estilo visual", "presentation.skin", draft.presentation.skin, { type: "select", options: presentationOptions("skin", draft.presentation.skin) })}
+      ${inputField("Encabezado", "presentation.heroLayout", draft.presentation.heroLayout, { type: "select", options: presentationOptions("heroLayout", draft.presentation.heroLayout) })}
+      ${inputField("Productos", "presentation.cardLayout", draft.presentation.cardLayout, { type: "select", options: presentationOptions("cardLayout", draft.presentation.cardLayout) })}
+      ${inputField("Espaciado", "presentation.density", draft.presentation.density, { type: "select", options: presentationOptions("density", draft.presentation.density) })}
     </div><div class="qarta-builder-color-grid">${colors}</div>`, false);
   }
 
