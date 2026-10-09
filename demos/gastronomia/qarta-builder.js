@@ -29,15 +29,15 @@
     line: "#d4cdbd",
   };
   const PRESENTATION_OPTIONS = {
-    skin: ["sushi-editorial", "direct"],
-    heroLayout: ["plate", "stacked"],
-    cardLayout: ["image-led", "compact"],
+    skin: ["sushi-editorial", "direct", "press"],
+    heroLayout: ["plate", "stacked", "cover"],
+    cardLayout: ["image-led", "compact", "bulletin"],
     density: ["airy", "compact"],
   };
   const PRESENTATION_LABELS = {
-    skin: { "sushi-editorial": "Editorial", direct: "Directo" },
-    heroLayout: { plate: "Texto e imagen lateral", stacked: "Imagen arriba" },
-    cardLayout: { "image-led": "Imagen protagonista", compact: "Compacto" },
+    skin: { "sushi-editorial": "Editorial", direct: "Directo", press: "Prensa editorial" },
+    heroLayout: { plate: "Texto e imagen lateral", stacked: "Imagen arriba", cover: "Portada" },
+    cardLayout: { "image-led": "Imagen protagonista", compact: "Compacto", bulletin: "Boletín editorial" },
     density: { airy: "Con aire", compact: "Más compacto" },
   };
   const COLOR_LABELS = {
@@ -118,6 +118,7 @@
     if (!source || /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(source)) return "";
     return safeUrl(source);
   };
+  const safeAnchor = (value) => /^#[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(String(value || "").trim()) ? String(value).trim() : "";
   const safeWhatsApp = (value) => String(value || "").replace(/\D/g, "").slice(0, 18);
   const tagsFromValue = (value) => String(value || "")
     .split(",")
@@ -159,9 +160,38 @@
   const presentationOptions = (key, selected) => PRESENTATION_OPTIONS[key].map((item) => `<option value="${escapeHtml(item)}" ${item === selected ? "selected" : ""}>${escapeHtml(PRESENTATION_LABELS[key]?.[item] || item)}</option>`).join("");
   const fieldId = (path) => `qarta-builder-${path.replace(/[^a-z0-9]+/gi, "-")}`;
 
+  function normalizeEditorialItem(source) {
+    if (!isRecord(source)) return null;
+    return {
+      id: cleanText(source.id, 60),
+      number: cleanText(source.number, 20),
+      eyebrow: cleanText(source.eyebrow, 90),
+      title: cleanText(source.title, 160),
+      copy: cleanText(source.copy, 360),
+      image: safeUrl(source.image),
+      imageAlt: cleanText(source.imageAlt, 180),
+    };
+  }
+
+  function normalizeEditorial(source) {
+    if (!isRecord(source)) return undefined;
+    const editionToday = normalizeEditorialItem(source.editionToday);
+    const place = normalizeEditorialItem(source.place);
+    const readings = Array.isArray(source.readings)
+      ? source.readings.map(normalizeEditorialItem).filter((item) => item?.title).slice(0, 6)
+      : [];
+    const edition = isRecord(source.edition) ? {
+      city: cleanText(source.edition.city, 70),
+      issue: cleanText(source.edition.issue, 70),
+    } : undefined;
+    if (!edition && !editionToday?.title && !place?.title && !readings.length) return undefined;
+    return { edition, editionToday, readings, place };
+  }
+
   function copyDefaults() {
     return {
       heroCaption: "Carta de la semana",
+      navigation: { menu: "Carta", promotions: "Promociones", how: "Cómo pedir", local: "Información" },
       categories: { eyebrow: "EXPLORÁ LA CARTA", title: "Elegí lo que querés pedir." },
       menu: {
         eyebrow: "LA CARTA",
@@ -199,7 +229,7 @@
       },
       contact: { whatsapp: "", locationLabel: "", pickupLabel: "", publicUrl: "", instagramUrl: "" },
       schedule: [],
-      hero: { eyebrow: "CARTA DIGITAL", title: "", copy: "", image: "", imageAlt: "", primaryCta: "Ver la carta", secondaryCta: "Cómo pedir" },
+      hero: { eyebrow: "CARTA DIGITAL", title: "", copy: "", image: "", imageAlt: "", primaryCta: "Ver la carta", secondaryCta: "Cómo pedir", secondaryTarget: "" },
       copy: copyDefaults(),
       categories: [],
       promotions: [],
@@ -248,9 +278,19 @@
         imageAlt: cleanText(input.hero?.imageAlt, 180),
         primaryCta: cleanText(input.hero?.primaryCta, 70) || base.hero.primaryCta,
         secondaryCta: cleanText(input.hero?.secondaryCta, 70) || base.hero.secondaryCta,
+        secondaryTarget: safeAnchor(input.hero?.secondaryTarget),
       },
       copy: {
         heroCaption: cleanText(input.copy?.heroCaption, 90),
+        navigation: {
+          cover: cleanText(input.copy?.navigation?.cover, 70),
+          menu: cleanText(input.copy?.navigation?.menu, 70),
+          readings: cleanText(input.copy?.navigation?.readings, 70),
+          place: cleanText(input.copy?.navigation?.place, 70),
+          promotions: cleanText(input.copy?.navigation?.promotions, 70),
+          how: cleanText(input.copy?.navigation?.how, 70),
+          local: cleanText(input.copy?.navigation?.local, 70),
+        },
         categories: {
           eyebrow: cleanText(input.copy?.categories?.eyebrow, 90),
           title: cleanText(input.copy?.categories?.title, 160),
@@ -262,7 +302,11 @@
           emptySearch: cleanText(input.copy?.menu?.emptySearch, 180),
           productCta: cleanText(input.copy?.menu?.productCta, 70),
         },
-        how: { eyebrow: cleanText(input.copy?.how?.eyebrow, 90), title: cleanText(input.copy?.how?.title, 160) },
+        how: {
+          eyebrow: cleanText(input.copy?.how?.eyebrow, 90),
+          title: cleanText(input.copy?.how?.title, 160),
+          steps: Array.isArray(input.copy?.how?.steps) ? input.copy.how.steps.map((step) => ({ title: cleanText(step?.title, 140), copy: cleanText(step?.copy, 280) })).filter((step) => step.title || step.copy).slice(0, 3) : [],
+        },
         local: { eyebrow: cleanText(input.copy?.local?.eyebrow, 90), copy: cleanText(input.copy?.local?.copy, 360) },
         product: { featured: cleanText(input.copy?.product?.featured, 70), addCta: cleanText(input.copy?.product?.addCta, 70) },
       },
@@ -306,6 +350,7 @@
           price: normalizedPrice(choice?.price),
         })).slice(0, 20) : [],
       })).slice(0, 200) : [],
+      editorial: normalizeEditorial(input.editorial),
     };
     normalized.meta = {
       title: cleanText(input.meta?.title, 160) || `${normalized.brand.name || "QARTA"} · Carta digital | NODO`,
@@ -633,6 +678,11 @@
       || !restaurant.products.every((product) => isRecord(product) && Array.isArray(product.variants) && Array.isArray(product.extras) && Array.isArray(product.tags) && product.variants.every(isRecord) && product.extras.every(isRecord))
       || !restaurant.promotions.every(isRecord)
       || !restaurant.schedule.every(isRecord)) return ["El archivo contiene elementos internos con un formato no válido."];
+    if (restaurant.editorial !== undefined && (!isRecord(restaurant.editorial)
+      || (restaurant.editorial.readings !== undefined && (!Array.isArray(restaurant.editorial.readings) || !restaurant.editorial.readings.every(isRecord)))
+      || (restaurant.editorial.editionToday !== undefined && !isRecord(restaurant.editorial.editionToday))
+      || (restaurant.editorial.place !== undefined && !isRecord(restaurant.editorial.place))
+      || (restaurant.editorial.edition !== undefined && !isRecord(restaurant.editorial.edition)))) return ["Los bloques editoriales no tienen un formato válido."];
     if (restaurant.categories.length > 40 || restaurant.products.length > 200 || restaurant.promotions.length > 20 || restaurant.schedule.length > 14) errors.push("El archivo supera los límites razonables de categorías, productos, promociones u horarios.");
     restaurant.products.forEach((product, index) => {
       if (!isRecord(product) || (Array.isArray(product.variants) && product.variants.length > 20) || (Array.isArray(product.extras) && product.extras.length > 20) || (Array.isArray(product.tags) && product.tags.length > 10)) errors.push(`El producto ${index + 1} supera un límite permitido o no tiene un formato válido.`);
@@ -649,6 +699,10 @@
     const urls = [restaurant.hero.image, restaurant.meta?.image, restaurant.contact.publicUrl, restaurant.contact.instagramUrl, restaurant.qr?.target];
     restaurant.products.forEach((product) => urls.push(product?.image));
     restaurant.promotions.forEach((promotion) => urls.push(promotion?.image));
+    if (restaurant.editorial) {
+      urls.push(restaurant.editorial.editionToday?.image, restaurant.editorial.place?.image);
+      (restaurant.editorial.readings || []).forEach((reading) => urls.push(reading?.image));
+    }
     if (urls.some((url) => !isSafeOptionalUrl(url))) errors.push("El archivo contiene una URL no permitida.");
     if (restaurant.qr?.asset && !safeLocalAsset(restaurant.qr.asset)) errors.push("El asset QR debe ser una ruta local segura.");
     if (containsMarkup(restaurant)) errors.push("El archivo contiene HTML no permitido.");

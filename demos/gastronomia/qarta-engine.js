@@ -23,9 +23,9 @@
   const formatMoney = (value) => money.format(Number(value) || 0);
   const cssVariableName = (name) => String(name).replace(/[A-Z]/g, (character) => `-${character.toLowerCase()}`);
   const presentationOptions = {
-    skin: new Set(["sushi-editorial", "direct"]),
-    heroLayout: new Set(["plate", "stacked"]),
-    cardLayout: new Set(["image-led", "compact"]),
+    skin: new Set(["sushi-editorial", "direct", "press"]),
+    heroLayout: new Set(["plate", "stacked", "cover"]),
+    cardLayout: new Set(["image-led", "compact", "bulletin"]),
     density: new Set(["airy", "compact"]),
   };
   const colorKeys = new Set(["ink", "paper", "paperStrong", "accent", "accentDeep", "warm", "line"]);
@@ -47,6 +47,33 @@
   const runtimePrice = (value) => {
     const price = Number(value);
     return Number.isFinite(price) && price >= 0 ? price : 0;
+  };
+  const safeAnchor = (value) => /^#[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(String(value || "").trim()) ? String(value).trim() : "";
+  const normalizeEditorialItem = (source) => {
+    if (!isRecord(source)) return null;
+    return {
+      ...source,
+      id: runtimeText(source.id, 60),
+      number: runtimeText(source.number, 20),
+      eyebrow: runtimeText(source.eyebrow, 90),
+      title: runtimeText(source.title, 160),
+      copy: runtimeText(source.copy, 360),
+      image: runtimeText(source.image, 500),
+      imageAlt: runtimeText(source.imageAlt, 180),
+    };
+  };
+  const normalizeEditorial = (source) => {
+    if (!isRecord(source)) return null;
+    const editionToday = normalizeEditorialItem(source.editionToday);
+    const place = normalizeEditorialItem(source.place);
+    const readings = Array.isArray(source.readings)
+      ? source.readings.map(normalizeEditorialItem).filter((item) => item?.title).slice(0, 6)
+      : [];
+    const edition = isRecord(source.edition) ? {
+      city: runtimeText(source.edition.city, 70),
+      issue: runtimeText(source.edition.issue, 70),
+    } : null;
+    return (edition || editionToday?.title || place?.title || readings.length) ? { edition, editionToday, readings, place } : null;
   };
 
   function normalizeRuntimeRestaurant(source) {
@@ -94,6 +121,7 @@
         imageAlt: runtimeText(source.hero.imageAlt, 180),
         primaryCta: runtimeText(source.hero.primaryCta, 70),
         secondaryCta: runtimeText(source.hero.secondaryCta, 70),
+        secondaryTarget: safeAnchor(source.hero.secondaryTarget),
       },
       copy: source.copy,
       categories: source.categories.filter(isRecord).map((category) => ({
@@ -140,6 +168,7 @@
         days: runtimeText(entry.days, 70),
         hours: runtimeText(entry.hours, 70),
       })),
+      editorial: normalizeEditorial(source.editorial),
       meta: isRecord(source.meta) ? source.meta : {},
       qr: isRecord(source.qr) ? source.qr : {},
     };
@@ -436,6 +465,35 @@
     </div>`;
   }
 
+  function editionTodaySection(editorial) {
+    const edition = editorial?.editionToday;
+    if (!edition?.title) return "";
+    return `<section class="qarta-section qarta-section--edition" id="edicion" aria-labelledby="qarta-edition-title">
+      <div class="shell qarta-edition-today">
+        <div class="qarta-edition-today__image">${media(edition.image, edition.imageAlt, "qarta-media--edition")}</div>
+        <div class="qarta-edition-today__copy"><p class="qarta-kicker">${escapeHtml(edition.eyebrow || "LA EDICIÓN DE HOY")}</p><h2 id="qarta-edition-title">${escapeHtml(edition.title)}</h2><p>${escapeHtml(edition.copy || "")}</p><a class="qarta-text-button" href="#carta">Ver la carta <span aria-hidden="true">↓</span></a></div>
+      </div>
+    </section>`;
+  }
+
+  function readingsSection(editorial) {
+    const readings = editorial?.readings || [];
+    if (!readings.length) return "";
+    return `<section class="qarta-section qarta-section--readings" id="lecturas" aria-labelledby="qarta-readings-title">
+      <div class="shell"><div class="qarta-section-heading qarta-section-heading--compact"><p class="qarta-kicker">LECTURAS</p><h2 id="qarta-readings-title">Una pausa también puede ser una página.</h2></div>
+        <div class="qarta-readings-grid">${readings.map((reading, index) => `<article class="qarta-reading"><div class="qarta-reading__media">${media(reading.image, reading.imageAlt, "qarta-media--reading")}</div><div class="qarta-reading__body"><span>${escapeHtml(reading.number || String(index + 1).padStart(2, "0"))}</span><h3>${escapeHtml(reading.title)}</h3><p>${escapeHtml(reading.copy || "")}</p></div></article>`).join("")}</div>
+      </div>
+    </section>`;
+  }
+
+  function placeSection(editorial) {
+    const place = editorial?.place;
+    if (!place?.title) return "";
+    return `<section class="qarta-section qarta-section--place" id="puesto" aria-labelledby="qarta-place-title">
+      <div class="shell qarta-place"><div class="qarta-place__copy"><p class="qarta-kicker">${escapeHtml(place.eyebrow || "EL PUESTO")}</p><h2 id="qarta-place-title">${escapeHtml(place.title)}</h2><p>${escapeHtml(place.copy || "")}</p></div><div class="qarta-place__image">${media(place.image, place.imageAlt, "qarta-media--place")}</div></div>
+    </section>`;
+  }
+
   function productCard(product) {
     const category = categoryById.get(product.category);
     const unavailable = product.available === false;
@@ -500,6 +558,9 @@
     const featured = products.filter((product) => product.featured).slice(0, 4);
     const promotions = activePromotions();
     const howSteps = copySteps();
+    const editorial = restaurant.editorial;
+    const hasEditorial = Boolean(editorial);
+    const secondaryTarget = safeAnchor(restaurant.hero.secondaryTarget) || "#como-pedir";
     app.innerHTML = `
       <div class="qarta-demo-strip" role="note">
         <div class="shell">${previewRecovered ? "La vista previa no está disponible; mostramos la carta base de forma segura." : "Demo gastronómica de NODO · Marca, carta, precios y horarios ficticios."}</div>
@@ -512,9 +573,12 @@
           </a>
           <button class="qarta-menu-toggle" type="button" data-action="toggle-nav" aria-expanded="false" aria-controls="qarta-navigation"><span></span><span></span><span></span><span class="sr-only">Abrir navegación</span></button>
           <nav class="qarta-navigation" id="qarta-navigation" aria-label="Navegación principal">
+            ${hasEditorial ? `<a href="#inicio" data-action="close-nav">${escapeHtml(copyValue(["navigation", "cover"]) || "Portada")}</a>` : ""}
             <a href="#carta" data-action="close-nav">${escapeHtml(copyValue(["navigation", "menu"]))}</a>
-            ${promotions.length ? `<a href="#promos" data-action="close-nav">${escapeHtml(copyValue(["navigation", "promotions"]))}</a>` : ""}
-            <a href="#como-pedir" data-action="close-nav">${escapeHtml(copyValue(["navigation", "how"]))}</a>
+            ${hasEditorial && editorial.readings?.length ? `<a href="#lecturas" data-action="close-nav">${escapeHtml(copyValue(["navigation", "readings"]) || "Lecturas")}</a>` : ""}
+            ${hasEditorial && editorial.place?.title ? `<a href="#puesto" data-action="close-nav">${escapeHtml(copyValue(["navigation", "place"]) || "El puesto")}</a>` : ""}
+            ${!hasEditorial && promotions.length ? `<a href="#promos" data-action="close-nav">${escapeHtml(copyValue(["navigation", "promotions"]))}</a>` : ""}
+            ${!hasEditorial ? `<a href="#como-pedir" data-action="close-nav">${escapeHtml(copyValue(["navigation", "how"]))}</a>` : ""}
             <a href="#local" data-action="close-nav">${escapeHtml(copyValue(["navigation", "local"]))}</a>
           </nav>
           <button class="qarta-cart-button" type="button" data-action="open-cart" aria-label="Abrir pedido, ${cartCount()} productos">
@@ -523,15 +587,16 @@
         </div>
       </header>
       <main>
-        <section class="qarta-hero" id="inicio">
+        <section class="qarta-hero${hasEditorial ? " qarta-hero--editorial" : ""}" id="inicio">
           <div class="shell qarta-hero__grid">
             <div class="qarta-hero__copy">
+              ${hasEditorial ? `<p class="qarta-hero__masthead">${escapeHtml(restaurant.brand.name)}</p>${editorial.edition ? `<p class="qarta-hero__issue"><span>${escapeHtml(editorial.edition.city || "")}</span><span>${escapeHtml(editorial.edition.issue || "")}</span></p>` : ""}` : ""}
               <p class="qarta-kicker">${escapeHtml(restaurant.hero.eyebrow || "")}</p>
               <h1>${escapeHtml(restaurant.hero.title || restaurant.brand.tagline)}</h1>
               <p class="qarta-hero__lead">${escapeHtml(restaurant.hero.copy || restaurant.brand.description || "")}</p>
               <div class="qarta-hero__actions">
                 <a class="qarta-button qarta-button--dark" href="#carta">${escapeHtml(restaurant.hero.primaryCta || "Ver carta")} <span aria-hidden="true">↓</span></a>
-                <a class="qarta-button qarta-button--quiet" href="#como-pedir">${escapeHtml(restaurant.hero.secondaryCta || "Cómo pedir")}</a>
+                <a class="qarta-button qarta-button--quiet" href="${escapeHtml(secondaryTarget)}">${escapeHtml(restaurant.hero.secondaryCta || "Cómo pedir")}</a>
               </div>
               <p class="qarta-hero__location">${escapeHtml(restaurant.contact.pickupLabel || restaurant.contact.locationLabel || "")}</p>
             </div>
@@ -541,6 +606,7 @@
              </div>
           </div>
         </section>
+        ${editionTodaySection(editorial)}
         <section class="qarta-section qarta-section--categories" aria-labelledby="qarta-categories-title">
           <div class="shell">
              <div class="qarta-section-heading qarta-section-heading--compact">
@@ -577,6 +643,8 @@
             ${media(promotion.image, promotion.imageAlt, "qarta-media--promo")}
           </article>`).join("")}</div>
         </section>` : ""}
+        ${readingsSection(editorial)}
+        ${placeSection(editorial)}
         <section class="qarta-section qarta-section--how" id="como-pedir" aria-labelledby="qarta-how-title">
            <div class="shell">
              <div class="qarta-section-heading"><p class="qarta-kicker">${escapeHtml(copyValue(["how", "eyebrow"]))}</p><h2 id="qarta-how-title">${escapeHtml(copyValue(["how", "title"]))}</h2></div>
@@ -768,6 +836,14 @@
     document.getElementById("carta")?.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
   }
 
+  function resolveInitialHash() {
+    const hash = safeAnchor(window.location.hash);
+    if (!hash) return;
+    window.requestAnimationFrame(() => {
+      document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: "auto", block: "start" });
+    });
+  }
+
   function chooseCategory(id) {
     state.activeCategory = id === "all" || categoryById.has(id) ? id : "all";
     syncMenu();
@@ -872,4 +948,5 @@
   applyPresentation();
   applyMetadata();
   renderPage();
+  resolveInitialHash();
 })();

@@ -85,10 +85,10 @@ body.qarta-site a { color: inherit; }
 .qarta-hero__caption { position: absolute; right: -13px; bottom: 28px; padding: 11px 15px; color: var(--qarta-ink); background: var(--qarta-paper); box-shadow: 0 10px 30px rgb(28 35 29 / 10%); font-size: .73rem; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; transform: rotate(-4deg); }
 
 /* Presentation API: generic alternatives for future restaurant configurations. */
-body.qarta-site[data-qarta-hero="stacked"] .qarta-hero__grid { grid-template-columns: minmax(0, 1fr); max-width: 860px; gap: clamp(30px, 4vw, 52px); }
-body.qarta-site[data-qarta-hero="stacked"] .qarta-hero__visual { order: -1; min-height: clamp(230px, 32vw, 420px); width: 100%; }
-body.qarta-site[data-qarta-hero="stacked"] .qarta-media--hero { border-radius: 16px; }
-body.qarta-site[data-qarta-hero="stacked"] .qarta-hero__caption { right: 18px; bottom: 18px; transform: none; }
+body.qarta-site[data-qarta-hero-layout="stacked"] .qarta-hero__grid { grid-template-columns: minmax(0, 1fr); max-width: 860px; gap: clamp(30px, 4vw, 52px); }
+body.qarta-site[data-qarta-hero-layout="stacked"] .qarta-hero__visual { order: -1; min-height: clamp(230px, 32vw, 420px); width: 100%; }
+body.qarta-site[data-qarta-hero-layout="stacked"] .qarta-media--hero { border-radius: 16px; }
+body.qarta-site[data-qarta-hero-layout="stacked"] .qarta-hero__caption { right: 18px; bottom: 18px; transform: none; }
 body.qarta-site[data-qarta-skin="direct"] .qarta-hero h1,
 body.qarta-site[data-qarta-skin="direct"] .qarta-section-heading h2,
 body.qarta-site[data-qarta-skin="direct"] .qarta-product-card h3 { font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-weight: 800; letter-spacing: -.06em; }
@@ -141,12 +141,12 @@ body.qarta-site[data-qarta-skin="direct"] .qarta-hero::before { width: min(42vw,
 .qarta-product-card--unavailable .qarta-media img { filter: grayscale(.65); opacity: .48; }
 .qarta-product-card__flag--unavailable { color: var(--qarta-ink); background: var(--qarta-paper); }
 .qarta-product-card__availability { display: inline-flex; align-self: flex-start; margin-top: 17px; color: color-mix(in srgb, var(--qarta-ink) 66%, transparent); font-size: .75rem; font-weight: 800; }
-body.qarta-site[data-qarta-cards="compact"] .qarta-product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--qarta-card-gap); }
-body.qarta-site[data-qarta-cards="compact"] .qarta-product-card { display: grid; grid-template-columns: minmax(108px, .72fr) minmax(0, 1.28fr); align-items: stretch; gap: 16px; padding: 12px; border: 1px solid var(--qarta-line); background: color-mix(in srgb, var(--qarta-paper-strong) 38%, transparent); }
-body.qarta-site[data-qarta-cards="compact"] .qarta-product-card__media { aspect-ratio: auto; min-height: 156px; }
-body.qarta-site[data-qarta-cards="compact"] .qarta-media--product { border-radius: 10px; }
-body.qarta-site[data-qarta-cards="compact"] .qarta-product-card__body { padding-top: 0; }
-body.qarta-site[data-qarta-cards="compact"] .qarta-text-button { margin-top: auto; padding-top: 14px; }
+body.qarta-site[data-qarta-card-layout="compact"] .qarta-product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--qarta-card-gap); }
+body.qarta-site[data-qarta-card-layout="compact"] .qarta-product-card { display: grid; grid-template-columns: minmax(108px, .72fr) minmax(0, 1.28fr); align-items: stretch; gap: 16px; padding: 12px; border: 1px solid var(--qarta-line); background: color-mix(in srgb, var(--qarta-paper-strong) 38%, transparent); }
+body.qarta-site[data-qarta-card-layout="compact"] .qarta-product-card__media { aspect-ratio: auto; min-height: 156px; }
+body.qarta-site[data-qarta-card-layout="compact"] .qarta-media--product { border-radius: 10px; }
+body.qarta-site[data-qarta-card-layout="compact"] .qarta-product-card__body { padding-top: 0; }
+body.qarta-site[data-qarta-card-layout="compact"] .qarta-text-button { margin-top: auto; padding-top: 14px; }
 .qarta-empty-state { padding: 45px 20px; border: 1px dashed var(--qarta-line); text-align: center; }
 .qarta-empty-state p { margin: 0; }
 
@@ -248,6 +248,113 @@ body.qarta-site[data-qarta-cards="compact"] .qarta-text-button { margin-top: aut
 
 .qarta-site :focus-visible { outline: 3px solid color-mix(in srgb, var(--qarta-warm) 78%, #fff); outline-offset: 3px; }
 
+/* Press is a presentation, not a second engine: it only restyles shared QARTA markup. */
+body.qarta-site[data-qarta-skin="press"] {
+  font-family: "Arial Narrow", "Roboto Condensed", "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: .005em;
+}
+body.qarta-site[data-qarta-skin="press"] .qarta-demo-strip { color: var(--qarta-paper); background: var(--qarta-ink); font-size: .62rem; letter-spacing: .12em; }
+body.qarta-site[data-qarta-skin="press"] .qarta-header { border-bottom: 2px solid var(--qarta-ink); background: color-mix(in srgb, var(--qarta-paper) 96%, transparent); }
+body.qarta-site[data-qarta-skin="press"] .qarta-header__inner { min-height: 74px; }
+body.qarta-site[data-qarta-skin="press"] .qarta-brand { gap: 9px; }
+body.qarta-site[data-qarta-skin="press"] .qarta-brand__mark { width: 33px; border-radius: 0; color: var(--qarta-paper); background: var(--qarta-accent); font-family: "Arial Black", Arial, sans-serif; }
+body.qarta-site[data-qarta-skin="press"] .qarta-brand strong { font-family: "Arial Black", "Arial Narrow", Arial, sans-serif; font-size: 1rem; letter-spacing: .08em; }
+body.qarta-site[data-qarta-skin="press"] .qarta-brand small { font-size: .56rem; letter-spacing: .12em; }
+body.qarta-site[data-qarta-skin="press"] .qarta-navigation { gap: clamp(15px, 2vw, 29px); }
+body.qarta-site[data-qarta-skin="press"] .qarta-navigation a { font-size: .68rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+body.qarta-site[data-qarta-skin="press"] .qarta-cart-button,
+body.qarta-site[data-qarta-skin="press"] .qarta-button,
+body.qarta-site[data-qarta-skin="press"] .qarta-filter { border-radius: 0; }
+body.qarta-site[data-qarta-skin="press"] .qarta-cart-button { border-color: var(--qarta-accent); background: var(--qarta-accent); font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; }
+body.qarta-site[data-qarta-skin="press"] .qarta-cart-button:hover { background: var(--qarta-accent-deep); }
+body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial { padding-block: clamp(34px, 5vw, 74px) clamp(52px, 7vw, 92px); border-bottom: 1px solid var(--qarta-line); }
+body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial::before { display: none; }
+body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial .qarta-hero__grid { grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr); gap: clamp(28px, 5vw, 72px); align-items: stretch; }
+body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial .qarta-hero__copy { display: flex; flex-direction: column; justify-content: center; padding-block: clamp(12px, 4vw, 48px); }
+body.qarta-site[data-qarta-skin="press"] .qarta-hero__masthead { margin: 0 0 20px; font-family: "Arial Black", "Arial Narrow", Arial, sans-serif; font-size: clamp(1.35rem, 2.5vw, 2.5rem); font-weight: 900; letter-spacing: .12em; line-height: .95; }
+body.qarta-site[data-qarta-skin="press"] .qarta-hero__issue { display: flex; justify-content: space-between; gap: 18px; margin: 0 0 28px; border-top: 1px solid var(--qarta-ink); border-bottom: 1px solid var(--qarta-ink); padding: 7px 0; font-size: .66rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial .qarta-kicker { margin-bottom: 12px; color: var(--qarta-accent); }
+body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial h1,
+body.qarta-site[data-qarta-skin="press"] .qarta-section-heading h2,
+body.qarta-site[data-qarta-skin="press"] .qarta-edition-today h2,
+body.qarta-site[data-qarta-skin="press"] .qarta-place h2,
+body.qarta-site[data-qarta-skin="press"] .qarta-reading h3 { font-family: "Arial Narrow", "Franklin Gothic Medium", "Helvetica Neue", Arial, sans-serif; font-weight: 850; letter-spacing: -.05em; }
+body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial h1 { max-width: 610px; font-size: clamp(3.8rem, 7.2vw, 7.6rem); line-height: .86; text-transform: uppercase; }
+body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial .qarta-hero__lead { max-width: 465px; margin-top: 22px; font-size: clamp(1rem, 1.25vw, 1.15rem); line-height: 1.55; }
+body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial .qarta-hero__actions { margin-top: 29px; }
+body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial .qarta-button { min-height: 46px; padding-inline: 16px; font-size: .69rem; letter-spacing: .09em; text-transform: uppercase; }
+body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial .qarta-button--dark { background: var(--qarta-accent); }
+body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial .qarta-button--dark:hover { background: var(--qarta-accent-deep); }
+body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial .qarta-hero__visual { min-height: min(48vw, 640px); }
+body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial .qarta-media--hero { border-radius: 0; box-shadow: none; }
+body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial .qarta-media--hero::after { background: linear-gradient(90deg, rgb(28 25 21 / 22%), transparent 45%); }
+body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial .qarta-hero__caption { right: 0; bottom: 0; padding: 9px 12px; color: var(--qarta-paper); background: var(--qarta-ink); box-shadow: none; font-size: .61rem; transform: none; }
+body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial .qarta-hero__location { margin-top: 22px; font-size: .7rem; }
+body.qarta-site[data-qarta-skin="press"] .qarta-section--edition { padding-block: clamp(36px, 5vw, 70px); border-bottom: 1px solid var(--qarta-line); background: var(--qarta-paper-strong); }
+body.qarta-site[data-qarta-skin="press"] .qarta-edition-today { display: grid; grid-template-columns: minmax(220px, .8fr) minmax(0, 1.2fr); gap: clamp(25px, 5vw, 74px); align-items: center; }
+body.qarta-site[data-qarta-skin="press"] .qarta-edition-today__image { min-height: 250px; }
+body.qarta-site[data-qarta-skin="press"] .qarta-media--edition { height: 100%; border-radius: 0; }
+body.qarta-site[data-qarta-skin="press"] .qarta-edition-today h2 { margin: 0; max-width: 620px; font-size: clamp(2.55rem, 5vw, 5.25rem); line-height: .88; }
+body.qarta-site[data-qarta-skin="press"] .qarta-edition-today__copy > p:not(.qarta-kicker),
+body.qarta-site[data-qarta-skin="press"] .qarta-place__copy > p:not(.qarta-kicker) { max-width: 510px; margin: 17px 0 0; color: color-mix(in srgb, var(--qarta-ink) 68%, transparent); line-height: 1.58; }
+body.qarta-site[data-qarta-skin="press"] .qarta-section--categories { background: var(--qarta-paper); }
+body.qarta-site[data-qarta-skin="press"] .qarta-category-rail { grid-template-columns: repeat(5, minmax(150px, 1fr)); gap: 0; margin-top: 31px; padding-bottom: 0; }
+body.qarta-site[data-qarta-skin="press"] .qarta-category-link { min-height: 142px; border-color: var(--qarta-line); border-right-width: 0; border-radius: 0; padding: 16px; background: transparent; }
+body.qarta-site[data-qarta-skin="press"] .qarta-category-link:last-child { border-right-width: 1px; }
+body.qarta-site[data-qarta-skin="press"] .qarta-category-link::before { width: 8px; height: 8px; border-radius: 0; background: var(--qarta-accent); }
+body.qarta-site[data-qarta-skin="press"] .qarta-category-link strong { margin-top: 15px; font-family: "Arial Narrow", Arial, sans-serif; font-size: 1.15rem; font-weight: 850; }
+body.qarta-site[data-qarta-skin="press"] .qarta-category-link:hover { transform: none; color: var(--qarta-paper); background: var(--qarta-ink); }
+body.qarta-site[data-qarta-skin="press"] .qarta-category-link:hover span { color: color-mix(in srgb, var(--qarta-paper) 65%, transparent); }
+body.qarta-site[data-qarta-skin="press"] .qarta-section--menu { border-top: 1px solid var(--qarta-line); }
+body.qarta-site[data-qarta-skin="press"] .qarta-filter-row { gap: 0; border-block: 1px solid var(--qarta-line); padding: 0; }
+body.qarta-site[data-qarta-skin="press"] .qarta-filter { min-height: 40px; border: 0; border-right: 1px solid var(--qarta-line); padding: 8px 13px; font-size: .66rem; letter-spacing: .07em; text-transform: uppercase; }
+body.qarta-site[data-qarta-skin="press"] .qarta-filter[aria-pressed="true"],
+body.qarta-site[data-qarta-skin="press"] .qarta-filter:hover { color: var(--qarta-paper); background: var(--qarta-accent); }
+body.qarta-site[data-qarta-skin="press"][data-qarta-card-layout="bulletin"] .qarta-product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 2px solid var(--qarta-ink); border-left: 1px solid var(--qarta-line); }
+body.qarta-site[data-qarta-skin="press"][data-qarta-card-layout="bulletin"] .qarta-product-card { padding: 13px; border-right: 1px solid var(--qarta-line); border-bottom: 1px solid var(--qarta-line); background: var(--qarta-paper); }
+body.qarta-site[data-qarta-skin="press"][data-qarta-card-layout="bulletin"] .qarta-product-card__media { aspect-ratio: 1.18; }
+body.qarta-site[data-qarta-skin="press"][data-qarta-card-layout="bulletin"] .qarta-media--product { border-radius: 0; }
+body.qarta-site[data-qarta-skin="press"][data-qarta-card-layout="bulletin"] .qarta-product-card__flag { top: 0; left: 0; border-radius: 0; background: var(--qarta-accent); font-size: .55rem; }
+body.qarta-site[data-qarta-skin="press"][data-qarta-card-layout="bulletin"] .qarta-product-card__body { padding-top: 12px; }
+body.qarta-site[data-qarta-skin="press"][data-qarta-card-layout="bulletin"] .qarta-product-card__category { color: var(--qarta-accent); font-size: .56rem; letter-spacing: .14em; }
+body.qarta-site[data-qarta-skin="press"][data-qarta-card-layout="bulletin"] .qarta-product-card h3 { font-family: "Arial Narrow", Arial, sans-serif; font-size: 1.35rem; font-weight: 850; letter-spacing: -.035em; }
+body.qarta-site[data-qarta-skin="press"][data-qarta-card-layout="bulletin"] .qarta-product-card__body > p:not(.qarta-product-card__category) { font-size: .76rem; }
+body.qarta-site[data-qarta-skin="press"][data-qarta-card-layout="bulletin"] .qarta-tags li { border-radius: 0; font-size: .56rem; }
+body.qarta-site[data-qarta-skin="press"][data-qarta-card-layout="bulletin"] .qarta-text-button { color: var(--qarta-accent); font-size: .68rem; letter-spacing: .05em; text-transform: uppercase; }
+body.qarta-site[data-qarta-skin="press"] .qarta-section--promo { padding-block: 0; color: var(--qarta-ink); background: var(--qarta-paper-strong); border-block: 1px solid var(--qarta-ink); }
+body.qarta-site[data-qarta-skin="press"] .qarta-promo { grid-template-columns: 1.15fr .85fr; background: transparent; }
+body.qarta-site[data-qarta-skin="press"] .qarta-promo__copy { padding: clamp(28px, 5vw, 62px); }
+body.qarta-site[data-qarta-skin="press"] .qarta-promo .qarta-kicker { color: var(--qarta-accent); }
+body.qarta-site[data-qarta-skin="press"] .qarta-promo p:not(.qarta-kicker),
+body.qarta-site[data-qarta-skin="press"] .qarta-promo small { color: color-mix(in srgb, var(--qarta-ink) 68%, transparent); }
+body.qarta-site[data-qarta-skin="press"] .qarta-media--promo { border-radius: 0; }
+body.qarta-site[data-qarta-skin="press"] .qarta-section--readings { background: var(--qarta-ink); color: var(--qarta-paper); }
+body.qarta-site[data-qarta-skin="press"] .qarta-section--readings .qarta-kicker { color: color-mix(in srgb, var(--qarta-paper) 68%, var(--qarta-warm)); }
+body.qarta-site[data-qarta-skin="press"] .qarta-section--readings .qarta-section-heading h2 { max-width: 650px; }
+body.qarta-site[data-qarta-skin="press"] .qarta-readings-grid { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 38px; border-top: 1px solid color-mix(in srgb, var(--qarta-paper) 42%, transparent); border-left: 1px solid color-mix(in srgb, var(--qarta-paper) 42%, transparent); }
+body.qarta-site[data-qarta-skin="press"] .qarta-reading { min-width: 0; border-right: 1px solid color-mix(in srgb, var(--qarta-paper) 42%, transparent); }
+body.qarta-site[data-qarta-skin="press"] .qarta-reading__media { aspect-ratio: 1.32; }
+body.qarta-site[data-qarta-skin="press"] .qarta-media--reading { height: 100%; border-radius: 0; }
+body.qarta-site[data-qarta-skin="press"] .qarta-reading__body { padding: 17px; }
+body.qarta-site[data-qarta-skin="press"] .qarta-reading__body > span { color: var(--qarta-warm); font-size: .72rem; font-weight: 800; letter-spacing: .12em; }
+body.qarta-site[data-qarta-skin="press"] .qarta-reading h3 { margin: 30px 0 0; font-size: 1.48rem; line-height: .98; }
+body.qarta-site[data-qarta-skin="press"] .qarta-reading p { margin: 10px 0 0; color: color-mix(in srgb, var(--qarta-paper) 70%, transparent); font-size: .8rem; line-height: 1.5; }
+body.qarta-site[data-qarta-skin="press"] .qarta-section--place { border-bottom: 1px solid var(--qarta-line); }
+body.qarta-site[data-qarta-skin="press"] .qarta-place { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 7vw, 110px); align-items: center; }
+body.qarta-site[data-qarta-skin="press"] .qarta-place h2 { margin: 0; font-size: clamp(2.5rem, 4.4vw, 5rem); line-height: .9; }
+body.qarta-site[data-qarta-skin="press"] .qarta-place__image { min-height: 380px; }
+body.qarta-site[data-qarta-skin="press"] .qarta-media--place { height: 100%; border-radius: 0; }
+body.qarta-site[data-qarta-skin="press"] .qarta-section--how { border-bottom: 1px solid var(--qarta-line); background: var(--qarta-paper-strong); }
+body.qarta-site[data-qarta-skin="press"] .qarta-steps { gap: 0; border-top: 2px solid var(--qarta-ink); }
+body.qarta-site[data-qarta-skin="press"] .qarta-steps li { min-height: 190px; border-top: 0; border-right: 1px solid var(--qarta-line); padding: 18px; background: transparent; }
+body.qarta-site[data-qarta-skin="press"] .qarta-steps li:last-child { border-right: 0; }
+body.qarta-site[data-qarta-skin="press"] .qarta-steps span { width: auto; height: auto; border-radius: 0; padding: 0; color: var(--qarta-accent); background: transparent; font-size: .68rem; letter-spacing: .12em; }
+body.qarta-site[data-qarta-skin="press"] .qarta-steps h3 { margin-top: 34px; font-family: "Arial Narrow", Arial, sans-serif; font-size: 1.35rem; font-weight: 850; }
+body.qarta-site[data-qarta-skin="press"] .qarta-section--local { background: var(--qarta-paper); }
+body.qarta-site[data-qarta-skin="press"] .qarta-qr-slot { border-style: solid; border-color: var(--qarta-line); }
+body.qarta-site[data-qarta-skin="press"] .qarta-footer { background: var(--qarta-ink); }
+body.qarta-site[data-qarta-skin="press"] .qarta-footer strong { font-family: "Arial Black", Arial, sans-serif; font-size: 1.05rem; letter-spacing: .1em; }
+
 @media (max-width: 1040px) {
   .qarta-product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .qarta-category-rail { grid-template-columns: repeat(7, minmax(175px, 1fr)); }
@@ -294,9 +401,9 @@ body.qarta-site[data-qarta-cards="compact"] .qarta-text-button { margin-top: aut
   .qarta-search { width: 100%; margin-top: 26px; }
   .qarta-filter-row { margin-top: 29px; }
   .qarta-product-grid { gap: 27px 13px; }
-  body.qarta-site[data-qarta-cards="compact"] .qarta-product-grid { grid-template-columns: 1fr; }
-  body.qarta-site[data-qarta-cards="compact"] .qarta-product-card { grid-template-columns: 104px minmax(0, 1fr); gap: 13px; padding: 10px; }
-  body.qarta-site[data-qarta-cards="compact"] .qarta-product-card__media { min-height: 132px; }
+  body.qarta-site[data-qarta-card-layout="compact"] .qarta-product-grid { grid-template-columns: 1fr; }
+  body.qarta-site[data-qarta-card-layout="compact"] .qarta-product-card { grid-template-columns: 104px minmax(0, 1fr); gap: 13px; padding: 10px; }
+  body.qarta-site[data-qarta-card-layout="compact"] .qarta-product-card__media { min-height: 132px; }
   .qarta-product-card h3 { font-size: 1.13rem; }
   .qarta-product-card__title-row { display: block; }
   .qarta-product-card__title-row strong { display: block; margin-top: 6px; }
@@ -338,6 +445,56 @@ body.qarta-site[data-qarta-cards="compact"] .qarta-text-button { margin-top: aut
   .qarta-product-card__category { font-size: .56rem; }
   .qarta-product-card h3 { font-size: 1.02rem; }
   .qarta-product-card__body > p:not(.qarta-product-card__category) { font-size: .7rem; }
+}
+
+@media (max-width: 1040px) {
+  body.qarta-site[data-qarta-skin="press"][data-qarta-card-layout="bulletin"] .qarta-product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 820px) {
+  body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial .qarta-hero__grid { grid-template-columns: 1fr; gap: 28px; }
+  body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial .qarta-hero__visual { min-height: min(72vw, 530px); width: 100%; max-width: none; }
+  body.qarta-site[data-qarta-skin="press"] .qarta-edition-today,
+  body.qarta-site[data-qarta-skin="press"] .qarta-place { grid-template-columns: 1fr; gap: 24px; }
+  body.qarta-site[data-qarta-skin="press"] .qarta-place__image { min-height: min(66vw, 440px); }
+  body.qarta-site[data-qarta-skin="press"] .qarta-category-rail { grid-template-columns: repeat(5, minmax(152px, 1fr)); }
+}
+
+@media (max-width: 620px) {
+  body.qarta-site[data-qarta-skin="press"] .qarta-header__inner { min-height: 68px; }
+  body.qarta-site[data-qarta-skin="press"] .qarta-navigation { background: var(--qarta-paper); }
+  body.qarta-site[data-qarta-skin="press"] .qarta-navigation a { font-size: .7rem; }
+  body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial { padding-block: 26px 45px; }
+  body.qarta-site[data-qarta-skin="press"] .qarta-hero__masthead { margin-bottom: 16px; font-size: 1.35rem; }
+  body.qarta-site[data-qarta-skin="press"] .qarta-hero__issue { margin-bottom: 19px; font-size: .55rem; }
+  body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial h1 { font-size: clamp(3.1rem, 15vw, 4.7rem); }
+  body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial .qarta-hero__lead { font-size: .92rem; }
+  body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial .qarta-hero__visual { min-height: 77vw; }
+  body.qarta-site[data-qarta-skin="press"] .qarta-edition-today__image { min-height: 58vw; }
+  body.qarta-site[data-qarta-skin="press"] .qarta-edition-today h2 { font-size: clamp(2.35rem, 12.5vw, 3.75rem); }
+  body.qarta-site[data-qarta-skin="press"] .qarta-category-rail { margin-inline: calc((100vw - 100%) / -2); padding-inline: 16px; }
+  body.qarta-site[data-qarta-skin="press"][data-qarta-card-layout="bulletin"] .qarta-product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  body.qarta-site[data-qarta-skin="press"][data-qarta-card-layout="bulletin"] .qarta-product-card { padding: 9px; }
+  body.qarta-site[data-qarta-skin="press"][data-qarta-card-layout="bulletin"] .qarta-product-card h3 { font-size: 1.12rem; }
+  body.qarta-site[data-qarta-skin="press"][data-qarta-card-layout="bulletin"] .qarta-product-card__body > p:not(.qarta-product-card__category) { display: none; }
+  body.qarta-site[data-qarta-skin="press"][data-qarta-card-layout="bulletin"] .qarta-tags { display: none; }
+  body.qarta-site[data-qarta-skin="press"] .qarta-promo { grid-template-columns: 1fr; }
+  body.qarta-site[data-qarta-skin="press"] .qarta-media--promo { min-height: 54vw; }
+  body.qarta-site[data-qarta-skin="press"] .qarta-readings-grid { grid-template-columns: 1fr; margin-top: 29px; }
+  body.qarta-site[data-qarta-skin="press"] .qarta-reading { display: grid; grid-template-columns: 105px 1fr; border-bottom: 1px solid color-mix(in srgb, var(--qarta-paper) 42%, transparent); }
+  body.qarta-site[data-qarta-skin="press"] .qarta-reading__media { aspect-ratio: auto; }
+  body.qarta-site[data-qarta-skin="press"] .qarta-reading h3 { margin-top: 17px; font-size: 1.3rem; }
+  body.qarta-site[data-qarta-skin="press"] .qarta-reading p { font-size: .73rem; }
+  body.qarta-site[data-qarta-skin="press"] .qarta-place h2 { font-size: clamp(2.4rem, 11vw, 3.6rem); }
+  body.qarta-site[data-qarta-skin="press"] .qarta-steps { margin-top: 30px; }
+  body.qarta-site[data-qarta-skin="press"] .qarta-steps li { border-right: 0; border-bottom: 1px solid var(--qarta-line); }
+  body.qarta-site[data-qarta-skin="press"] .qarta-steps h3 { margin-top: 0; }
+}
+
+@media (max-width: 370px) {
+  body.qarta-site[data-qarta-skin="press"] .qarta-hero--editorial h1 { font-size: 2.9rem; }
+  body.qarta-site[data-qarta-skin="press"][data-qarta-card-layout="bulletin"] .qarta-product-grid { grid-template-columns: 1fr; }
+  body.qarta-site[data-qarta-skin="press"] .qarta-reading { grid-template-columns: 88px 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {
