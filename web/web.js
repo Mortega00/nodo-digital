@@ -1614,6 +1614,138 @@ function setupNodoIntro() {
     }, 1650);
 }
 
+function setupHomeHiloExperience() {
+    const hero = document.querySelector("[data-home-hilo]");
+    if (!hero || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+
+    const root = document.documentElement;
+    const title = hero.querySelector("h1");
+    const actions = hero.querySelector(".hero-actions");
+    const markStage = hero.querySelector(".home-hilo-mark-stage");
+    const threads = hero.querySelector(".home-hilo-threads");
+
+    const beginEntrance = () => window.requestAnimationFrame(() => hero.classList.add("is-hilo-ready"));
+    if (root.classList.contains("nodo-intro-active")) {
+        const introObserver = new MutationObserver(() => {
+            if (root.classList.contains("nodo-intro-active")) return;
+            introObserver.disconnect();
+            beginEntrance();
+        });
+        introObserver.observe(root, { attributes: true, attributeFilter: ["class"] });
+    } else {
+        beginEntrance();
+    }
+
+    let ticking = false;
+    const updateHeroDepth = () => {
+        ticking = false;
+        const bounds = hero.getBoundingClientRect();
+        const viewportHeight = window.innerHeight || root.clientHeight;
+        const distance = Math.max(1, bounds.height - viewportHeight * 0.28);
+        const progress = Math.min(1, Math.max(0, -bounds.top / distance));
+
+        if (title) {
+            title.style.opacity = String((1 - progress).toFixed(3));
+            title.style.transform = `translateY(${Math.round(progress * -42)}px)`;
+        }
+        if (actions) {
+            actions.style.opacity = String((1 - progress * 0.94).toFixed(3));
+            actions.style.transform = `translateY(${Math.round(progress * -18)}px)`;
+        }
+        if (markStage) {
+            markStage.style.opacity = String((1 - progress * 0.18).toFixed(3));
+            markStage.style.transform = `translate(-50%, calc(-50% - ${Math.round(progress * 30)}px)) scale(${(1 - progress * 0.055).toFixed(3)})`;
+        }
+        if (threads) {
+            threads.style.opacity = String((1 - progress * 0.16).toFixed(3));
+            threads.style.transform = `translateY(${Math.round(progress * -18)}px)`;
+        }
+    };
+    const requestHeroDepth = () => {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(updateHeroDepth);
+    };
+    window.addEventListener("scroll", requestHeroDepth, { passive: true });
+    window.addEventListener("resize", requestHeroDepth, { passive: true });
+    requestHeroDepth();
+
+    const continuity = document.querySelector("[data-home-hilo-continuity]");
+    const revealSelectors = [
+        ".work-section .work-heading",
+        ".work-section .nativa-feature",
+        ".industries-home-section .industries-home-heading",
+        ".industries-home-section .industries-home-grid",
+        ".solutions-section .section-heading",
+        ".solutions-section .solution-grid",
+        ".advisor-intro",
+        ".advisor-card",
+        ".process-section .section-heading",
+        ".process-section .process-list",
+        ".expectations-section .section-heading",
+        ".expectations-section .check-list",
+        ".home-questions-card",
+        ".team-heading",
+        ".team-summary-grid",
+        ".final-card"
+    ];
+    const revealElements = revealSelectors
+        .flatMap(selector => [...document.querySelectorAll(selector)])
+        .filter((element, index, items) => items.indexOf(element) === index);
+
+    revealElements.forEach((element, index) => {
+        element.classList.add("home-hilo-reveal");
+        element.style.setProperty("--home-hilo-reveal-delay", `${(index % 2) * 85}ms`);
+    });
+
+    if (!("IntersectionObserver" in window)) {
+        revealElements.forEach(element => element.classList.add("is-hilo-revealed"));
+        continuity?.classList.add("is-hilo-continuity-visible");
+        return;
+    }
+
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            if (entry.target === continuity) entry.target.classList.add("is-hilo-continuity-visible");
+            else entry.target.classList.add("is-hilo-revealed");
+            observer.unobserve(entry.target);
+        });
+    }, { threshold: 0.12, rootMargin: "0px 0px -8%" });
+
+    revealElements.forEach(element => observer.observe(element));
+    if (continuity) observer.observe(continuity);
+}
+
+function setupCommercialSectionThreads() {
+    const sections = [...document.querySelectorAll("[data-nodo-thread]")];
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (!sections.length || reducedMotion || !("IntersectionObserver" in window)) return;
+
+    const root = document.documentElement;
+    root.classList.add("nodo-section-threads-active");
+
+    const threadObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add("is-thread-visible");
+            threadObserver.unobserve(entry.target);
+        });
+    }, { threshold: 0.16 });
+
+    sections.forEach(section => threadObserver.observe(section));
+
+    document.addEventListener("nodo:themechange", () => {
+        const visibleSections = sections.filter(section => section.classList.contains("is-thread-visible"));
+        if (!visibleSections.length) return;
+
+        visibleSections.forEach(section => section.classList.remove("is-thread-visible"));
+        window.requestAnimationFrame(() => {
+            visibleSections.forEach(section => section.classList.add("is-thread-visible"));
+        });
+    });
+}
+
 const themeStorageKey = "nodo_web_theme";
 
 function preferredTheme() {
@@ -1630,6 +1762,7 @@ function preferredTheme() {
 function applyTheme(theme, persist = false) {
     const nextTheme = theme === "light" ? "light" : "dark";
     const toggle = document.getElementById("theme-toggle");
+    const previousTheme = document.documentElement.dataset.theme;
     document.documentElement.dataset.theme = nextTheme;
 
     if (toggle) {
@@ -1647,6 +1780,10 @@ function applyTheme(theme, persist = false) {
             // La preferencia visual es opcional si el navegador bloquea almacenamiento.
         }
     }
+
+    if (previousTheme && previousTheme !== nextTheme) {
+        document.dispatchEvent(new CustomEvent("nodo:themechange"));
+    }
 }
 
 function setupThemeToggle() {
@@ -1660,6 +1797,8 @@ function setupThemeToggle() {
 window.NodoWebAdvisor = { plans, getRecommendation };
 setupThemeToggle();
 setupNodoIntro();
+setupHomeHiloExperience();
+setupCommercialSectionThreads();
 renderAdvisor();
 setupPageChrome();
 setupFaqAccordion();
